@@ -2,14 +2,14 @@
 
 ## Team Members
 
-| Name        | CCID   | GitHub Username |
-| ----------- | ------ | --------------- |
-| [Full Name] | [CCID] | [@username]     |
-| [Full Name] | [CCID] | [@username]     |
-| [Full Name] | [CCID] | [@username]     |
-| [Full Name] | [CCID] | [@username]     |
-| [Full Name] | [CCID] | [@username]     |
-| [Full Name] | [CCID] | [@username]     |
+| Name                | CCID     | GitHub Username |
+| ------------------  | ------   | --------------- |
+| Grace Wannapongsai  | wannapon | pantirawn       |
+| [Full Name]         | [CCID]   | [@username]     |
+| [Full Name]         | [CCID]   | [@username]     |
+| [Full Name]         | [CCID]   | [@username]     |
+| [Full Name]         | [CCID]   | [@username]     |
+| [Full Name]         | [CCID]   | [@username]     |
 
 ## Project Description
 
