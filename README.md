@@ -7,7 +7,7 @@
 | Kennedy Barber      |kmbarber| @KennedyBarber   |
 | Grace Wannapongsai  |wannapon| @pantirawn       |
 | Arshdeep Bajaj      | bajaj3 | @arshuz7         |
-| [Full Name] | [CCID] | [@username]     |
+| Naved Hossain       | naved  | @naved201        |
 | [Full Name] | [CCID] | [@username]     |
 | [Full Name] | [CCID] | [@username]     |
 
