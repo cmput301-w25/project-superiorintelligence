@@ -2,11 +2,11 @@
 
 ## Team Members
 
-| Name        | CCID   | GitHub Username |
-| ----------- | ------ | --------------- |
-| Kennedy     |kmabrber| @KennedyBarber  |
-| [Full Name] | [CCID] | [@username]     |
-| [Full Name] | [CCID] | [@username]     |
+| Name                | CCID   | GitHub Username  |
+| -----------         | ------ | ---------------  |
+| Kennedy Barber      |kmbarber| @KennedyBarber   |
+| Grace Wannapongsai  |wannapon| @pantirawn       |
+| [Full Name]   | [CCID] | [@username]     |
 | [Full Name] | [CCID] | [@username]     |
 | [Full Name] | [CCID] | [@username]     |
 | [Full Name] | [CCID] | [@username]     |
