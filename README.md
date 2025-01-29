@@ -6,7 +6,7 @@
 | -----------         | ------ | ---------------  |
 | Kennedy Barber      |kmbarber| @KennedyBarber   |
 | Grace Wannapongsai  |wannapon| @pantirawn       |
-| [Full Name]   | [CCID] | [@username]     |
+| Arshdeep Bajaj      | bajaj3 | @arshuz7         |
 | [Full Name] | [CCID] | [@username]     |
 | [Full Name] | [CCID] | [@username]     |
 | [Full Name] | [CCID] | [@username]     |
