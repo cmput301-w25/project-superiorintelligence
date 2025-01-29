@@ -9,7 +9,7 @@
 | Arshdeep Bajaj      | bajaj3 | @arshuz7         |
 | Naved Hossain       | naved  | @naved201        |
 | Abdul Rafai Ahmad | arahmad | @arahmad-ualberta     |
-| [Full Name] | [CCID] | [@username]     |
+| Michael Pattison | mppattis | @MichaelCode1     |
 
 ## Project Description
 
