@@ -8,7 +8,7 @@
 | Grace Wannapongsai  |wannapon| @pantirawn       |
 | Arshdeep Bajaj      | bajaj3 | @arshuz7         |
 | Naved Hossain       | naved  | @naved201        |
-| [Full Name] | [CCID] | [@username]     |
+| Abdul Rafai Ahmad | arahmad | @arahmad-ualberta     |
 | [Full Name] | [CCID] | [@username]     |
 
 ## Project Description
