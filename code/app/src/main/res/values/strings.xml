@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">superior_Intelligence</string>
+    <string name="user_profile">User Profile</string>
+    <string name="back_button">Back</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="first_last_name">First Last</string>
+    <string name="username">Username</string>
+    <string name="user_preferences">User Preferences</string>
+    <string name="mood_following">Mood Following</string>
+    <string name="privacy">Privacy</string>
+    <string name="tool_icon_desc">Tool Icon</string>
+    <string name="search_icon_desc">Search Icon</string>
+    <string name="lock_icon_desc">Lock Icon</string>
+    <string name="arrow_icon_desc">Simple Arrow Icon</string>
+    <string name="profile_image_desc">Profile Image Container</string>
 </resources>
