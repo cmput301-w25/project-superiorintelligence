@@ -1,15 +1,15 @@
-# CMPUT 301 W25 - Team [Team Name]
+# CMPUT 301 W25 - Team Superior Intelligence
 
 ## Team Members
 
-| Name                | CCID     | GitHub Username |
-| ------------------  | ------   | --------------- |
-| Grace Wannapongsai  | wannapon | pantirawn       |
-| [Full Name]         | [CCID]   | [@username]     |
-| [Full Name]         | [CCID]   | [@username]     |
-| [Full Name]         | [CCID]   | [@username]     |
-| [Full Name]         | [CCID]   | [@username]     |
-| [Full Name]         | [CCID]   | [@username]     |
+| Name                | CCID   | GitHub Username  |
+| -----------         | ------ | ---------------  |
+| Kennedy Barber      |kmbarber| @KennedyBarber   |
+| Grace Wannapongsai  |wannapon| @pantirawn       |
+| Arshdeep Bajaj      | bajaj3 | @arshuz7         |
+| Naved Hossain       | naved  | @naved201        |
+| Abdul Rafai Ahmad | arahmad | @arahmad-ualberta     |
+| Michael Pattison | mppattis | @MichaelCode1     |
 
 ## Project Description
 
