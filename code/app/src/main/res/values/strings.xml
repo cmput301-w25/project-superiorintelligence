@@ -3,7 +3,6 @@
     <string name="app_name">superior_Intelligence</string>
 
     <!-- Text -->
-    <string name="confirm_button_text">Confirm</string>
     <string name="first_last_name_text">First Last</string>
     <string name="username_text">Username</string>
     <string name="user_preferences_text">User Preferences</string>
@@ -13,6 +12,15 @@
     <!-- Header Text -->
     <string name="Photo_header_title">Add a Photo to your Event</string>
     <string name="user_profile_header_title">User Profile</string>
+    <string name="photo_access_permission_header_title">Access Permission</string>
+
+    <!-- Body Text -->
+    <string name="photo_access_permission_body_text">Allow APP to access photos and camera on your device?</string>
+
+    <!-- Button Text -->
+    <string name="confirm_button_text">Confirm</string>
+    <string name="deny_button_text">Deny</string>
+    <string name="allow_button_text">Allow</string>
 
     <!-- Content Descriptions -->
     <string name="content_desc_tool_icon">Tool Icon</string>
