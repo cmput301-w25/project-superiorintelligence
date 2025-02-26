@@ -1,16 +1,31 @@
 <resources>
+    <!-- General -->
     <string name="app_name">superior_Intelligence</string>
-    <string name="user_profile">User Profile</string>
-    <string name="back_button">Back</string>
-    <string name="edit_profile">Edit Profile</string>
-    <string name="first_last_name">First Last</string>
-    <string name="username">Username</string>
-    <string name="user_preferences">User Preferences</string>
-    <string name="mood_following">Mood Following</string>
-    <string name="privacy">Privacy</string>
-    <string name="tool_icon_desc">Tool Icon</string>
-    <string name="search_icon_desc">Search Icon</string>
-    <string name="lock_icon_desc">Lock Icon</string>
-    <string name="arrow_icon_desc">Simple Arrow Icon</string>
-    <string name="profile_image_desc">Profile Image Container</string>
+
+    <!-- Text -->
+    <string name="confirm_button_text">Confirm</string>
+    <string name="first_last_name_text">First Last</string>
+    <string name="username_text">Username</string>
+    <string name="user_preferences_text">User Preferences</string>
+    <string name="mood_following_text">Mood Following</string>
+    <string name="privacy_text">Privacy</string>
+
+    <!-- Header Text -->
+    <string name="Photo_header_title">Add a Photo to your Event</string>
+    <string name="user_profile_header_title">User Profile</string>
+
+    <!-- Content Descriptions -->
+    <string name="content_desc_tool_icon">Tool Icon</string>
+    <string name="content_desc_search_icon">Search Icon</string>
+    <string name="content_desc_lock_icon">Lock Icon</string>
+    <string name="content_desc_arrow_icon">Simple Arrow Icon</string>
+    <string name="content_desc_profile_image">Profile Image Container</string>
+    <string name="content_desc_photo">Placeholder for uploaded photo</string>
+    <string name="content_desc_camera_icon">Button to take a photo</string>
+    <string name="content_desc_upload_icon">Change or upload a photo</string>
+    <string name="content_desc_confirm_icon">Confirm</string>
+    <string name="content_desc_perfect_icon">Confirm selection</string>
+    <string name="content_desc_back_icon">Back</string>
+    <string name="content_desc_edit_profile_icon">Edit Profile</string>
+
 </resources>

@@ -22,7 +22,7 @@
         android:id="@+id/header_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/user_profile"
+        android:text="@string/user_profile_header_title"
         android:textSize="22sp"
         android:textStyle="bold"
         android:textColor="@color/black"
@@ -34,11 +34,13 @@
     <!-- Back Button -->
     <ImageButton
         android:id="@+id/profile_back_button"
+        android:clickable="true"
+        android:focusable="true"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="10dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/back_button"
+        android:contentDescription="@string/content_desc_back_icon"
         android:scaleType="fitCenter"
         android:src="@drawable/back_arrow"
         app:layout_constraintBottom_toBottomOf="@id/profile_toolbar"
@@ -50,6 +52,8 @@
         android:id="@+id/profile_image"
         android:layout_width="160dp"
         android:layout_height="160dp"
+        android:clickable="true"
+        android:focusable="true"
         app:cardCornerRadius="70dp"
         app:cardElevation="4dp"
         app:layout_constraintTop_toBottomOf="@id/header_title"
@@ -61,7 +65,7 @@
             android:id="@+id/profile_image_png"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="@string/profile_image_desc"
+            android:contentDescription="@string/content_desc_profile_image"
             android:scaleType="centerCrop"
             android:src="@drawable/profile_icon" />
     </androidx.cardview.widget.CardView>
@@ -73,7 +77,7 @@
         android:layout_height="48dp"
         android:layout_marginEnd="4dp"
         android:layout_marginBottom="4dp"
-        android:contentDescription="@string/edit_profile"
+        android:contentDescription="@string/content_desc_edit_profile_icon"
         android:background="@drawable/circle_background"
         android:clickable="true"
         android:elevation="6dp"
@@ -88,7 +92,7 @@
         android:id="@+id/profile_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/first_last_name"
+        android:text="@string/first_last_name_text"
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="@color/black"
@@ -102,7 +106,7 @@
         android:id="@+id/profile_username"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/username"
+        android:text="@string/username_text"
         android:textSize="14sp"
         android:textColor="@color/black"
         app:layout_constraintTop_toBottomOf="@id/profile_name"
@@ -129,14 +133,14 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:contentDescription="@string/tool_icon_desc"
+            android:contentDescription="@string/content_desc_tool_icon"
             android:src="@android:drawable/ic_menu_manage"
             app:tint="@color/black" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/user_preferences"
+            android:text="@string/user_preferences_text"
             android:textColor="@color/black"
             android:textSize="16sp"
             android:layout_weight="1"
@@ -146,7 +150,7 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:contentDescription="@string/arrow_icon_desc"
+            android:contentDescription="@string/content_desc_arrow_icon"
             android:src="@drawable/simple_arrow"
             app:tint="@color/black" />
     </LinearLayout>
@@ -170,14 +174,14 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:contentDescription="@string/search_icon_desc"
+            android:contentDescription="@string/content_desc_search_icon"
             android:src="@android:drawable/ic_menu_search"
             app:tint="@color/black" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/mood_following"
+            android:text="@string/mood_following_text"
             android:textColor="@color/black"
             android:textSize="16sp"
             android:layout_weight="1"
@@ -187,7 +191,7 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:contentDescription="@string/arrow_icon_desc"
+            android:contentDescription="@string/content_desc_arrow_icon"
             android:src="@drawable/simple_arrow"
             app:tint="@color/black" />
     </LinearLayout>
@@ -211,14 +215,14 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:contentDescription="@string/lock_icon_desc"
+            android:contentDescription="@string/content_desc_lock_icon"
             android:src="@android:drawable/ic_lock_lock"
             app:tint="@color/black" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/privacy"
+            android:text="@string/privacy_text"
             android:textColor="@color/black"
             android:textSize="16sp"
             android:layout_weight="1"
@@ -228,7 +232,7 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:contentDescription="@string/arrow_icon_desc"
+            android:contentDescription="@string/content_desc_arrow_icon"
             android:src="@drawable/simple_arrow"
             app:tint="@color/black" />
 
