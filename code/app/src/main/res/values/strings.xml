@@ -21,6 +21,7 @@
     <string name="confirm_button_text">Confirm</string>
     <string name="deny_button_text">Deny</string>
     <string name="allow_button_text">Allow</string>
+    <string name="ok_button_text">OK</string>
 
     <!-- Content Descriptions -->
     <string name="content_desc_tool_icon">Tool Icon</string>
@@ -35,5 +36,9 @@
     <string name="content_desc_perfect_icon">Confirm selection</string>
     <string name="content_desc_back_icon">Back</string>
     <string name="content_desc_edit_profile_icon">Edit Profile</string>
+
+    <!-- Error Messages -->
+    <string name="image_size_exceeded_title">Image size exceed limit</string>
+    <string name="image_size_exceeded_message">Image must be under 65536 bytes</string>
 
 </resources>
