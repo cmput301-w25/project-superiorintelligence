@@ -59,16 +59,26 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/header_title">
 
-        <!-- Centered Image Icon -->
+        <!-- Large ImageView for displaying the photo -->
         <ImageView
             android:id="@+id/photo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:contentDescription="@string/content_desc_profile_image"
+            android:visibility="gone" />
+
+        <!-- Small overlay icon (appears initially, disappears when photo is set) -->
+        <ImageView
+            android:id="@+id/photo_icon"
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_gravity="center"
             android:scaleType="fitCenter"
-            app:tint="@color/black"
+            android:visibility="visible"
             android:contentDescription="@string/content_desc_profile_image"
-            tools:srcCompat="@android:drawable/ic_menu_gallery" />
+            app:tint="@color/black"
+            android:src="@android:drawable/ic_menu_gallery"/>
     </androidx.cardview.widget.CardView>
 
     <LinearLayout
