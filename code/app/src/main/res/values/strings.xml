@@ -15,8 +15,8 @@
     <string name="photo_access_permission_header_title">Access Permission</string>
 
     <!-- Body Text -->
-    <string name="photo_access_permission_body_text">Allow APP to access photos and camera on your device?</string>
-
+    <string name="permission_camera_message">Allow APP to access your Camera to take pictures.</string>
+    <string name="permission_gallery_message">Allow APP to access your Photo Gallery to upload images.</string>
     <!-- Button Text -->
     <string name="confirm_button_text">Confirm</string>
     <string name="deny_button_text">Deny</string>
@@ -36,6 +36,7 @@
     <string name="content_desc_perfect_icon">Confirm selection</string>
     <string name="content_desc_back_icon">Back</string>
     <string name="content_desc_edit_profile_icon">Edit Profile</string>
+    <string name="unknown_permission_request">Unknown permission request.</string>
 
     <!-- Error Messages -->
     <string name="image_size_exceeded_title">Image size exceed limit</string>
