@@ -1,163 +1,137 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/coordinator_layout"
+    android:id="@+id/constraint_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!--
-         1) A small ConstraintLayout just for the toolbar area,
-            allowing you to easily center the title and place the back button on the left.
-    -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/toolbar_container"
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/map_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="70dp"
+        android:background="@drawable/toolbar_background"
+        android:foregroundTint="#4CAF50"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Toolbar -->
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/mood_map_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:background="@drawable/toolbar_background"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Centered Title -->
-        <TextView
-            android:id="@+id/header_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/moodMap_header_title"
-            android:textColor="@color/black"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            app:layout_constraintTop_toTopOf="@id/mood_map_toolbar"
-            app:layout_constraintBottom_toBottomOf="@id/mood_map_toolbar"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+    <TextView
+        android:id="@+id/header_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/map_toolbar"
+        android:textColor="@color/black"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/map_toolbar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/map_toolbar" />
 
-        <!-- Back Button -->
-        <ImageButton
-            android:id="@+id/back_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="10dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:contentDescription="@string/content_desc_back_icon"
-            android:focusable="true"
-            android:scaleType="fitCenter"
-            android:src="@drawable/back_arrow"
-            app:layout_constraintTop_toTopOf="@id/mood_map_toolbar"
-            app:layout_constraintBottom_toBottomOf="@id/mood_map_toolbar"
-            app:layout_constraintStart_toStartOf="@id/mood_map_toolbar" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Map Container-->
+    <ImageButton
+        android:id="@+id/back_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:contentDescription="@string/content_desc_back_icon"
+        android:focusable="true"
+        android:scaleType="fitCenter"
+        android:src="@drawable/back_arrow"
+        app:layout_constraintBottom_toBottomOf="@id/map_toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/map_toolbar" />
 
-    <!--
-         2) The map container, which sits beneath the toolbar.
-            We offset it by 70dp (the toolbar height) for simplicity.
-    -->
     <FrameLayout
         android:id="@+id/map_container"
-        android:layout_width="match_parent"
-        android:layout_height="482dp"
-        android:layout_marginTop="70dp">
-
-    </FrameLayout>
-
-    <!--
-         3) Bottom Sheet for filter options.
-            Using MaterialCardView for a rounded-corner look.
-    -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/filter_bottom_sheet"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:padding="16dp"
-        android:elevation="8dp"
-        android:backgroundTint="@color/backgroundGreen"
-        app:cardCornerRadius="16dp"
-        app:cardPreventCornerOverlap="true"
-        app:cardUseCompatPadding="true"
-        app:layout_behavior="@string/bottom_sheet_behavior">
-
-        <!-- Bottom Sheet Content -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <!-- Collapsed Header Row (shown in peek state) -->
-            <LinearLayout
-                android:id="@+id/bottom_sheet_header"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:padding="8dp">
-
-                <!-- "Filter Mood Events" text -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Filter Mood Events"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@android:color/black" />
-            </LinearLayout>
-
-            <!-- Optional Divider -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginVertical="4dp"
-                android:background="@android:color/darker_gray" />
-
-            <!-- Expanded content: checkboxes & apply button -->
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/map_toolbar"
+        app:layout_constraintBottom_toTopOf="@id/filter_panel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <LinearLayout
-        android:id="@+id/bottom_sheet_content"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:id="@+id/filter_panel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/backgroundGreen"
         android:orientation="vertical"
-        android:visibility="visible">
+        android:padding="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Example checkboxes -->
-        <CheckBox
-            android:id="@+id/cb_last_12_hours"
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Last 12 hours" />
+            android:text="Filter Mood Events"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black" />
 
-        <CheckBox
-            android:id="@+id/cb_following"
-            android:layout_width="wrap_content"
+        <GridLayout
+            android:id="@+id/checkbox_grid"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Following" />
+            android:columnCount="3"
+            android:alignmentMode="alignMargins"
+            android:useDefaultMargins="true"
+            android:padding="16dp">
 
-        <!-- Add more checkboxes as needed... -->
-        <CheckBox
-            android:id="@+id/cb_confusion"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Confusion" />
+            <CheckBox
+                android:id="@+id/cb_last_12_hours"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Last 12 hours" />
 
-        <!-- Apply button -->
+            <CheckBox
+                android:id="@+id/cb_confusion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Confusion" />
+
+            <CheckBox
+                android:id="@+id/cb_anger"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Anger" />
+
+            <CheckBox
+                android:id="@+id/cb_fear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Fear" />
+
+            <CheckBox
+                android:id="@+id/cb_disgust"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Disgust" />
+
+            <CheckBox
+                android:id="@+id/cb_happy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Happy" />
+
+        </GridLayout>
+
         <Button
             android:id="@+id/btn_apply_filters"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Apply"
             android:layout_marginTop="8dp"
             android:backgroundTint="@color/buttonGreen"
-            android:text="Apply"
             android:textColor="@android:color/white" />
+
     </LinearLayout>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
