@@ -1,3 +1,10 @@
+/**
+ * completes sub issue: Create log-in screen #123
+ * link: https://github.com/orgs/cmput301-w25/projects/9/views/1?pane=issue&itemId=99937029&issue=cmput301-w25%7Cproject-superiorintelligence%7C123
+ * Connects to login_page.xml, provide button to enter CreateAccount.java
+ * if user enters login and enters username, will check database to see if existing
+ */
+
 package com.example.superior_intelligence;
 
 import android.content.Intent;
@@ -6,6 +13,9 @@ import android.view.View;
 import android.widget.ImageButton;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+
+import com.example.superior_intelligence.CreateAccountActivity;
+import com.example.superior_intelligence.HomePageActivity;
 
 public class LoginPageActivity extends AppCompatActivity {
     @Override

@@ -1,3 +1,11 @@
+/**
+ * completes sub issue: Create app main page. #130
+ * link: https://github.com/orgs/cmput301-w25/projects/9/views/1?pane=issue&itemId=99976897&issue=cmput301-w25%7Cproject-superiorintelligence%7C130
+ * Connects to app_main_page.xml
+ * Functionality: contains a login/sign up button that brings you to LoginPageActivity.java
+ *
+ */
+
 package com.example.superior_intelligence;
 
 import android.content.Intent;
