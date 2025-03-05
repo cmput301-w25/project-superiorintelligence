@@ -13,15 +13,10 @@
     <string name="Photo_header_title">Add a Photo to your Event</string>
     <string name="user_profile_header_title">User Profile</string>
     <string name="photo_access_permission_header_title">Access Permission</string>
-    <string name="mood_events_page_header">Mood Events</string>
-    <string name="_create_untitled_mood_event">Untitled</string>
 
     <!-- Body Text -->
-    <string name="photo_access_permission_body_text">Allow APP to access photos and camera on your device?</string>
-
-    <!-- Dropdown Menu Text -->
-    <string name="emotional_state_text">How are you feeling?</string>
-
+    <string name="permission_camera_message">Allow APP to access your Camera to take pictures.</string>
+    <string name="permission_gallery_message">Allow APP to access your Photo Gallery to upload images.</string>
     <!-- Button Text -->
     <string name="confirm_button_text">Confirm</string>
     <string name="deny_button_text">Deny</string>
@@ -41,10 +36,12 @@
     <string name="content_desc_perfect_icon">Confirm selection</string>
     <string name="content_desc_back_icon">Back</string>
     <string name="content_desc_edit_profile_icon">Edit Profile</string>
-    <string name="content_desc_add_button_icon">+</string>
+    <string name="unknown_permission_request">Unknown permission request.</string>
 
     <!-- Error Messages -->
     <string name="image_size_exceeded_title">Image size exceed limit</string>
     <string name="image_size_exceeded_message">Image must be under 65536 bytes</string>
+    <string name="mood_explanation_hint">Quick reason for your mood!</string>
+    <string name="map_toolbar">Mood Map</string>
 
 </resources>

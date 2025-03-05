@@ -23,7 +23,9 @@
         android:id="@+id/mood_events_list_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/mood_events_page_header"
+
+        android:text="Mood Events"
+
         android:textColor="@color/black"
         android:textSize="22sp"
         android:textStyle="bold"
@@ -55,7 +57,7 @@
         android:background="@drawable/rounded_background"
         android:elevation="8dp"
         android:src="@drawable/ic_add"
-        android:contentDescription="@string/content_desc_add_button_icon"
+        android:contentDescription="@string/add_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.88"

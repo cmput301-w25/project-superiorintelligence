@@ -22,7 +22,7 @@
         android:id="@+id/mood_events_list_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/_create_untitled_mood_event"
+        android:text="Create New Mood Event"
         android:textColor="@color/black"
         android:textSize="22sp"
         android:textStyle="bold"
@@ -66,7 +66,9 @@
                 android:id="@+id/emotional_state_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/emotional_state_text"
+
+                android:text="Emotional State"
+
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 app:layout_constraintBottom_toBottomOf="parent"

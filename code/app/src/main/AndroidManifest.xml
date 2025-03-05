@@ -2,6 +2,31 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Permissions -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
+
+    <!-- Compatibility with older Android versions -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
+    <!-- Feature declarations -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
+    <!-- Add queries to check if apps can handle camera and gallery intents -->
+    <queries>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.PICK" />
+            <data android:mimeType="image/*" />
+        </intent>
+    </queries>
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -11,16 +36,52 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Superior_Intelligence"
+        android:requestLegacyExternalStorage="true"
         tools:targetApi="31">
+
+        <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    </application>
 
+        <!-- Photo Activity -->
+        <activity
+            android:name=".PhotoActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Superior_Intelligence">
+        </activity>
+
+        <!-- login Page -->
+        <activity android:name=".LoginPageActivity"
+            android:parentActivityName=".MainActivity"
+            android:exported="false"/>
+
+        <!-- Create account Page -->
+        <activity android:name=".CreateAccountActivity"
+            android:parentActivityName=".LoginPageActivity"
+            android:exported="false"/>
+
+        <!-- Home Page -->
+        <activity android:name=".HomePageActivity"
+            android:parentActivityName=".LoginPageActivity"
+            android:exported="false"/>
+
+
+        <!-- FileProvider for Camera Image Storage -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.superior_intelligence.file_provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+    </application>
 </manifest>
