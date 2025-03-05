@@ -8,6 +8,8 @@
     <string name="user_preferences_text">User Preferences</string>
     <string name="mood_following_text">Mood Following</string>
     <string name="privacy_text">Privacy</string>
+    <string name="emotional_trigger">What triggered this mood?</string>
+    <string name="emotional_trigger_textbox_hint">(Optional)</string>
 
     <!-- Header Text -->
     <string name="Photo_header_title">Add a Photo to your Event</string>
