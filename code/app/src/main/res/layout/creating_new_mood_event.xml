@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/backgroundGreen">
 
+    <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/mood_events_list_toolbar"
         android:layout_width="match_parent"
@@ -18,11 +19,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Page Header -->
     <TextView
         android:id="@+id/mood_events_list_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Create New Mood Event"
+        android:text="@string/create_untitled_mood_event"
         android:textColor="@color/black"
         android:textSize="22sp"
         android:textStyle="bold"
@@ -31,6 +33,7 @@
         app:layout_constraintStart_toStartOf="@+id/mood_events_list_toolbar"
         app:layout_constraintTop_toTopOf="@+id/mood_events_list_toolbar" />
 
+    <!-- Back Button -->
     <ImageButton
         android:id="@+id/mood_events_list_back_button"
         android:layout_width="48dp"
@@ -45,17 +48,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/mood_events_list_header" />
 
+    <!-- Emotion Selection Dropdown -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
         android:layout_width="350dp"
-        android:layout_height="45dp"
+        android:layout_height="55dp"
+        android:layout_marginTop="80dp"
         android:background="@android:color/transparent"
         app:cardCornerRadius="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/mood_events_list_toolbar"
-        app:layout_constraintVertical_bias="0.08">
+        app:layout_constraintTop_toBottomOf="@+id/mood_events_list_toolbar">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -66,29 +69,141 @@
                 android:id="@+id/emotional_state_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
-                android:text="Emotional State"
-
+                android:text="@string/emotional_state_text"
                 android:textColor="@color/black"
                 android:textSize="20sp"
+                android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.5" />
 
             <ImageView
                 android:id="@+id/imageView"
                 android:layout_width="44dp"
                 android:layout_height="25dp"
+                android:contentDescription="@string/content_desc_arrow_icon"
                 app:layout_constraintBottom_toBottomOf="@+id/emotional_state_text"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toEndOf="@+id/emotional_state_text"
                 app:layout_constraintTop_toTopOf="@+id/emotional_state_text"
                 app:layout_constraintVertical_bias="1.0"
                 app:srcCompat="@drawable/simple_arrow" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
+
+    <!-- Hidden Spinner (Dropdown) -->
+    <Spinner
+        android:id="@+id/emotion_dropdown"
+        android:layout_width="300dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="4dp"
+        android:background="@color/white"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="@+id/cardView"
+        app:layout_constraintStart_toStartOf="@+id/cardView"
+        app:layout_constraintTop_toBottomOf="@+id/cardView"
+        tools:visibility="visible" />
+
+    <!-- NEW: Static Banner (Non-Clickable) -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/trigger_banner"
+        android:layout_width="350dp"
+        android:layout_height="55dp"
+        android:layout_marginTop="100dp"
+        android:background="@android:color/transparent"
+        app:cardCornerRadius="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardView"
+        app:layout_constraintVertical_bias="0.0">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/rounded_background">
+
+            <TextView
+                android:id="@+id/mood_trigger_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/emotional_trigger"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.5" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- NEW: Text Field Below Static Banner -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/mood_trigger_input_layout"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        app:boxStrokeColor="@color/black"
+        app:hintEnabled="true"
+        app:layout_constraintTop_toBottomOf="@+id/trigger_banner"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/mood_trigger_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/emotional_trigger_textbox_hint"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/social_situation_banner"
+        android:layout_width="355dp"
+        android:layout_height="55dp"
+        android:layout_marginBottom="160dp"
+        android:background="@android:color/transparent"
+        app:cardCornerRadius="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/mood_trigger_input_layout"
+        app:layout_constraintStart_toStartOf="@+id/mood_trigger_input_layout"
+        app:layout_constraintTop_toBottomOf="@+id/mood_trigger_input_layout" >
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/buttonGreen">
+
+            <TextView
+                android:id="@+id/social_situation_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="What's your current social situation?"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="@+id/social_situation_banner"
+        app:layout_constraintTop_toBottomOf="@+id/social_situation_banner">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/emotional_trigger_textbox_hint" />
+
+    </com.google.android.material.textfield.TextInputLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
