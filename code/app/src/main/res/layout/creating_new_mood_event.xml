@@ -22,7 +22,7 @@
         android:id="@+id/mood_events_list_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/create_new_mood_event_default"
+        android:text="@string/_create_untitled_mood_event"
         android:textColor="@color/black"
         android:textSize="22sp"
         android:textStyle="bold"
