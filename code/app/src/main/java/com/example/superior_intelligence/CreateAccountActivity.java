@@ -1,3 +1,9 @@
+/**
+ * completes sub-issue: CreateAccountPage #144
+ * link: https://github.com/orgs/cmput301-w25/projects/9/views/1?pane=issue&itemId=100541362&issue=cmput301-w25%7Cproject-superiorintelligence%7C144
+ * Creates an account by entering a unique username. Checks database to ensure username is unique and doesn't exist
+ */
+
 package com.example.superior_intelligence;
 
 import android.content.Intent;
@@ -6,6 +12,8 @@ import android.view.View;
 import android.widget.ImageButton;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+
+import com.example.superior_intelligence.HomePageActivity;
 
 public class CreateAccountActivity extends AppCompatActivity {
     @Override
