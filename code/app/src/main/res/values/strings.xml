@@ -28,6 +28,16 @@
 
     <!-- Dropdown Menu Text -->
     <string name="emotional_state_text">How are you feeling?</string>
+    <string-array name="emotional_state_list">
+        <item>Anger</item>
+        <item>Confusion</item>
+        <item>Disgust</item>
+        <item>Fear</item>
+        <item>Happiness</item>
+        <item>Sadness</item>
+        <item>Shame</item>
+        <item>Surprise</item>
+    </string-array>
 
     <!-- Content Descriptions -->
     <string name="content_desc_tool_icon">Tool Icon</string>
