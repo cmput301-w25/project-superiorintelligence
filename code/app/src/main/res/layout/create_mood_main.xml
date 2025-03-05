@@ -49,16 +49,31 @@
 
 
     <EditText
-        android:id="@+id/mood_reason"
+        android:id="@+id/mood_reason_textbox"
         android:layout_width="332dp"
         android:layout_height="68dp"
         android:background="@color/buttonGreen"
         android:hint="@string/mood_explanation_hint"
-        android:paddingStart="10dp"
         android:inputType="text"
+        android:paddingStart="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.492"
         app:layout_constraintStart_toStartOf="parent"
         tools:layout_editor_absoluteY="86dp" />
+
+    <Spinner
+        android:id="@+id/social_situation_dropdown"
+        style="@style/Widget.AppCompat.Spinner"
+        android:layout_width="336dp"
+        android:layout_height="65dp"
+        android:layout_marginTop="24dp"
+        android:background="@android:drawable/btn_dropdown"
+        android:dropDownSelector="@color/buttonGreen"
+        android:popupBackground="@color/buttonGreen"
+        android:spinnerMode="dropdown"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mood_reason_textbox" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
