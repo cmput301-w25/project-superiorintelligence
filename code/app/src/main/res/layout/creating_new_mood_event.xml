@@ -22,7 +22,7 @@
         android:id="@+id/mood_events_list_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Create New Mood Event"
+        android:text="@string/create_untitled_mood_event"
         android:textColor="@color/black"
         android:textSize="22sp"
         android:textStyle="bold"
@@ -66,9 +66,7 @@
                 android:id="@+id/emotional_state_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
-                android:text="Emotional State"
-
+                android:text="@string/emotional_state_text"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -86,7 +84,8 @@
                 app:layout_constraintStart_toEndOf="@+id/emotional_state_text"
                 app:layout_constraintTop_toTopOf="@+id/emotional_state_text"
                 app:layout_constraintVertical_bias="1.0"
-                app:srcCompat="@drawable/simple_arrow" />
+                app:srcCompat="@drawable/simple_arrow"
+                android:contentDescription="@string/content_desc_arrow_icon"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
