@@ -9,13 +9,23 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
+/**
+ * Activity that allows users to create or edit a mood event.
+ * It provides options to select emotional state and social situation using dropdowns.
+ */
 public class MoodCreateAndEditActivity extends AppCompatActivity {
+
     private CardView emotionSelector, socialSituationSelector;
     private Spinner emotionDropdown, emotionDropdown2;
     private TextView emotionText, socialSituationText;
     private boolean isEmotionSelected = false;
     private boolean isSocialSituationSelected = false;
 
+    /**
+     * Called when the activity is first created. Initializes UI components and sets up event listeners.
+     *
+     * @param savedInstanceState the state of the activity being restored (if any).
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,16 +43,16 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
 
         // Load emotions into the first Spinner
         ArrayAdapter<CharSequence> emotionAdapter = new ArrayAdapter<>(this,
-                R.layout.emotional_state_options,
+                R.layout.all_dropdown_options,
                 getResources().getStringArray(R.array.emotional_state_list));
-        emotionAdapter.setDropDownViewResource(R.layout.emotional_state_options);
+        emotionAdapter.setDropDownViewResource(R.layout.all_dropdown_options);
         emotionDropdown.setAdapter(emotionAdapter);
 
         // Load social situations into the second Spinner
         ArrayAdapter<CharSequence> socialSituationAdapter = new ArrayAdapter<>(this,
-                R.layout.emotional_state_options,  // Using same layout for styling
+                R.layout.all_dropdown_options,  // Using the same layout for styling
                 getResources().getStringArray(R.array.social_situation_list));
-        socialSituationAdapter.setDropDownViewResource(R.layout.emotional_state_options);
+        socialSituationAdapter.setDropDownViewResource(R.layout.all_dropdown_options);
         emotionDropdown2.setAdapter(socialSituationAdapter);
 
         // Hide spinners initially
@@ -69,6 +79,15 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
 
         // Handle selection for first dropdown (Emotional State)
         emotionDropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            /**
+             * Handles selection of an emotional state from the first dropdown.
+             * It updates the displayed emotional state and toggles visibility of the dropdown.
+             *
+             * @param parent the AdapterView where the selection was made.
+             * @param view the view within the AdapterView that was clicked.
+             * @param position the position of the selected item in the adapter.
+             * @param id the row id of the selected item.
+             */
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedEmotion = parent.getItemAtPosition(position).toString();
@@ -83,6 +102,11 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
                 emotionDropdown.setVisibility(View.GONE);
             }
 
+            /**
+             * Resets the emotional state text when nothing is selected.
+             *
+             * @param parent the AdapterView where the selection was made.
+             */
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
                 emotionText.setText("Emotional State");
@@ -92,6 +116,15 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
 
         // Handle selection for second dropdown (Social Situation)
         emotionDropdown2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            /**
+             * Handles selection of a social situation from the second dropdown.
+             * It updates the displayed social situation and toggles visibility of the dropdown.
+             *
+             * @param parent the AdapterView where the selection was made.
+             * @param view the view within the AdapterView that was clicked.
+             * @param position the position of the selected item in the adapter.
+             * @param id the row id of the selected item.
+             */
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedSocialSituation = parent.getItemAtPosition(position).toString();
@@ -106,6 +139,11 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
                 emotionDropdown2.setVisibility(View.GONE);
             }
 
+            /**
+             * Resets the social situation text when nothing is selected.
+             *
+             * @param parent the AdapterView where the selection was made.
+             */
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
                 socialSituationText.setText("Current social situation");
