@@ -57,7 +57,6 @@
     <string name="content_desc_edit_profile_icon">Edit Profile</string>
     <string name="content_desc_add_button_icon">+</string>
     <string name="content_desc_rounded_add_photo_icon">Button for adding a photo</string>
-    <string name="content_desc_tick_icon">Tick icon for a confirm button</string>
     <string name="unknown_permission_request">Unknown permission request.</string>
 
     <!-- Error Messages -->

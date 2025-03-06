@@ -53,7 +53,6 @@
         android:layout_height="60dp"
         android:layout_marginBottom="32dp"
         android:background="@drawable/rounded_background"
-        android:contentDescription="TODO"
         android:elevation="8dp"
         android:src="@drawable/ic_add"
         android:contentDescription="@string/content_desc_add_button_icon"

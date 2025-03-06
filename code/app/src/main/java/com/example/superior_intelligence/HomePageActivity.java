@@ -5,22 +5,25 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatButton;
 
 public class HomePageActivity extends AppCompatActivity {
+
+    private ImageButton addButton; // Declare add button
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.home_page);
+        setContentView(R.layout.home_page); // Ensure correct layout file
 
-        // Find the back button
-        ImageButton backButton = findViewById(R.id.back_button);
+        // Initialize the add button
+        addButton = findViewById(R.id.addButton);
 
-        // Set click listener to navigate back
-        backButton.setOnClickListener(new View.OnClickListener() {
+        // Set click listener to navigate to Create Mood Event Page
+        addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish(); // Closes the current activity and returns to MainActivity
+                Intent intent = new Intent(HomePageActivity.this, MoodCreateAndEditActivity.class);
+                startActivity(intent);
             }
         });
     }
