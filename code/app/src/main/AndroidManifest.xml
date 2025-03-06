@@ -56,6 +56,14 @@
             android:theme="@style/Theme.Superior_Intelligence">
         </activity>
 
+        <!-- Home Activity -->
+        <activity
+            android:name=".HomeActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Superior_Intelligence">
+        </activity>
+
+
         <!-- FileProvider for Camera Image Storage -->
         <provider
             android:name="androidx.core.content.FileProvider"
