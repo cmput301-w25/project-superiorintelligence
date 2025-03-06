@@ -61,15 +61,20 @@
         app:layout_constraintStart_toStartOf="parent"
         tools:layout_editor_absoluteY="86dp" />
 
+    <androidx.constraintlayout.helper.widget.Layer
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="social_situation_dropdown"
+        tools:layout_editor_absoluteX="12dp"
+        tools:layout_editor_absoluteY="178dp" />
+
     <Spinner
         android:id="@+id/social_situation_dropdown"
         style="@style/Widget.AppCompat.Spinner"
         android:layout_width="336dp"
         android:layout_height="65dp"
         android:layout_marginTop="24dp"
-        android:background="@android:drawable/btn_dropdown"
-        android:dropDownSelector="@color/buttonGreen"
-        android:popupBackground="@color/buttonGreen"
+        android:background="@color/buttonGreen"
         android:spinnerMode="dropdown"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

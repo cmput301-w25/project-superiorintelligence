@@ -8,20 +8,39 @@
     <string name="user_preferences_text">User Preferences</string>
     <string name="mood_following_text">Mood Following</string>
     <string name="privacy_text">Privacy</string>
+    <string name="emotional_trigger">What triggered this mood?</string>
+    <string name="emotional_trigger_textbox_hint">(Optional)</string>
+
 
     <!-- Header Text -->
     <string name="Photo_header_title">Add a Photo to your Event</string>
     <string name="user_profile_header_title">User Profile</string>
     <string name="photo_access_permission_header_title">Access Permission</string>
+    <string name="create_untitled_mood_event">Untitled</string>
+    <string name="mood_events_page_header">Mood Events</string>
 
     <!-- Body Text -->
     <string name="permission_camera_message">Allow APP to access your Camera to take pictures.</string>
     <string name="permission_gallery_message">Allow APP to access your Photo Gallery to upload images.</string>
+
     <!-- Button Text -->
     <string name="confirm_button_text">Confirm</string>
     <string name="deny_button_text">Deny</string>
     <string name="allow_button_text">Allow</string>
     <string name="ok_button_text">OK</string>
+
+    <!-- Dropdown Menu Text -->
+    <string name="emotional_state_text">How are you feeling?</string>
+    <string-array name="emotional_state_list">
+        <item>Anger</item>
+        <item>Confusion</item>
+        <item>Disgust</item>
+        <item>Fear</item>
+        <item>Happiness</item>
+        <item>Sadness</item>
+        <item>Shame</item>
+        <item>Surprise</item>
+    </string-array>
 
     <!-- Content Descriptions -->
     <string name="content_desc_tool_icon">Tool Icon</string>
@@ -36,12 +55,14 @@
     <string name="content_desc_perfect_icon">Confirm selection</string>
     <string name="content_desc_back_icon">Back</string>
     <string name="content_desc_edit_profile_icon">Edit Profile</string>
+    <string name="content_desc_add_button_icon">+</string>
     <string name="unknown_permission_request">Unknown permission request.</string>
+    <string name="content_desc_add_button_icon">+</string>
 
     <!-- Error Messages -->
     <string name="image_size_exceeded_title">Image size exceed limit</string>
     <string name="image_size_exceeded_message">Image must be under 65536 bytes</string>
-    <string name="mood_explanation_hint">Quick reason for your mood!</string>
+    <string name="mood_explanation_hint">Quick explanation for your mood!</string>
     <string name="map_toolbar">Mood Map</string>
 
 </resources>

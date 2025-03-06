@@ -63,6 +63,22 @@
             android:theme="@style/Theme.Superior_Intelligence">
         </activity>
 
+        <!-- login Page -->
+        <activity android:name=".LoginPageActivity"
+            android:parentActivityName=".MainActivity"
+            android:exported="false"/>
+
+        <!-- Create account Page -->
+        <activity android:name=".CreateAccountActivity"
+            android:parentActivityName=".LoginPageActivity"
+            android:exported="false"/>
+
+        <!-- Home Page -->
+        <activity android:name=".HomePageActivity"
+            android:parentActivityName=".LoginPageActivity"
+            android:exported="false"/>
+
+
 
         <!-- FileProvider for Camera Image Storage -->
         <provider
