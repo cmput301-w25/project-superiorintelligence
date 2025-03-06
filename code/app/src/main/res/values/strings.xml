@@ -9,7 +9,7 @@
     <string name="mood_following_text">Mood Following</string>
     <string name="privacy_text">Privacy</string>
     <string name="emotional_trigger">What triggered this mood?</string>
-    <string name="emotional_trigger_textbox_hint">(Optional)</string>
+    <string name="emotional_trigger_textbox_hint">Type here (Optional)</string>
 
 
     <!-- Header Text -->
@@ -56,8 +56,9 @@
     <string name="content_desc_back_icon">Back</string>
     <string name="content_desc_edit_profile_icon">Edit Profile</string>
     <string name="content_desc_add_button_icon">+</string>
+    <string name="content_desc_rounded_add_photo_icon">Button for adding a photo</string>
+    <string name="content_desc_tick_icon">Tick icon for a confirm button</string>
     <string name="unknown_permission_request">Unknown permission request.</string>
-    <string name="content_desc_add_button_icon">+</string>
 
     <!-- Error Messages -->
     <string name="image_size_exceeded_title">Image size exceed limit</string>
