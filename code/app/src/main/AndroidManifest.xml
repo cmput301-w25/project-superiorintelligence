@@ -56,6 +56,13 @@
             android:theme="@style/Theme.Superior_Intelligence">
         </activity>
 
+        <!-- Home Activity -->
+        <activity
+            android:name=".HomeActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Superior_Intelligence">
+        </activity>
+
         <!-- login Page -->
         <activity android:name=".LoginPageActivity"
             android:parentActivityName=".MainActivity"
@@ -70,6 +77,7 @@
         <activity android:name=".HomePageActivity"
             android:parentActivityName=".LoginPageActivity"
             android:exported="false"/>
+
 
 
         <!-- FileProvider for Camera Image Storage -->
