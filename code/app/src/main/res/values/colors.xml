@@ -6,5 +6,7 @@
     <color name="buttonGreen">#C5E773</color>
     <color name="secondaryGreen">#E0FCAC</color>
     <color name="overlayDefault">#B3FFFFFF</color>  <!-- 70% Transparent White -->
+    <color name="selected_row_color">#FF5733</color> <!-- Orange highlight for selected item -->
+
 
 </resources>
