@@ -72,7 +72,7 @@
                 android:id="@+id/emotional_state_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="emotional state"
+                android:text="Emotional state"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold"
@@ -97,18 +97,23 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Hidden Spinner (Dropdown) -->
-    <Spinner
-        android:id="@+id/emotion_dropdown"
-        android:layout_width="0dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="4dp"
-        android:background="@color/white"
-        android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="@+id/cardView"
-        app:layout_constraintStart_toStartOf="@+id/cardView"
-        app:layout_constraintTop_toBottomOf="@+id/cardView"
-        tools:visibility="visible" />
+<!--    <ScrollView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:fillViewport="true">-->
+
+        <Spinner
+            android:id="@+id/emotion_dropdown"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@+id/cardView"
+            app:layout_constraintStart_toStartOf="@+id/cardView"
+            app:layout_constraintTop_toBottomOf="@+id/cardView"
+            tools:visibility="visible" />
+<!--    </ScrollView>-->
+
 
     <!-- NEW: Static Banner (Non-Clickable) -->
     <androidx.cardview.widget.CardView
@@ -187,8 +192,8 @@
                 android:id="@+id/social_situation_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="What's your current social situation?"
-                android:textSize="17sp"
+                android:text="Current social situation"
+                android:textSize="20sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -201,9 +206,7 @@
                 android:layout_height="25dp"
                 android:contentDescription="@string/content_desc_arrow_icon"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.952"
-                app:layout_constraintStart_toEndOf="@+id/emotional_state_text"
+                app:layout_constraintStart_toEndOf="@+id/social_situation_text"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.533"
                 app:srcCompat="@drawable/simple_arrow" />
