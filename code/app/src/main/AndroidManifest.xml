@@ -56,21 +56,31 @@
             android:theme="@style/Theme.Superior_Intelligence">
         </activity>
 
-        <!-- login Page -->
+        <!-- Home Activity -->
+        <activity
+            android:name=".HomeActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Superior_Intelligence">
+        </activity>
+
+        <!-- Login Page -->
         <activity android:name=".LoginPageActivity"
             android:parentActivityName=".MainActivity"
-            android:exported="false"/>
+            android:exported="true"/>
 
-        <!-- Create account Page -->
+        <!-- Create Account Page -->
         <activity android:name=".CreateAccountActivity"
             android:parentActivityName=".LoginPageActivity"
-            android:exported="false"/>
+            android:exported="true"/>
 
         <!-- Home Page -->
         <activity android:name=".HomePageActivity"
             android:parentActivityName=".LoginPageActivity"
-            android:exported="false"/>
+            android:exported="true"/>
 
+        <!-- Mood Create and Edit Activity -->
+        <activity android:name=".MoodCreateAndEditActivity"
+            android:exported="true"/>
 
         <!-- FileProvider for Camera Image Storage -->
         <provider

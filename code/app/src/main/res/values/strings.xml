@@ -9,7 +9,7 @@
     <string name="mood_following_text">Mood Following</string>
     <string name="privacy_text">Privacy</string>
     <string name="emotional_trigger">What triggered this mood?</string>
-    <string name="emotional_trigger_textbox_hint">(Optional)</string>
+    <string name="emotional_trigger_textbox_hint">Type here (Optional)</string>
 
 
     <!-- Header Text -->
@@ -31,6 +31,7 @@
 
     <!-- Dropdown Menu Text -->
     <string name="emotional_state_text">How are you feeling?</string>
+
     <string-array name="emotional_state_list">
         <item>Anger</item>
         <item>Confusion</item>
@@ -40,6 +41,13 @@
         <item>Sadness</item>
         <item>Shame</item>
         <item>Surprise</item>
+    </string-array>
+
+    <string-array name="social_situation_list">
+        <item>Alone</item>
+        <item>With one other person</item>
+        <item>With two to several people</item>
+        <item>With a crowd</item>
     </string-array>
 
     <!-- Content Descriptions -->
@@ -56,6 +64,7 @@
     <string name="content_desc_back_icon">Back</string>
     <string name="content_desc_edit_profile_icon">Edit Profile</string>
     <string name="content_desc_add_button_icon">+</string>
+    <string name="content_desc_rounded_add_photo_icon">Button for adding a photo</string>
     <string name="unknown_permission_request">Unknown permission request.</string>
 
     <!-- Error Messages -->

@@ -1,8 +1,5 @@
-/***  SOURCES
- * https://developer.android.com/about/versions/14/changes/partial-photo-video-access
- * https://www.youtube.com/watch?v=D3JCtaK8LSU ***/
-
 package com.example.superior_intelligence;
+
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -41,6 +38,7 @@ import java.util.Locale;
 public class PhotoActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 100;
     private Uri photoUri;
+    private String currentPhotoPath; // Stores the image file path
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,10 +87,6 @@ public class PhotoActivity extends AppCompatActivity {
                 } else {
                     openGallery();
                 }
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                // If user selected "Allow limited access" but denied full permission
-                Toast.makeText(this, "Limited Access: Only selected photos will be available.", Toast.LENGTH_LONG).show();
-                openGallery(); // Still allow selecting limited photos
             } else {
                 Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
             }
@@ -104,17 +98,7 @@ public class PhotoActivity extends AppCompatActivity {
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                     result -> {
                         if (result.getResultCode() == RESULT_OK) {
-                            ImageView photoImageView = findViewById(R.id.photo);
-                            ImageView photoIcon = findViewById(R.id.photo_icon);
-
-                            Bitmap compressedBitmap = getCompressedBitmap(photoUri);
-                            if (compressedBitmap == null) return; // Stop if image exceeds size limit
-
-                            photoImageView.setImageBitmap(compressedBitmap);
-                            photoImageView.setVisibility(View.VISIBLE);
-                            photoIcon.setVisibility(View.GONE);
-
-                            saveCompressedImage(compressedBitmap);
+                            processSelectedImage(photoUri);
                         }
                     });
 
@@ -137,19 +121,7 @@ public class PhotoActivity extends AppCompatActivity {
                     result -> {
                         if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                             Uri selectedImage = result.getData().getData();
-                            if (selectedImage != null) {
-                                ImageView photoImageView = findViewById(R.id.photo);
-                                ImageView photoIcon = findViewById(R.id.photo_icon);
-
-                                Bitmap compressedBitmap = getCompressedBitmap(selectedImage);
-                                if (compressedBitmap == null) return; // Stop if image exceeds size limit
-
-                                photoImageView.setImageBitmap(compressedBitmap);
-                                photoImageView.setVisibility(View.VISIBLE);
-                                photoIcon.setVisibility(View.GONE);
-
-                                saveCompressedImage(compressedBitmap);
-                            }
+                            processSelectedImage(selectedImage);
                         }
                     });
 
@@ -167,10 +139,26 @@ public class PhotoActivity extends AppCompatActivity {
 
         try {
             imageFile = File.createTempFile(imageFileName, ".jpg", storageDir);
+            currentPhotoPath = imageFile.getAbsolutePath(); // Save the file path
         } catch (IOException e) {
             Log.e("PhotoActivity", "Error creating file", e);
         }
         return imageFile;
+    }
+
+    /***  PROCESS SELECTED IMAGE  ***/
+    private void processSelectedImage(Uri imageUri) {
+        Bitmap compressedBitmap = getCompressedBitmap(imageUri);
+        if (compressedBitmap == null) return; // Stop if image exceeds size limit
+
+        ImageView photoImageView = findViewById(R.id.photo);
+        ImageView photoIcon = findViewById(R.id.photo_icon);
+
+        photoImageView.setImageBitmap(compressedBitmap);
+        photoImageView.setVisibility(View.VISIBLE);
+        photoIcon.setVisibility(View.GONE);
+
+        saveCompressedImage(compressedBitmap);
     }
 
     /***  COMPRESS IMAGE & CHECK SIZE LIMIT (64 KB)  ***/
@@ -241,5 +229,10 @@ public class PhotoActivity extends AppCompatActivity {
         } catch (IOException e) {
             Log.e("PhotoActivity", "Error saving image", e);
         }
+    }
+
+    /***  GET IMAGE URL FOR ADAPTER  ***/
+    public String getImageUrl() {
+        return currentPhotoPath;
     }
 }

@@ -51,8 +51,8 @@ public class CreateAccountActivity extends AppCompatActivity {
         signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                database = FirebaseDatabase.getInstance();
-                reference = database.getReference("users");
+                //database = FirebaseDatabase.getInstance();
+                //reference = database.getReference("users");
 
                 CollectionReference userRef = db.collection("users");
                 DocumentReference userDoc = userRef.document();

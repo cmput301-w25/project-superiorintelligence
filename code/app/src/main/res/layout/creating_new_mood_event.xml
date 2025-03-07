@@ -8,6 +8,7 @@
     android:background="@color/backgroundGreen">
 
     <!-- Toolbar -->
+
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/mood_events_list_toolbar"
         android:layout_width="match_parent"
@@ -24,7 +25,9 @@
         android:id="@+id/mood_events_list_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+
         android:text="@string/create_untitled_mood_event"
+
         android:textColor="@color/black"
         android:textSize="22sp"
         android:textStyle="bold"
@@ -69,7 +72,7 @@
                 android:id="@+id/emotional_state_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/emotional_state_text"
+                android:text="Emotional state"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold"
@@ -86,32 +89,38 @@
                 android:contentDescription="@string/content_desc_arrow_icon"
                 app:layout_constraintBottom_toBottomOf="@+id/emotional_state_text"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toEndOf="@+id/emotional_state_text"
                 app:layout_constraintTop_toTopOf="@+id/emotional_state_text"
-                app:layout_constraintVertical_bias="1.0"
+                app:layout_constraintVertical_bias="0.0"
                 app:srcCompat="@drawable/simple_arrow" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Hidden Spinner (Dropdown) -->
-    <Spinner
-        android:id="@+id/emotion_dropdown"
-        android:layout_width="300dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="4dp"
-        android:background="@color/white"
-        android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="@+id/cardView"
-        app:layout_constraintStart_toStartOf="@+id/cardView"
-        app:layout_constraintTop_toBottomOf="@+id/cardView"
-        tools:visibility="visible" />
+<!--    <ScrollView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:fillViewport="true">-->
+
+        <Spinner
+            android:id="@+id/emotion_dropdown"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@+id/cardView"
+            app:layout_constraintStart_toStartOf="@+id/cardView"
+            app:layout_constraintTop_toBottomOf="@+id/cardView"
+            tools:visibility="visible" />
+<!--    </ScrollView>-->
+
 
     <!-- NEW: Static Banner (Non-Clickable) -->
     <androidx.cardview.widget.CardView
         android:id="@+id/trigger_banner"
         android:layout_width="350dp"
         android:layout_height="55dp"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="70dp"
         android:background="@android:color/transparent"
         app:cardCornerRadius="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -166,13 +175,13 @@
         android:id="@+id/social_situation_banner"
         android:layout_width="355dp"
         android:layout_height="55dp"
-        android:layout_marginBottom="160dp"
+        android:layout_marginBottom="190dp"
         android:background="@android:color/transparent"
         app:cardCornerRadius="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/mood_trigger_input_layout"
         app:layout_constraintStart_toStartOf="@+id/mood_trigger_input_layout"
-        app:layout_constraintTop_toBottomOf="@+id/mood_trigger_input_layout" >
+        app:layout_constraintTop_toBottomOf="@+id/mood_trigger_input_layout">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -183,27 +192,88 @@
                 android:id="@+id/social_situation_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="What's your current social situation?"
-                android:textSize="17sp"
+                android:text="Current social situation"
+                android:textSize="20sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="44dp"
+                android:layout_height="25dp"
+                android:contentDescription="@string/content_desc_arrow_icon"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/social_situation_text"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.533"
+                app:srcCompat="@drawable/simple_arrow" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="350dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="@+id/social_situation_banner"
-        app:layout_constraintTop_toBottomOf="@+id/social_situation_banner">
+    <ImageButton
+        android:id="@+id/add_photo_button"
+        android:layout_width="63dp"
+        android:layout_height="63dp"
+        android:layout_marginBottom="45dp"
+        android:background="@drawable/rounded_background"
+        android:contentDescription="@string/content_desc_rounded_add_photo_icon"
+        android:scaleType="centerInside"
+        android:src="@drawable/rounded_add_photo_icon"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.097"
+        app:layout_constraintStart_toStartOf="parent" />
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:layout_width="match_parent"
+    <LinearLayout
+        android:id="@+id/confirm_button"
+        android:layout_width="wrap_content"
+        android:layout_height="63dp"
+        android:layout_marginBottom="45dp"
+        android:background="@drawable/rounded_background"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.828"
+        app:layout_constraintStart_toEndOf="@+id/add_photo_button">
+
+        <!-- Perfect Icon -->
+        <ImageView
+            android:layout_width="31dp"
+            android:layout_height="27dp"
+            android:layout_marginEnd="8dp"
+            android:contentDescription="@string/content_desc_perfect_icon"
+            android:scaleType="fitCenter"
+            android:src="@drawable/perfect" />
+
+        <!-- Confirm Text -->
+        <TextView
+            android:id="@+id/confirm_text"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="@string/emotional_trigger_textbox_hint" />
+            android:text="@string/content_desc_confirm_icon"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
-    </com.google.android.material.textfield.TextInputLayout>
+    <Spinner
+        android:id="@+id/emotion_dropdown2"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/white"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="@+id/social_situation_banner"
+        app:layout_constraintStart_toStartOf="@+id/social_situation_banner"
+        app:layout_constraintTop_toBottomOf="@+id/social_situation_banner"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
