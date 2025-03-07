@@ -1,8 +1,12 @@
 package com.example.superior_intelligence;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
@@ -42,12 +46,35 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         recyclerView.setAdapter(adapter);
 
 
-        switchTab(exploreEvents, tabExplore);
+        String selectedTab = getIntent().getStringExtra("selectedTab");
+        if ("myposts".equals(selectedTab)) {
+            switchTab(myPostsEvents, tabMyPosts);
+        } else {
+            // Default to Explore tab
+            switchTab(exploreEvents, tabExplore);
+        }
 
         // Set tab listeners
         tabExplore.setOnClickListener(v -> switchTab(exploreEvents, tabExplore));
         tabFollowed.setOnClickListener(v -> switchTab(followedEvents, tabFollowed));
         tabMyPosts.setOnClickListener(v -> switchTab(myPostsEvents, tabMyPosts));
+
+        // Launch's MoodCreateAndEditActivity when clicked
+        ImageButton addButton = findViewById(R.id.addButton);
+        addButton.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, MoodCreateAndEditActivity.class);
+            startActivity(intent);
+        });
+
+        // Launch's ProfileActivity when clicked
+        CardView profileImage = findViewById(R.id.profile_image);
+        profileImage.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, ProfileActivity.class);
+            startActivity(intent);
+        });
+
+
+
     }
 
     private void loadSampleEvents() {

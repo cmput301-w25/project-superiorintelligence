@@ -14,9 +14,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -25,7 +26,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +44,14 @@ public class PhotoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photo_add);
+
+        // Back button returns to MoodCreateAndEditActivity
+        ImageButton backButton = findViewById(R.id.back_button);
+        backButton.setOnClickListener(v -> finish());
+
+        // Confirm button goes back to MoodCreateAndEditActivity
+        LinearLayout confirmButton = findViewById(R.id.confirm_button);
+        confirmButton.setOnClickListener(v -> finish());
 
         ImageView photoIcon = findViewById(R.id.photo_icon);
         photoIcon.setVisibility(View.VISIBLE); // Ensure placeholder icon is visible
@@ -174,7 +182,7 @@ public class PhotoActivity extends AppCompatActivity {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inSampleSize = 2; // Reduce size by half
             Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
-            inputStream.close(); // Close input stream after use
+            inputStream.close();
 
             if (bitmap == null) {
                 Log.e("PhotoActivity", "Bitmap decoding failed");
