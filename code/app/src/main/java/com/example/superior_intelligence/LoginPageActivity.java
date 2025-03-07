@@ -32,6 +32,7 @@ public class LoginPageActivity extends AppCompatActivity {
 
     EditText loginUsername;
     Button loginButton;
+    Button signUpButton;
     //TextView signupRedirectText;
 
     @Override
@@ -42,6 +43,7 @@ public class LoginPageActivity extends AppCompatActivity {
         loginUsername = findViewById(R.id.login_username);
         //signupRedirectText = findViewById(R.id.signupRedirectText);
         loginButton = findViewById(R.id.login_button);
+        signUpButton = findViewById(R.id.signup_page_button);
 
         // Find the back button
         ImageButton backButton = findViewById(R.id.back_button);
@@ -54,8 +56,7 @@ public class LoginPageActivity extends AppCompatActivity {
         });
 
         // login page to sign up page
-        AppCompatButton SignupButton = findViewById(R.id.signup_page_button);
-        SignupButton.setOnClickListener(new View.OnClickListener() {
+        signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(LoginPageActivity.this, CreateAccountActivity.class);

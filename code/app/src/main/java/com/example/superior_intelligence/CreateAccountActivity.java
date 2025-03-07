@@ -22,6 +22,9 @@ import androidx.appcompat.widget.AppCompatButton;
 import com.example.superior_intelligence.HomePageActivity;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class CreateAccountActivity extends AppCompatActivity {
 
@@ -30,7 +33,7 @@ public class CreateAccountActivity extends AppCompatActivity {
     Button signupButton;
     FirebaseDatabase database;
     DatabaseReference reference;
-
+    FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,19 +44,27 @@ public class CreateAccountActivity extends AppCompatActivity {
         signupUsername = findViewById(R.id.signup_username);
         //loginRedirectText = findViewById(R.id.loginRedirectText);
 
+        db = FirebaseFirestore.getInstance();
+
         // Set click listener to navigate back
-        AppCompatButton SignupButton = findViewById(R.id.signup_button);
+        signupButton = findViewById(R.id.signup_button);
         signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 database = FirebaseDatabase.getInstance();
                 reference = database.getReference("users");
 
+                CollectionReference userRef = db.collection("users");
+                DocumentReference userDoc = userRef.document();
+
+
                 String name = signupName.getText().toString();
                 String username = signupUsername.getText().toString();
 
                 HelperClass helperClass = new HelperClass(name, username);
                 reference.child(username).setValue(helperClass);
+
+                userDoc.set(helperClass);
 
                 Toast.makeText(CreateAccountActivity.this, "Your signup is successful", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(CreateAccountActivity.this, LoginPageActivity.class);
