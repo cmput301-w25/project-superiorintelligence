@@ -57,7 +57,6 @@
     <string name="content_desc_edit_profile_icon">Edit Profile</string>
     <string name="content_desc_add_button_icon">+</string>
     <string name="unknown_permission_request">Unknown permission request.</string>
-    <string name="content_desc_add_button_icon">+</string>
 
     <!-- Error Messages -->
     <string name="image_size_exceeded_title">Image size exceed limit</string>
