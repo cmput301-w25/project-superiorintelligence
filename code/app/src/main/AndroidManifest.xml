@@ -82,6 +82,12 @@
         <activity android:name=".MoodCreateAndEditActivity"
             android:exported="true"/>
 
+        <!-- Profile Activity -->
+        <activity
+            android:name=".ProfileActivity"
+            android:exported="true">
+        </activity>
+
         <!-- FileProvider for Camera Image Storage -->
         <provider
             android:name="androidx.core.content.FileProvider"

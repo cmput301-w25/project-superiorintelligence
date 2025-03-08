@@ -1,9 +1,12 @@
 package com.example.superior_intelligence;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -43,16 +46,16 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
 
         // Load emotions into the first Spinner
         ArrayAdapter<CharSequence> emotionAdapter = new ArrayAdapter<>(this,
-                R.layout.all_dropdown_options,
+                R.layout.emotional_state_options,
                 getResources().getStringArray(R.array.emotional_state_list));
-        emotionAdapter.setDropDownViewResource(R.layout.all_dropdown_options);
+        emotionAdapter.setDropDownViewResource(R.layout.emotional_state_options);
         emotionDropdown.setAdapter(emotionAdapter);
 
         // Load social situations into the second Spinner
         ArrayAdapter<CharSequence> socialSituationAdapter = new ArrayAdapter<>(this,
-                R.layout.all_dropdown_options,  // Using the same layout for styling
+                R.layout.emotional_state_options,
                 getResources().getStringArray(R.array.social_situation_list));
-        socialSituationAdapter.setDropDownViewResource(R.layout.all_dropdown_options);
+        socialSituationAdapter.setDropDownViewResource(R.layout.emotional_state_options);
         emotionDropdown2.setAdapter(socialSituationAdapter);
 
         // Hide spinners initially
@@ -79,15 +82,6 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
 
         // Handle selection for first dropdown (Emotional State)
         emotionDropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            /**
-             * Handles selection of an emotional state from the first dropdown.
-             * It updates the displayed emotional state and toggles visibility of the dropdown.
-             *
-             * @param parent the AdapterView where the selection was made.
-             * @param view the view within the AdapterView that was clicked.
-             * @param position the position of the selected item in the adapter.
-             * @param id the row id of the selected item.
-             */
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedEmotion = parent.getItemAtPosition(position).toString();
@@ -114,17 +108,8 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
             }
         });
 
-        // Handle selection for second dropdown (Social Situation)
+        // Handle selection for the second dropdown (Social Situation)
         emotionDropdown2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            /**
-             * Handles selection of a social situation from the second dropdown.
-             * It updates the displayed social situation and toggles visibility of the dropdown.
-             *
-             * @param parent the AdapterView where the selection was made.
-             * @param view the view within the AdapterView that was clicked.
-             * @param position the position of the selected item in the adapter.
-             * @param id the row id of the selected item.
-             */
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedSocialSituation = parent.getItemAtPosition(position).toString();
@@ -149,6 +134,32 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
                 socialSituationText.setText("Current social situation");
                 isSocialSituationSelected = false;
             }
+        });
+
+        // --- Navigation Buttons Implementation ---
+
+        // Back Button: Navigate back to HomeActivity
+        ImageButton backButton = findViewById(R.id.mood_events_list_back_button);
+        backButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MoodCreateAndEditActivity.this, HomeActivity.class);
+            startActivity(intent);
+            finish();
+        });
+
+        // Add Photo Button: Launch PhotoActivity
+        ImageButton addPhotoButton = findViewById(R.id.add_photo_button);
+        addPhotoButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MoodCreateAndEditActivity.this, PhotoActivity.class);
+            startActivity(intent);
+        });
+
+        // Confirm Button: Navigate to HomeActivity with the "myposts" tab selected
+        LinearLayout confirmButton = findViewById(R.id.confirm_button);
+        confirmButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MoodCreateAndEditActivity.this, HomeActivity.class);
+            intent.putExtra("selectedTab", "myposts");
+            startActivity(intent);
+            finish();
         });
     }
 }
