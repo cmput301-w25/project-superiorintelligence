@@ -1,46 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mood_event_creation"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/backgroundGreen">
+    android:background="@color/backgroundGreen"
+    tools:context=".MoodCreateAndEditActivity" >
 
     <!-- Toolbar -->
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/mood_events_list_toolbar"
+        android:id="@+id/create_event_toolbar"
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:background="@drawable/toolbar_background"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Page Header -->
+    <!-- Editable Title at Center of Toolbar -->
     <EditText
         android:id="@+id/mood_event_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/create_untitled_mood_event"
+        android:minHeight="48dp"
+        android:minWidth="48dp"
+        android:layout_marginTop="0dp"
+        android:background="@android:color/transparent"
+        android:hint="Event Title"
         android:textColor="@color/black"
         android:textSize="22sp"
         android:textStyle="bold"
-        android:background="@android:color/transparent"
         android:gravity="center"
-        android:inputType="textCapSentences"
-        android:singleLine="true"
-        android:ellipsize="end"
-        app:layout_constraintBottom_toBottomOf="@+id/mood_events_list_toolbar"
-        app:layout_constraintEnd_toEndOf="@+id/mood_events_list_toolbar"
-        app:layout_constraintStart_toStartOf="@+id/mood_events_list_toolbar"
-        app:layout_constraintTop_toTopOf="@+id/mood_events_list_toolbar" />
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        app:layout_constraintTop_toTopOf="@+id/create_event_toolbar"
+        app:layout_constraintBottom_toBottomOf="@+id/create_event_toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-
-    <!-- Back Button -->
+    <!-- Back Button (top-left) -->
     <ImageButton
         android:id="@+id/mood_events_list_back_button"
         android:layout_width="48dp"
@@ -51,21 +52,21 @@
         android:focusable="true"
         android:scaleType="fitCenter"
         android:src="@drawable/back_arrow"
-        app:layout_constraintBottom_toBottomOf="@+id/mood_events_list_header"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/mood_events_list_header" />
+        app:layout_constraintTop_toTopOf="@+id/create_event_toolbar"
+        app:layout_constraintBottom_toBottomOf="@+id/create_event_toolbar"
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- Emotion Selection Dropdown -->
+    <!-- Mood Selection (Card + arrow) -->
     <androidx.cardview.widget.CardView
-        android:id="@+id/cardView"
+        android:id="@+id/emotional_state_banner"
         android:layout_width="350dp"
         android:layout_height="55dp"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="30dp"
         android:background="@android:color/transparent"
         app:cardCornerRadius="20dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/create_event_toolbar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/mood_events_list_toolbar">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -76,62 +77,67 @@
                 android:id="@+id/emotional_state_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Emotional state"
+                android:layout_marginStart="20dp"
+                android:text="How have you been feeling?"
                 android:textColor="@color/black"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
-                android:id="@+id/imageView"
-                android:layout_width="44dp"
-                android:layout_height="25dp"
+                android:id="@+id/emotion_arrow"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="20dp"
                 android:contentDescription="@string/content_desc_arrow_icon"
-                app:layout_constraintBottom_toBottomOf="@+id/emotional_state_text"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toEndOf="@+id/emotional_state_text"
-                app:layout_constraintTop_toTopOf="@+id/emotional_state_text"
-                app:layout_constraintVertical_bias="0.0"
-                app:srcCompat="@drawable/simple_arrow" />
+                app:srcCompat="@drawable/simple_arrow"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-<!--    <ScrollView-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:fillViewport="true">-->
+    <!-- The actual Spinner for emotions (match the card width) -->
+    <Spinner
+        android:id="@+id/emotion_spinner"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/emotional_state_banner"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-        <Spinner
-            android:id="@+id/emotion_dropdown"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="@+id/cardView"
-            app:layout_constraintStart_toStartOf="@+id/cardView"
-            app:layout_constraintTop_toBottomOf="@+id/cardView"
-            tools:visibility="visible" />
-<!--    </ScrollView>-->
+    <!-- Selected Mood Bubble -->
+    <TextView
+        android:id="@+id/selected_mood"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="30dp"
+        android:background="@drawable/text_input_rounded_box"
+        android:padding="12dp"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:text="Select Mood"
+        app:layout_constraintTop_toBottomOf="@+id/emotion_spinner"
+        app:layout_constraintStart_toStartOf="parent" />
 
-
-    <!-- NEW: Static Banner (Non-Clickable) -->
+    <!-- Trigger banner -->
     <androidx.cardview.widget.CardView
         android:id="@+id/trigger_banner"
         android:layout_width="350dp"
         android:layout_height="55dp"
-        android:layout_marginTop="70dp"
+        android:layout_marginTop="30dp"
         android:background="@android:color/transparent"
         app:cardCornerRadius="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/selected_mood"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardView"
-        app:layout_constraintVertical_bias="0.0">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -142,50 +148,48 @@
                 android:id="@+id/mood_trigger_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/emotional_trigger"
+                android:layout_marginStart="20dp"
+                android:text="What triggered this mood?"
                 android:textColor="@color/black"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.5" />
+                app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- NEW: Text Field Below Static Banner -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/mood_trigger_input_layout"
-        android:layout_width="350dp"
+    <!-- Trigger response EditText -->
+    <EditText
+        android:id="@+id/trigger_response"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:boxStrokeColor="@color/black"
-        app:hintEnabled="true"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginTop="8dp"
+        android:minHeight="48dp"
+        android:background="@drawable/text_input_rounded_box"
+        android:padding="12dp"
+        android:hint="Type here (Optional)"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@+id/trigger_banner"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="8dp">
+        app:layout_constraintEnd_toEndOf="parent" />
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/mood_trigger_input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/emotional_trigger_textbox_hint"
-            android:textColor="@color/black"
-            android:textSize="16sp" />
-    </com.google.android.material.textfield.TextInputLayout>
-
+    <!-- Social Situation Banner -->
     <androidx.cardview.widget.CardView
         android:id="@+id/social_situation_banner"
-        android:layout_width="355dp"
+        android:layout_width="350dp"
         android:layout_height="55dp"
-        android:layout_marginBottom="190dp"
+        android:layout_marginTop="30dp"
         android:background="@android:color/transparent"
         app:cardCornerRadius="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/mood_trigger_input_layout"
-        app:layout_constraintStart_toStartOf="@+id/mood_trigger_input_layout"
-        app:layout_constraintTop_toBottomOf="@+id/mood_trigger_input_layout">
+        app:layout_constraintTop_toBottomOf="@+id/trigger_response"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -196,41 +200,51 @@
                 android:id="@+id/social_situation_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Current social situation"
+                android:text="Your current social situation"
+                android:textSize="18sp"
                 android:textColor="@color/black"
-                android:textSize="20sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintStart_toStartOf="parent" />
 
             <ImageView
-                android:id="@+id/imageView2"
-                android:layout_width="44dp"
-                android:layout_height="25dp"
+                android:id="@+id/situation_arrow"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="20dp"
                 android:contentDescription="@string/content_desc_arrow_icon"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/social_situation_text"
+                app:srcCompat="@drawable/simple_arrow"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.533"
-                app:srcCompat="@drawable/simple_arrow" />
-
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <ImageButton
-        android:id="@+id/add_photo_button"
-        android:layout_width="63dp"
-        android:layout_height="63dp"
-        android:layout_marginBottom="45dp"
-        android:background="@drawable/rounded_background"
-        android:contentDescription="@string/content_desc_rounded_add_photo_icon"
-        android:scaleType="centerInside"
-        android:src="@drawable/rounded_add_photo_icon"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.097"
+    <!-- The actual Spinner for social situations -->
+    <Spinner
+        android:id="@+id/situation_spinner"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/social_situation_banner"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Selected Social Situation Bubble -->
+    <TextView
+        android:id="@+id/selected_situation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="30dp"
+        android:background="@drawable/text_input_rounded_box"
+        android:padding="12dp"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:text="Select a Situation"
+        app:layout_constraintTop_toBottomOf="@+id/situation_spinner"
         app:layout_constraintStart_toStartOf="parent" />
 
 
@@ -269,16 +283,50 @@
 
     </FrameLayout>
 
-    <Spinner
-        android:id="@+id/emotion_dropdown2"
-        android:layout_width="0dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="8dp"
-        android:background="@color/white"
-        android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="@+id/social_situation_banner"
-        app:layout_constraintStart_toStartOf="@+id/social_situation_banner"
-        app:layout_constraintTop_toBottomOf="@+id/social_situation_banner"
-        tools:visibility="visible" />
+    <!-- Add Photo Button -->
+    <ImageButton
+        android:id="@+id/add_photo_button"
+        android:layout_width="63dp"
+        android:layout_height="63dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/rounded_background"
+        android:contentDescription="@string/content_desc_rounded_add_photo_icon"
+        android:scaleType="centerInside"
+        android:src="@drawable/rounded_add_photo_icon"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Emoji + Checkbox Layout -->
+    <LinearLayout
+        android:id="@+id/emoji_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:background="@drawable/rounded_background"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/add_photo_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/selected_situation">
+
+        <ImageButton
+            android:id="@+id/emoji_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="emoji"
+            android:scaleType="centerInside"
+            android:src="@drawable/happy_icon" />
+
+        <CheckBox
+            android:id="@+id/include_emoji_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:textColor="@color/black"
+            android:textSize="14sp" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
