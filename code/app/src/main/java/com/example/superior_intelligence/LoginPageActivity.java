@@ -27,6 +27,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoginPageActivity extends AppCompatActivity {
 
@@ -87,33 +88,31 @@ public class LoginPageActivity extends AppCompatActivity {
         }
     }
 
-    public  void checkUser(){
+    public void checkUser() {
         String userUsername = loginUsername.getText().toString().trim();
 
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("users");
-        Query checkUserDatabase = reference.orderByChild("username").equalTo(userUsername);
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        checkUserDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()){
-                    loginUsername.setError(null);
+        db.collection("users")
+                .whereEqualTo("username", userUsername)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        loginUsername.setError(null);
 
-                    Intent intent = new Intent(LoginPageActivity.this, HomePageActivity.class);
-                    startActivity(intent);
-                } else {
-                    loginUsername.setError("User does not exist");
+                        // User exists → Go to HomePageActivity
+                        Intent intent = new Intent(LoginPageActivity.this, HomePageActivity.class);
+                        startActivity(intent);
+                    } else {
+                        // User doesn't exist
+                        loginUsername.setError("User does not exist");
+                        loginUsername.requestFocus();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    loginUsername.setError("Failed to connect to Firestore");
                     loginUsername.requestFocus();
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-
+                });
     }
+
 }

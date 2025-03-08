@@ -62,7 +62,7 @@ public class CreateAccountActivity extends AppCompatActivity {
                 String username = signupUsername.getText().toString();
 
                 HelperClass helperClass = new HelperClass(name, username);
-                reference.child(username).setValue(helperClass);
+                //reference.child(username).setValue(helperClass);
 
                 userDoc.set(helperClass);
 
