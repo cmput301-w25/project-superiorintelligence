@@ -109,7 +109,7 @@ public class LoginPageActivity extends AppCompatActivity {
                         loginUsername.requestFocus();
                     }
                 })
-                .addOnFailureListener(e -> {
+                .addOnFailureListener(e -> { // error handling
                     loginUsername.setError("Failed to connect to Firestore");
                     loginUsername.requestFocus();
                 });
