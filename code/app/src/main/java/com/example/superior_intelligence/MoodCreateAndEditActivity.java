@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+
 public class MoodCreateAndEditActivity extends AppCompatActivity {
 
     // Title
@@ -99,21 +100,28 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
 
         // 6) Confirm button: Return to HomeActivity with the "myposts" tab selected
         confirmButton.setOnClickListener(v -> {
-            String eventTitle = headerTitle.getText().toString().trim();
-            String mood = selectedMood.getText().toString();
-            String situation = selectedSituation.getText().toString();
-            boolean includeEmoji = includeEmojiCheckbox.isChecked();
-
-            // TODO: Save or pass these values as needed
-
+            Event newEvent = createNewEvent();
             Intent intent = new Intent(MoodCreateAndEditActivity.this, HomeActivity.class);
             intent.putExtra("selectedTab", "myposts");
+            intent.putExtra("newEvent", newEvent);
             startActivity(intent);
             finish();
         });
+
     }
 
-    // ---------- HELPER METHODS ----------
+    private Event createNewEvent() {
+        String eventTitle = headerTitle.getText().toString().trim();
+        String eventDate = "Today";
+        String overlayColor = "#FFD700";
+        String imageUrl = "";
+        int emojiResource = includeEmojiCheckbox.isChecked() ? updateEmojiIcon(selectedMood.getText().toString()) : 0;
+        boolean isFollowed = false;
+        boolean isMyPost = true;
+
+        return new Event(eventTitle, eventDate, overlayColor, imageUrl, emojiResource, isFollowed, isMyPost);
+    }
+
 
     private void setupEmotionSpinner() {
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
@@ -168,16 +176,21 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
      * Update the emoji icon based on the chosen mood.
      * Adjust the drawables and mood strings as needed.
      */
-    private void updateEmojiIcon(String mood) {
+    private int updateEmojiIcon(String mood) {
+        int emojiResId;
+
         if (mood.equalsIgnoreCase("anger")) {
-            emojiButton.setImageResource(R.drawable.angry_icon);
+            emojiResId = R.drawable.angry_icon;
         } else if (mood.equalsIgnoreCase("happiness")) {
-            emojiButton.setImageResource(R.drawable.happy_icon);
+            emojiResId = R.drawable.happy_icon;
         } else if (mood.equalsIgnoreCase("sadness")) {
-            emojiButton.setImageResource(R.drawable.sad_icon);
+            emojiResId = R.drawable.sad_icon;
         } else {
             // Default icon if no match is found
-            emojiButton.setImageResource(R.drawable.happy_icon);
+            emojiResId = R.drawable.happy_icon;
         }
+
+        emojiButton.setImageResource(emojiResId); // Keep UI update
+        return emojiResId; // Return resource ID
     }
 }
