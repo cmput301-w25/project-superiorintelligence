@@ -93,10 +93,11 @@
                 android:layout_height="24dp"
                 android:layout_marginEnd="20dp"
                 android:contentDescription="@string/content_desc_arrow_icon"
-                app:srcCompat="@drawable/simple_arrow"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/emotional_state_text"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/simple_arrow" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
@@ -201,11 +202,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Your current social situation"
-                android:textSize="18sp"
                 android:textColor="@color/black"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
                 android:id="@+id/situation_arrow"
@@ -213,10 +216,11 @@
                 android:layout_height="24dp"
                 android:layout_marginEnd="20dp"
                 android:contentDescription="@string/content_desc_arrow_icon"
-                app:srcCompat="@drawable/simple_arrow"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/social_situation_text"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/simple_arrow" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
