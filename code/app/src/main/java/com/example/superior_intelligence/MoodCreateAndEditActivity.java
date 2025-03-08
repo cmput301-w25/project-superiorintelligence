@@ -5,137 +5,192 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
+
 
 public class MoodCreateAndEditActivity extends AppCompatActivity {
-    private CardView emotionSelector, socialSituationSelector;
-    private Spinner emotionDropdown, emotionDropdown2;
-    private TextView emotionText, socialSituationText;
-    private boolean isEmotionSelected = false;
-    private boolean isSocialSituationSelected = false;
+
+    // Title
+    private EditText headerTitle;
+
+    // Emotion
+    private ImageView emotionArrow;
+    private Spinner emotionSpinner;
+    private TextView selectedMood;
+
+    // Situation
+    private ImageView situationArrow;
+    private Spinner situationSpinner;
+    private TextView selectedSituation;
+
+    // Emoji
+    private ImageButton emojiButton;
+    private CheckBox includeEmojiCheckbox;
+
+    // Buttons
+    private ImageButton backButton;
+    private ImageButton addPhotoButton;
+    private LinearLayout confirmButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.creating_new_mood_event);
 
-        // Initialize UI components for the first spinner (Emotional State)
-        emotionSelector = findViewById(R.id.cardView);
-        emotionDropdown = findViewById(R.id.emotion_dropdown);
-        emotionText = findViewById(R.id.emotional_state_text);
+        // 1) Find views
+        headerTitle = findViewById(R.id.header_title);
 
-        // Initialize UI components for the second spinner (Social Situation)
-        socialSituationSelector = findViewById(R.id.social_situation_banner);
-        emotionDropdown2 = findViewById(R.id.emotion_dropdown2);
-        socialSituationText = findViewById(R.id.social_situation_text);
+        emotionArrow = findViewById(R.id.emotion_arrow);
+        emotionSpinner = findViewById(R.id.emotion_spinner);
+        selectedMood = findViewById(R.id.selected_mood);
 
-        // Load emotions into the first Spinner
-        ArrayAdapter<CharSequence> emotionAdapter = new ArrayAdapter<>(this,
-                R.layout.emotional_state_options,
-                getResources().getStringArray(R.array.emotional_state_list));
-        emotionAdapter.setDropDownViewResource(R.layout.emotional_state_options);
-        emotionDropdown.setAdapter(emotionAdapter);
+        situationArrow = findViewById(R.id.situation_arrow);
+        situationSpinner = findViewById(R.id.situation_spinner);
+        selectedSituation = findViewById(R.id.selected_situation);
 
-        // Load social situations into the second Spinner
-        ArrayAdapter<CharSequence> socialSituationAdapter = new ArrayAdapter<>(this,
-                R.layout.emotional_state_options,
-                getResources().getStringArray(R.array.social_situation_list));
-        socialSituationAdapter.setDropDownViewResource(R.layout.emotional_state_options);
-        emotionDropdown2.setAdapter(socialSituationAdapter);
+        emojiButton = findViewById(R.id.emoji_button);
+        includeEmojiCheckbox = findViewById(R.id.include_emoji_checkbox);
 
-        // Hide spinners initially
-        emotionDropdown.setVisibility(View.GONE);
-        emotionDropdown2.setVisibility(View.GONE);
+        backButton = findViewById(R.id.back_button);
+        addPhotoButton = findViewById(R.id.add_photo_button);
+        confirmButton = findViewById(R.id.confirm_button);
 
-        // Toggle first dropdown when clicking the "Emotional State" card
-        emotionSelector.setOnClickListener(v -> {
-            if (emotionDropdown.getVisibility() == View.GONE) {
-                emotionDropdown.setVisibility(View.VISIBLE);
+        // 2) Set up the Spinners
+        setupEmotionSpinner();
+        setupSituationSpinner();
+
+        // 3) Arrow clicks: Show and immediately open the spinner
+        emotionArrow.setOnClickListener(v -> {
+            if (emotionSpinner.getVisibility() == View.GONE) {
+                emotionSpinner.setVisibility(View.VISIBLE);
+                emotionSpinner.performClick();
             } else {
-                emotionDropdown.setVisibility(View.GONE);
+                emotionSpinner.setVisibility(View.GONE);
             }
         });
 
-        // Toggle second dropdown when clicking the "Social Situation" banner
-        socialSituationSelector.setOnClickListener(v -> {
-            if (emotionDropdown2.getVisibility() == View.GONE) {
-                emotionDropdown2.setVisibility(View.VISIBLE);
+        situationArrow.setOnClickListener(v -> {
+            if (situationSpinner.getVisibility() == View.GONE) {
+                situationSpinner.setVisibility(View.VISIBLE);
+                situationSpinner.performClick();
             } else {
-                emotionDropdown2.setVisibility(View.GONE);
+                situationSpinner.setVisibility(View.GONE);
             }
         });
 
-        // Handle selection for the first dropdown (Emotional State)
-        emotionDropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selectedEmotion = parent.getItemAtPosition(position).toString();
-                if (isEmotionSelected && emotionText.getText().toString().equals(selectedEmotion)) {
-                    emotionText.setText("Emotional State");
-                    isEmotionSelected = false;
-                } else {
-                    emotionText.setText(selectedEmotion);
-                    isEmotionSelected = true;
-                }
-                emotionDropdown.setVisibility(View.GONE);
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                emotionText.setText("Emotional State");
-                isEmotionSelected = false;
-            }
-        });
-
-        // Handle selection for the second dropdown (Social Situation)
-        emotionDropdown2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selectedSocialSituation = parent.getItemAtPosition(position).toString();
-                if (isSocialSituationSelected && socialSituationText.getText().toString().equals(selectedSocialSituation)) {
-                    socialSituationText.setText("Current social situation");
-                    isSocialSituationSelected = false;
-                } else {
-                    socialSituationText.setText(selectedSocialSituation);
-                    isSocialSituationSelected = true;
-                }
-                emotionDropdown2.setVisibility(View.GONE);
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                socialSituationText.setText("Current social situation");
-                isSocialSituationSelected = false;
-            }
-        });
-
-        // --- Navigation Buttons Implementation ---
-
-        // Back Button: Navigate back to HomeActivity
-        ImageButton backButton = findViewById(R.id.mood_events_list_back_button);
+        // 4) Back button: Return to HomeActivity
         backButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MoodCreateAndEditActivity.this, HomeActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(MoodCreateAndEditActivity.this, HomeActivity.class));
             finish();
         });
 
-        // Add Photo Button: Launch PhotoActivity
-        ImageButton addPhotoButton = findViewById(R.id.add_photo_button);
+        // 5) Photo button: Open PhotoActivity
         addPhotoButton.setOnClickListener(v -> {
             Intent intent = new Intent(MoodCreateAndEditActivity.this, PhotoActivity.class);
             startActivity(intent);
         });
 
-        // Confirm Button: Navigate to HomeActivity with the "myposts" tab selected
-        LinearLayout confirmButton = findViewById(R.id.confirm_button);
+        // 6) Confirm button: Return to HomeActivity with the "myposts" tab selected
         confirmButton.setOnClickListener(v -> {
+            Event newEvent = createNewEvent();
             Intent intent = new Intent(MoodCreateAndEditActivity.this, HomeActivity.class);
             intent.putExtra("selectedTab", "myposts");
+            intent.putExtra("newEvent", newEvent);
             startActivity(intent);
             finish();
         });
+
+    }
+
+    private Event createNewEvent() {
+        String eventTitle = headerTitle.getText().toString().trim();
+        String eventDate = "Today";
+        String overlayColor = "#FFD700";
+        String imageUrl = "";
+        int emojiResource = includeEmojiCheckbox.isChecked() ? updateEmojiIcon(selectedMood.getText().toString()) : 0;
+        boolean isFollowed = false;
+        boolean isMyPost = true;
+
+        return new Event(eventTitle, eventDate, overlayColor, imageUrl, emojiResource, isFollowed, isMyPost);
+    }
+
+
+    private void setupEmotionSpinner() {
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+                this,
+                R.array.emotional_state_list,
+                android.R.layout.simple_spinner_item
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        emotionSpinner.setAdapter(adapter);
+        emotionSpinner.setVisibility(View.GONE);
+
+        // Always update bubbles and emoji when a selection is made
+        emotionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String chosenEmotion = parent.getItemAtPosition(position).toString();
+                selectedMood.setText(chosenEmotion);
+                updateEmojiIcon(chosenEmotion);
+                // Hide spinner after selection
+                emotionSpinner.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+    }
+
+    private void setupSituationSpinner() {
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+                this,
+                R.array.social_situation_list,
+                android.R.layout.simple_spinner_item
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        situationSpinner.setAdapter(adapter);
+        situationSpinner.setVisibility(View.GONE);
+
+        situationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String chosenSituation = parent.getItemAtPosition(position).toString();
+                selectedSituation.setText(chosenSituation);
+                situationSpinner.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+    }
+
+    /**
+     * Update the emoji icon based on the chosen mood.
+     * Adjust the drawables and mood strings as needed.
+     */
+    private int updateEmojiIcon(String mood) {
+        int emojiResId;
+
+        if (mood.equalsIgnoreCase("anger")) {
+            emojiResId = R.drawable.angry_icon;
+        } else if (mood.equalsIgnoreCase("happiness")) {
+            emojiResId = R.drawable.happy_icon;
+        } else if (mood.equalsIgnoreCase("sadness")) {
+            emojiResId = R.drawable.sad_icon;
+        } else {
+            // Default icon if no match is found
+            emojiResId = R.drawable.happy_icon;
+        }
+
+        emojiButton.setImageResource(emojiResId); // Keep UI update
+        return emojiResId; // Return resource ID
     }
 }
