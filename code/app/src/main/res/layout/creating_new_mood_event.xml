@@ -21,20 +21,24 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Page Header -->
-    <TextView
-        android:id="@+id/mood_events_list_header"
+    <EditText
+        android:id="@+id/mood_event_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
         android:text="@string/create_untitled_mood_event"
-
         android:textColor="@color/black"
         android:textSize="22sp"
         android:textStyle="bold"
+        android:background="@android:color/transparent"
+        android:gravity="center"
+        android:inputType="textCapSentences"
+        android:singleLine="true"
+        android:ellipsize="end"
         app:layout_constraintBottom_toBottomOf="@+id/mood_events_list_toolbar"
         app:layout_constraintEnd_toEndOf="@+id/mood_events_list_toolbar"
         app:layout_constraintStart_toStartOf="@+id/mood_events_list_toolbar"
         app:layout_constraintTop_toTopOf="@+id/mood_events_list_toolbar" />
+
 
     <!-- Back Button -->
     <ImageButton
@@ -132,7 +136,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/rounded_background">
+            android:background="@color/buttonGreen">
 
             <TextView
                 android:id="@+id/mood_trigger_text"
@@ -186,13 +190,14 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/buttonGreen">
+            android:background="@drawable/rounded_background">
 
             <TextView
                 android:id="@+id/social_situation_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Current social situation"
+                android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -228,41 +233,41 @@
         app:layout_constraintHorizontal_bias="0.097"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/confirm_button"
-        android:layout_width="wrap_content"
+
+    <FrameLayout
+        android:id="@+id/confirm_mood_create_button"
+        android:layout_width="120dp"
         android:layout_height="63dp"
-        android:layout_marginBottom="45dp"
+        android:layout_marginBottom="44dp"
         android:background="@drawable/rounded_background"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.828"
+        app:layout_constraintHorizontal_bias="0.845"
         app:layout_constraintStart_toEndOf="@+id/add_photo_button">
 
-        <!-- Perfect Icon -->
-        <ImageView
-            android:layout_width="31dp"
-            android:layout_height="27dp"
-            android:layout_marginEnd="8dp"
-            android:contentDescription="@string/content_desc_perfect_icon"
+        <ImageButton
+            android:id="@+id/confirm_button_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="3dp"
+            android:background="@color/buttonGreen"
+            android:contentDescription="@string/content_desc_confirm_icon"
             android:scaleType="fitCenter"
             android:src="@drawable/perfect" />
 
-        <!-- Confirm Text -->
         <TextView
-            android:id="@+id/confirm_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/content_desc_confirm_icon"
+            android:layout_gravity="end"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="10dp"
+            android:text="@string/confirm_button_text"
             android:textColor="@color/black"
             android:textSize="18sp"
             android:textStyle="bold" />
-    </LinearLayout>
+
+    </FrameLayout>
 
     <Spinner
         android:id="@+id/emotion_dropdown2"
