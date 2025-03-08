@@ -45,7 +45,17 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     }
 
     public void setEvents(List<Event> newList) {
-        currentList = newList;
+        // Ensure only MyPosts appear in MyPosts tab
+        if (currentList == myPostsEvents) {
+            currentList = new ArrayList<>();
+            for (Event event : newList) {
+                if (event.isMyPost()) {
+                    currentList.add(event);
+                }
+            }
+        } else {
+            currentList = newList;
+        }
         notifyDataSetChanged();
     }
 
@@ -61,24 +71,24 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Event event = currentList.get(position);
 
-        // Title & Date
+        // Set title & date
         holder.eventTitle.setText(event.getTitle());
         holder.eventDate.setText(event.getDate());
 
-        // Overlay color
+        // Set overlay color
         String colorStr = (event.getOverlayColor() != null && !event.getOverlayColor().isEmpty())
                 ? event.getOverlayColor() : "#99FFFFFF";
         holder.eventOverlay.setCardBackgroundColor(Color.parseColor(colorStr));
         holder.eventOverlay.getBackground().setAlpha(200);
 
-        // Image or default
+        // Set image or default background
         if (event.getImageUrl() != null && !event.getImageUrl().isEmpty()) {
             holder.eventImage.setImageURI(Uri.parse(event.getImageUrl()));
         } else {
             holder.eventImage.setBackgroundResource(R.color.secondaryGreen);
         }
 
-        // Emoticon
+        // Only show emoji if user selected it
         if (event.getEmojiResource() != 0) {
             holder.eventEmoticon.setVisibility(View.VISIBLE);
             holder.eventEmoticon.setImageResource(event.getEmojiResource());
@@ -86,7 +96,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
             holder.eventEmoticon.setVisibility(View.GONE);
         }
 
-        // Hide follow controls if it's the user's own post
+        // Completely hide follow options for MyPosts
         if (event.isMyPost()) {
             holder.followText.setVisibility(View.GONE);
             holder.followCheckbox.setVisibility(View.GONE);
@@ -94,18 +104,17 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
             holder.followText.setVisibility(View.VISIBLE);
             holder.followCheckbox.setVisibility(View.VISIBLE);
 
-            // Update text & checkbox for follow status
+            // Ensure follow text & checkbox reflect actual state
             holder.followText.setText(event.isFollowed() ? "Following" : "Follow");
-
-            holder.followCheckbox.setOnCheckedChangeListener(null);
+            holder.followCheckbox.setOnCheckedChangeListener(null); // Remove listener before updating state
             holder.followCheckbox.setChecked(event.isFollowed());
 
-            // On follow/unfollow
+            // Follow/unfollow logic
             holder.followCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 event.setFollowed(isChecked);
                 holder.followText.setText(isChecked ? "Following" : "Follow");
 
-                // Move event between Explore & Followed
+                // Move event between Explore & Followed lists
                 if (isChecked) {
                     if (!followedEvents.contains(event)) {
                         followedEvents.add(event);
@@ -118,12 +127,12 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
                     }
                 }
 
-                // Let HomeActivity do additional logic
+                // Notify HomeActivity of follow status change
                 if (followToggleListener != null) {
                     followToggleListener.onFollowToggled(event, isChecked);
                 }
 
-                // Delay the UI refresh
+                // Ensure RecyclerView refreshes properly
                 handler.post(() -> {
                     if (currentList == exploreEvents) {
                         setEvents(exploreEvents);
