@@ -48,7 +48,7 @@ public class PhotoActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 100;
     private Uri photoUri;
     private FirebaseFirestore db;
-    private String selectedPhotoDocID;
+    private String selectedPhotoDocID = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +63,16 @@ public class PhotoActivity extends AppCompatActivity {
 
         // Confirm button goes back to MoodCreateAndEditActivity
         LinearLayout confirmButton = findViewById(R.id.confirm_button);
-        confirmButton.setOnClickListener(v -> finish());
+        confirmButton.setOnClickListener(v -> {
+            if (selectedPhotoDocID != null) {
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("imageDocID", selectedPhotoDocID);
+                setResult(RESULT_OK, resultIntent);
+                finish();
+            } else {
+                Toast.makeText(this, "Please select an image before confirming.", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         ImageView photoIcon = findViewById(R.id.photo_icon);
         photoIcon.setVisibility(View.VISIBLE); // Ensure placeholder icon is visible
@@ -200,7 +209,7 @@ public class PhotoActivity extends AppCompatActivity {
 
             // Notify user and exit PhotoActivity
             Toast.makeText(this, "Image uploaded!", Toast.LENGTH_SHORT).show();
-            finish();
+
         }, username, "User Uploaded Image");
     }
 

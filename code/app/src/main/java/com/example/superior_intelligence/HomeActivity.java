@@ -60,7 +60,6 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         tabMyPosts = findViewById(R.id.tab_myposts);
 
         // Load sample events into the lists (For now until we can add our own)
-        loadSampleEvents();
         loadEventsFromFirebase();
 
         // Creates an adapter, default to Explore list
@@ -132,6 +131,7 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         eventData.put("mood", event.getMood());
         eventData.put("situation", event.getSituation());
         eventData.put("moodExplanation", event.getMoodExplanation());
+        eventData.put("postUser", event.getUser());
 
         myPostsRef.add(eventData)
                 .addOnSuccessListener(documentReference -> Log.d("Firebase", "Event saved: " + documentReference.getId()))
@@ -163,9 +163,10 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
                     String mood = document.getString("mood");
                     String situation = document.getString("situation");
                     String moodExplanation = document.getString("moodExplanation");
+                    String user = document.getString("user");
 
                     // Create event object
-                    Event event = new Event(title, date, overlayColor, imageUrl, emojiResource, isFollowed, isMyPost, mood, moodExplanation, situation);
+                    Event event = new Event(title, date, overlayColor, imageUrl, emojiResource, isFollowed, isMyPost, mood, moodExplanation, situation, user);
 
                     myPostsEvents.add(event); // Add event to list
                 }
@@ -183,19 +184,6 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         });
     }
 
-    private void loadSampleEvents() {
-        // (title, date, overlayColor, imageUrl, emojiResource, isFollowed, isMyPost)
-
-        // Explore events
-        exploreEvents.add(new Event("Event 1", "15 Apr 2019", "#A8E6CF", "", 0, false, false));
-        exploreEvents.add(new Event("Event 2", "20 Mar 2022", "#FF8A80",
-                "android.resource://" + getPackageName() + "/drawable/sample_image",
-                R.drawable.angry_icon, false, false));
-
-        // My posts (isMyPost = true)
-        myPostsEvents.add(new Event("My Post", "01 Jan 2025", "#FFD700", "",
-                0, false, true));
-    }
 
     private void switchTab(List<Event> targetList, TextView selectedTab) {
         // Reset all tabs to normal style
