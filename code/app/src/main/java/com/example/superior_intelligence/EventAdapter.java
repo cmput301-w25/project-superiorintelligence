@@ -1,5 +1,6 @@
 package com.example.superior_intelligence;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Handler;
@@ -95,6 +96,17 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         } else {
             holder.eventEmoticon.setVisibility(View.GONE);
         }
+
+        // Click listener to open EventDetailsActivity
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), EventDetailsActivity.class);
+            intent.putExtra("title", event.getTitle());
+            intent.putExtra("mood", event.getMood());
+            intent.putExtra("reason", event.getMoodExplanation());
+            intent.putExtra("situation", event.getSituation());
+            intent.putExtra("imageUrl", event.getImageUrl());
+            v.getContext().startActivity(intent);
+        });
 
         // Completely hide follow options for MyPosts
         if (event.isMyPost()) {

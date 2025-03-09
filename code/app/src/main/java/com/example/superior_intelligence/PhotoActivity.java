@@ -239,6 +239,9 @@ public class PhotoActivity extends AppCompatActivity {
         }
     }
 
+
+
+
     /***  GET IMAGE URL FOR ADAPTER  ***/
     public String getImageUrl() {
         return currentPhotoPath;

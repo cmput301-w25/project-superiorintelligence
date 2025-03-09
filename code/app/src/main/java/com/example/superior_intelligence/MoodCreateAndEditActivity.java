@@ -26,7 +26,8 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
     private Spinner emotionSpinner;
     private TextView selectedMood;
     private boolean isEmotionSelected = false; // Tracks if an emotion is selected
-
+    // Explanation
+    private EditText triggerExplanation;
     // Situation
     private ImageView situationArrow;
     private Spinner situationSpinner;
@@ -52,6 +53,8 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         emotionArrow = findViewById(R.id.emotion_arrow);
         emotionSpinner = findViewById(R.id.emotion_spinner);
         selectedMood = findViewById(R.id.selected_mood);
+
+        triggerExplanation = findViewById(R.id.trigger_response);
 
         situationArrow = findViewById(R.id.situation_arrow);
         situationSpinner = findViewById(R.id.situation_spinner);
@@ -133,8 +136,11 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         int emojiResource = includeEmojiCheckbox.isChecked() ? updateEmojiIcon(selectedMood.getText().toString()) : 0;
         boolean isFollowed = false;
         boolean isMyPost = true;
+        String mood = selectedMood.getText().toString();
+        String moodExplanation = triggerExplanation.getText().toString();
+        String situation = selectedSituation.getText().toString();
 
-        return new Event(eventTitle, eventDate, overlayColor, imageUrl, emojiResource, isFollowed, isMyPost);
+        return new Event(eventTitle, eventDate, overlayColor, imageUrl, emojiResource, isFollowed, isMyPost, mood, moodExplanation, situation);
     }
 
     /**
