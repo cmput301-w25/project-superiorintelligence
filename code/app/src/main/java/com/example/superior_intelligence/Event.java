@@ -1,10 +1,13 @@
 package com.example.superior_intelligence;
 
+import com.google.firebase.Timestamp;
 import java.io.Serializable;
+import java.util.Calendar;
+import java.util.Date;
 
 public class Event implements Serializable {
     private String title;
-    private String date;
+    private Date date; // Auto timestamp instead of String
     private String overlayColor;
     private String imageUrl;
     private int emojiResource;
@@ -15,7 +18,7 @@ public class Event implements Serializable {
         // empty constructor for Firestore
     }
 
-    public Event(String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost) {
+    public Event(String title, Date date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost) {
         this.title = title;
         this.date = date;
         this.overlayColor = overlayColor;
@@ -29,7 +32,7 @@ public class Event implements Serializable {
         return title;
     }
 
-    public String getDate() {
+    public Date getDate() {
         return date;
     }
 
@@ -57,7 +60,7 @@ public class Event implements Serializable {
         this.title = title;
     }
 
-    public void setDate(String date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 

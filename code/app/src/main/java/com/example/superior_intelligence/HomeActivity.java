@@ -10,8 +10,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.DocumentReference;
@@ -23,7 +29,6 @@ import com.google.firebase.firestore.EventListener;
 
 import android.util.Log;
 import androidx.annotation.Nullable;
-
 
 public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFollowToggleListener {
 
@@ -55,15 +60,15 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         tabFollowed = findViewById(R.id.tab_followed);
         tabMyPosts = findViewById(R.id.tab_myposts);
 
-        // Load sample events into the lists (For now until we can add our own)
+        // Load existing events
         loadSampleEvents();
         loadEventsFromFirebase();
 
-        // Creates an adapter, default to Explore list
-        // Passes all 3 lists to the adapter for follow/unfollow logic
+        // Initialize adapter with empty lists
         adapter = new EventAdapter(exploreEvents, followedEvents, myPostsEvents, this);
         recyclerView.setAdapter(adapter);
 
+        // Get event data from intent
         Event newEvent = (Event) getIntent().getSerializableExtra("newEvent");
 
         if (newEvent != null && newEvent.isMyPost()) {
@@ -80,26 +85,30 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
             exploreEvents.add(newEvent);
         }
 
+        // Ensure the correct tab is selected after posting
         String selectedTab = getIntent().getStringExtra("selectedTab");
         if ("myposts".equals(selectedTab)) {
             switchTab(myPostsEvents, tabMyPosts);
         } else {
-            switchTab(exploreEvents, tabExplore); // Ensure only Explore is bolded at start
+            switchTab(exploreEvents, tabExplore);
         }
+
+        // Ensure tabs are always clickable, even if no events exist
+        enableTabs();
 
         // Set tab listeners
         tabExplore.setOnClickListener(v -> switchTab(exploreEvents, tabExplore));
         tabFollowed.setOnClickListener(v -> switchTab(followedEvents, tabFollowed));
         tabMyPosts.setOnClickListener(v -> switchTab(myPostsEvents, tabMyPosts));
 
-        // Launch's MoodCreateAndEditActivity when clicked
+        // Launch MoodCreateAndEditActivity when clicking the add button
         ImageButton addButton = findViewById(R.id.addButton);
         addButton.setOnClickListener(v -> {
             Intent intent = new Intent(HomeActivity.this, MoodCreateAndEditActivity.class);
             startActivity(intent);
         });
 
-        // Launch's ProfileActivity when clicked
+        // Launch ProfileActivity when clicking the profile image
         CardView profileImage = findViewById(R.id.profile_image);
         profileImage.setOnClickListener(v -> {
             Intent intent = new Intent(HomeActivity.this, ProfileActivity.class);
@@ -107,17 +116,49 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         });
     }
 
+    /**
+     * Refresh events when returning to this screen.
+     */
     @Override
     protected void onResume() {
         super.onResume();
-        adapter.notifyDataSetChanged(); // Ensure RecyclerView updates when returning
+        adapter.notifyDataSetChanged();
     }
 
+    /**
+     * Enables tab clicks at all times.
+     */
+    private void enableTabs() {
+        tabExplore.setClickable(true);
+        tabFollowed.setClickable(true);
+        tabMyPosts.setClickable(true);
+    }
+
+    /**
+     * Converts a date string (e.g., "15 Apr 2019") to a Date object.
+     */
+    private Date convertToDate(String dateStr) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+        try {
+            return sdf.parse(dateStr);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return new Date(); // Default to current date if parsing fails
+        }
+    }
+
+    /**
+     * Saves the new event to Firebase Firestore.
+     */
     private void saveEventToFirebase(Event event) {
         myPostsRef.add(event)
                 .addOnSuccessListener(documentReference -> Log.d("Firebase", "Event saved: " + documentReference.getId()))
                 .addOnFailureListener(e -> Log.w("Firebase", "Error saving event", e));
     }
+
+    /**
+     * Loads saved events from Firebase Firestore.
+     */
     private void loadEventsFromFirebase() {
         myPostsRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -131,7 +172,7 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
                 // Ensure MyPosts only loads if it was selected
                 String selectedTab = getIntent().getStringExtra("selectedTab");
                 if ("myposts".equals(selectedTab)) {
-                    switchTab(myPostsEvents, tabMyPosts); // Show MyPosts correctly
+                    switchTab(myPostsEvents, tabMyPosts);
                 }
 
                 adapter.notifyDataSetChanged();
@@ -141,38 +182,36 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         });
     }
 
+    /**
+     * Loads sample events for testing purposes.
+     */
     private void loadSampleEvents() {
-        // (title, date, overlayColor, imageUrl, emojiResource, isFollowed, isMyPost)
-
-        // Explore events
-        exploreEvents.add(new Event("Event 1", "15 Apr 2019", "#A8E6CF", "", 0, false, false));
-        exploreEvents.add(new Event("Event 2", "20 Mar 2022", "#FF8A80",
+        exploreEvents.add(new Event("Event 1", convertToDate("15 Apr 2019"), "#A8E6CF", "", 0, false, false));
+        exploreEvents.add(new Event("Event 2", convertToDate("20 Mar 2022"), "#FF8A80",
                 "android.resource://" + getPackageName() + "/drawable/sample_image",
                 R.drawable.angry_icon, false, false));
 
-        // My posts (isMyPost = true)
-        myPostsEvents.add(new Event("My Post", "01 Jan 2025", "#FFD700", "",
+        myPostsEvents.add(new Event("My Post", convertToDate("01 Jan 2025"), "#FFD700", "",
                 0, false, true));
     }
 
+    /**
+     * Switches the current tab and updates the displayed event list.
+     */
     private void switchTab(List<Event> targetList, TextView selectedTab) {
-        // Reset all tabs to normal style
         tabExplore.setTypeface(null, android.graphics.Typeface.NORMAL);
         tabFollowed.setTypeface(null, android.graphics.Typeface.NORMAL);
         tabMyPosts.setTypeface(null, android.graphics.Typeface.NORMAL);
 
-        // Bold only the selected tab
         selectedTab.setTypeface(null, android.graphics.Typeface.BOLD);
 
-        // Ensure RecyclerView updates correctly
+
         adapter.setEvents(targetList);
         adapter.notifyDataSetChanged();
     }
 
-    // Called when user toggles follow/unfollow in EventAdapter
     @Override
     public void onFollowToggled(Event event, boolean isFollowed) {
         // Will be helpful for whoever works on logic (e.g., Toasts, DB saving).
-
     }
 }

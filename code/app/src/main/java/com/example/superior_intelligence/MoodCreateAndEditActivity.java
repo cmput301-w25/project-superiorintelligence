@@ -16,6 +16,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.Calendar;
+import java.util.Date;
+
 public class MoodCreateAndEditActivity extends AppCompatActivity {
 
     // Title
@@ -127,7 +130,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
      */
     private Event createNewEvent() {
         String eventTitle = headerTitle.getText().toString().trim();
-        String eventDate = "Today";
+        Date eventDate = Calendar.getInstance().getTime();
         String overlayColor = "#FFD700";
         String imageUrl = "";
         int emojiResource = includeEmojiCheckbox.isChecked() ? updateEmojiIcon(selectedMood.getText().toString()) : 0;

@@ -13,8 +13,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> {
 
@@ -45,19 +48,10 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     }
 
     public void setEvents(List<Event> newList) {
-        // Ensure only MyPosts appear in MyPosts tab
-        if (currentList == myPostsEvents) {
-            currentList = new ArrayList<>();
-            for (Event event : newList) {
-                if (event.isMyPost()) {
-                    currentList.add(event);
-                }
-            }
-        } else {
-            currentList = newList;
-        }
+        currentList = newList != null ? newList : new ArrayList<>();
         notifyDataSetChanged();
     }
+
 
     @NonNull
     @Override
@@ -71,9 +65,14 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Event event = currentList.get(position);
 
+        // Format timestamp as a readable date & time
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy - HH:mm", Locale.getDefault());
+        String formattedDate = sdf.format(event.getDate()); // Convert Date to readable format
+
+
         // Set title & date
         holder.eventTitle.setText(event.getTitle());
-        holder.eventDate.setText(event.getDate());
+        holder.eventDate.setText(formattedDate);
 
         // Set overlay color
         String colorStr = (event.getOverlayColor() != null && !event.getOverlayColor().isEmpty())
