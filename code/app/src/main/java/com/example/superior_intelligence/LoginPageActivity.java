@@ -27,6 +27,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoginPageActivity extends AppCompatActivity {
@@ -90,7 +91,6 @@ public class LoginPageActivity extends AppCompatActivity {
 
     public void checkUser() {
         String userUsername = loginUsername.getText().toString().trim();
-
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         db.collection("users")
@@ -98,7 +98,14 @@ public class LoginPageActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (!queryDocumentSnapshots.isEmpty()) {
-                        loginUsername.setError(null);
+                        DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
+                        String name = document.getString("name");
+                        String username = document.getString("username");
+
+                        // Populate the global User instance
+                        User user = User.getInstance();
+                        user.setName(name);
+                        user.setUsername(username);
 
                         // User exists → Go to HomePageActivity
                         Intent intent = new Intent(LoginPageActivity.this, HomePageActivity.class);
@@ -114,5 +121,4 @@ public class LoginPageActivity extends AppCompatActivity {
                     loginUsername.requestFocus();
                 });
     }
-
 }

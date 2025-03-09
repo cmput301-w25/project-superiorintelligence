@@ -89,6 +89,12 @@ public class CreateAccountActivity extends AppCompatActivity {
                 .add(helperClass)
                 .addOnSuccessListener(documentReference -> {
                     Toast.makeText(CreateAccountActivity.this, "Signup successful", Toast.LENGTH_SHORT).show();
+
+                    // Populate the global User instance
+                    User user = User.getInstance();
+                    user.setName(name);
+                    user.setUsername(username);
+
                     Intent intent = new Intent(CreateAccountActivity.this, LoginPageActivity.class);
                     startActivity(intent);
                     finish(); // Close current activity
