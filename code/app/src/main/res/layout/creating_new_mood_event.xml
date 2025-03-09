@@ -10,6 +10,7 @@
     tools:context=".MoodCreateAndEditActivity" >
 
     <!-- Toolbar -->
+
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/create_event_toolbar"
         android:layout_width="match_parent"
@@ -21,7 +22,7 @@
 
     <!-- Editable Title at Center of Toolbar -->
     <EditText
-        android:id="@+id/header_title"
+        android:id="@+id/mood_event_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:minHeight="48dp"
@@ -42,16 +43,15 @@
 
     <!-- Back Button (top-left) -->
     <ImageButton
-        android:id="@+id/back_button"
+        android:id="@+id/mood_events_list_back_button"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_marginStart="10dp"
         android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
         android:contentDescription="@string/content_desc_back_icon"
+        android:focusable="true"
         android:scaleType="fitCenter"
         android:src="@drawable/back_arrow"
-        android:clickable="true"
-        android:focusable="true"
         app:layout_constraintTop_toTopOf="@+id/create_event_toolbar"
         app:layout_constraintBottom_toBottomOf="@+id/create_event_toolbar"
         app:layout_constraintStart_toStartOf="parent" />
@@ -82,9 +82,10 @@
                 android:textColor="@color/black"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
                 android:id="@+id/emotion_arrow"
@@ -92,10 +93,11 @@
                 android:layout_height="24dp"
                 android:layout_marginEnd="20dp"
                 android:contentDescription="@string/content_desc_arrow_icon"
-                app:srcCompat="@drawable/simple_arrow"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/emotional_state_text"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/simple_arrow" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
@@ -141,10 +143,10 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/rounded_background">
+            android:background="@color/buttonGreen">
 
             <TextView
-                android:id="@+id/trigger_text"
+                android:id="@+id/mood_trigger_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
@@ -152,9 +154,10 @@
                 android:textColor="@color/black"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
@@ -198,14 +201,14 @@
                 android:id="@+id/social_situation_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:text="What was your social situation?"
+                android:text="Your current social situation"
                 android:textColor="@color/black"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
                 android:id="@+id/situation_arrow"
@@ -213,10 +216,11 @@
                 android:layout_height="24dp"
                 android:layout_marginEnd="20dp"
                 android:contentDescription="@string/content_desc_arrow_icon"
-                app:srcCompat="@drawable/simple_arrow"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/social_situation_text"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/simple_arrow" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
@@ -247,39 +251,41 @@
         app:layout_constraintTop_toBottomOf="@+id/situation_spinner"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- Confirm Button -->
-    <LinearLayout
-        android:id="@+id/confirm_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="30dp"
-        android:layout_marginBottom="32dp"
-        android:background="@drawable/rounded_background"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="12dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
 
-        <ImageView
+    <FrameLayout
+        android:id="@+id/confirm_mood_create_button"
+        android:layout_width="120dp"
+        android:layout_height="63dp"
+        android:layout_marginBottom="44dp"
+        android:background="@drawable/rounded_background"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.845"
+        app:layout_constraintStart_toEndOf="@+id/add_photo_button">
+
+        <ImageButton
+            android:id="@+id/confirm_button_icon"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_marginEnd="8dp"
-            android:contentDescription="@string/content_desc_perfect_icon"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="3dp"
+            android:background="@color/buttonGreen"
+            android:contentDescription="@string/content_desc_confirm_icon"
             android:scaleType="fitCenter"
             android:src="@drawable/perfect" />
 
         <TextView
-            android:id="@+id/confirm_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/content_desc_confirm_icon"
+            android:layout_gravity="end"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="10dp"
+            android:text="@string/confirm_button_text"
             android:textColor="@color/black"
             android:textSize="18sp"
             android:textStyle="bold" />
-    </LinearLayout>
+
+    </FrameLayout>
 
     <!-- Add Photo Button -->
     <ImageButton
