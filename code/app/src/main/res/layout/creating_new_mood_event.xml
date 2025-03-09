@@ -263,7 +263,7 @@
         app:layout_constraintHorizontal_bias="0.845"
         app:layout_constraintStart_toEndOf="@+id/add_photo_button">
 
-        <ImageButton
+        <ImageView
             android:id="@+id/confirm_button_icon"
             android:layout_width="40dp"
             android:layout_height="40dp"
@@ -306,14 +306,15 @@
         android:id="@+id/emoji_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
+        android:layout_marginStart="28dp"
         android:background="@drawable/rounded_background"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:padding="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/add_photo_button"
+        app:layout_constraintBottom_toTopOf="@+id/map_layout"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/selected_situation">
+        app:layout_constraintTop_toBottomOf="@+id/selected_situation"
+        app:layout_constraintVertical_bias="0.186">
 
         <ImageButton
             android:id="@+id/emoji_button"
@@ -326,6 +327,39 @@
 
         <CheckBox
             android:id="@+id/include_emoji_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:textColor="@color/black"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <!-- Emoji + Checkbox Layout -->
+    <LinearLayout
+        android:id="@+id/map_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="28dp"
+        android:background="@drawable/rounded_background"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/add_photo_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/emoji_layout"
+        app:layout_constraintVertical_bias="0.186">
+
+        <ImageButton
+            android:id="@+id/map_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="map"
+            android:scaleType="centerInside"
+            android:src="@drawable/google_maps" />
+
+        <CheckBox
+            android:id="@+id/include_map_checkbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
