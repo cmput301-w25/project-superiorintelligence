@@ -21,7 +21,7 @@ import java.util.Set;
 
 /**
  *  This class is the Homepage for the app with button to add mood event and ...
-
+ *
  */
 public class HomePageActivity extends AppCompatActivity /*implements MoodEventTitleFragment.MoodEventDialogListener*/ {
 

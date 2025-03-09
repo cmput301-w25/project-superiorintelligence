@@ -3,6 +3,8 @@
  * link: https://github.com/orgs/cmput301-w25/projects/9/views/1?pane=issue&itemId=99937029&issue=cmput301-w25%7Cproject-superiorintelligence%7C123
  * Connects to login_page.xml, provide button to enter CreateAccount.java
  * if user enters login and enters username, will check database to see if existing
+ * validateUsername returns true if a username was given, false if empty (bool)
+ * checkUser: checks if username exist in db, error else update db and go to login page
  */
 
 package com.example.superior_intelligence;
