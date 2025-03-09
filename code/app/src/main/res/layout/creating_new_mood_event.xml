@@ -10,7 +10,6 @@
     tools:context=".MoodCreateAndEditActivity" >
 
     <!-- Toolbar -->
-
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/create_event_toolbar"
         android:layout_width="match_parent"
