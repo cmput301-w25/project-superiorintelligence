@@ -62,7 +62,7 @@
         app:layout_constraintTop_toBottomOf="@id/login_toolbar" />
 
     <EditText
-        android:id="@+id/login_username"
+        android:id="@+id/username_text"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_marginStart="30dp"
@@ -91,7 +91,7 @@
         android:textColor="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/login_username"
+        app:layout_constraintTop_toBottomOf="@id/username_text"
         app:strokeColor="@color/black" />
 
     <TextView
@@ -109,7 +109,7 @@
     </TextView>
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/signup_page_button"
+        android:id="@+id/signup_button"
         android:layout_width="0dp"
         android:layout_height="55dp"
         android:layout_marginStart="30dp"
