@@ -2,6 +2,7 @@ package com.example.superior_intelligence;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -14,6 +15,9 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MoodCreateAndEditActivity extends AppCompatActivity {
@@ -41,6 +45,8 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
     private ImageButton backButton;
     private ImageButton addPhotoButton;
     private FrameLayout confirmButton;
+    private String imageUrl = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,12 +105,24 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         // 5) Photo button: Open PhotoActivity
         addPhotoButton.setOnClickListener(v -> {
             Intent intent = new Intent(MoodCreateAndEditActivity.this, PhotoActivity.class);
-            startActivity(intent);
+            photoActivityLauncher.launch(intent); // Launch PhotoActivity expecting a result
         });
 
         // 6) Confirm button: Ensure emotion is selected before proceeding
         confirmButton.setOnClickListener(v -> handleConfirmClick());
     }
+
+    // ActivityResultLauncher to receive image document ID from PhotoActivity
+    private final ActivityResultLauncher<Intent> photoActivityLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    String uploadedImageDocID = result.getData().getStringExtra("imageDocID");
+                    if (uploadedImageDocID != null) {
+                        Log.d("MoodCreateAndEditActivity", "Received image ID: " + uploadedImageDocID);
+                        imageUrl = uploadedImageDocID; // Store it for when we create the event
+                    }
+                }
+            });
 
     /**
      * Ensures that an emotional state is selected before confirming the mood event.
@@ -125,6 +143,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         }
     }
 
+
     /**
      * Creates a new event object with selected details.
      */
@@ -132,7 +151,6 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         String eventTitle = headerTitle.getText().toString().trim();
         String eventDate = "Today";
         String overlayColor = "#FFD700";
-        String imageUrl = "";
         int emojiResource = includeEmojiCheckbox.isChecked() ? updateEmojiIcon(selectedMood.getText().toString()) : 0;
         boolean isFollowed = false;
         boolean isMyPost = true;
@@ -140,7 +158,10 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         String moodExplanation = triggerExplanation.getText().toString();
         String situation = selectedSituation.getText().toString();
 
-        return new Event(eventTitle, eventDate, overlayColor, imageUrl, emojiResource, isFollowed, isMyPost, mood, moodExplanation, situation);
+        // Ensure imageUrl is either a valid document ID or empty
+        String finalImageUrl = (imageUrl != null) ? imageUrl : "";
+
+        return new Event(eventTitle, eventDate, overlayColor, finalImageUrl, emojiResource, isFollowed, isMyPost, mood, moodExplanation, situation);
     }
 
     /**

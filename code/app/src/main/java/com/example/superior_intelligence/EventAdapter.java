@@ -1,10 +1,14 @@
 package com.example.superior_intelligence;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,8 +18,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> {
 
@@ -82,11 +90,22 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         holder.eventOverlay.setCardBackgroundColor(Color.parseColor(colorStr));
         holder.eventOverlay.getBackground().setAlpha(200);
 
-        // Set image or default background
+        // Load image from Firestore if exists
         if (event.getImageUrl() != null && !event.getImageUrl().isEmpty()) {
-            holder.eventImage.setImageURI(Uri.parse(event.getImageUrl()));
+            fetchImageFromFirestore(event.getImageUrl(), new ImageLoadCallback() {
+                @Override
+                public void onImageLoaded(Bitmap bitmap) {
+                    holder.eventImage.setImageBitmap(bitmap);
+                }
+
+                @Override
+                public void onImageLoadFailed(String error) {
+                    Log.e("EventAdapter", "Failed to load image: " + error);
+                    holder.eventImage.setBackgroundResource(R.color.secondaryGreen); // Default background
+                }
+            });
         } else {
-            holder.eventImage.setBackgroundResource(R.color.secondaryGreen);
+            holder.eventImage.setBackgroundResource(R.color.secondaryGreen); // Default if no image
         }
 
         // Only show emoji if user selected it
@@ -156,6 +175,44 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
                 });
             });
         }
+    }
+
+    // Fetch image from Firestore using document ID
+    private void fetchImageFromFirestore(String documentId, ImageLoadCallback callback) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("images").document(documentId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String base64Image = documentSnapshot.getString("imgData");
+                        if (base64Image != null && !base64Image.isEmpty()) {
+                            Bitmap bitmap = base64ToBitmap(base64Image);
+                            callback.onImageLoaded(bitmap); // Return the bitmap
+                        } else {
+                            callback.onImageLoadFailed("No image data found");
+                        }
+                    } else {
+                        callback.onImageLoadFailed("Document does not exist");
+                    }
+                })
+                .addOnFailureListener(e -> callback.onImageLoadFailed("Failed to retrieve image: " + e.getMessage()));
+    }
+
+    // Convert Base64 string to Bitmap
+    private Bitmap base64ToBitmap(String base64Str) {
+        try {
+            byte[] decodedBytes = Base64.decode(base64Str, Base64.DEFAULT);
+            return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+        } catch (Exception e) {
+            Log.e("EventAdapter", "Error decoding Base64", e);
+            return null;
+        }
+    }
+
+    // Callback interface for image loading
+    public interface ImageLoadCallback {
+        void onImageLoaded(Bitmap bitmap);
+        void onImageLoadFailed(String error);
     }
 
     @Override

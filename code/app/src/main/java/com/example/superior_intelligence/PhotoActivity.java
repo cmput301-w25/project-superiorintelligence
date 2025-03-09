@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,7 +29,9 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -185,11 +188,43 @@ public class PhotoActivity extends AppCompatActivity {
     private void uploadSelectedImage(Uri imgURI) {
         User user = User.getInstance();
         String username = user.getUsername();
+
         uploadImage(imgURI, documentID -> {
             Log.d("PhotoActivity", "Image uploaded successfully, ID: " + documentID);
             selectedPhotoDocID = documentID;
+
+            // Send document ID back to MoodCreateAndEditActivity
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("imageDocID", documentID);
+            setResult(RESULT_OK, resultIntent);
+
+            // Notify user and exit PhotoActivity
             Toast.makeText(this, "Image uploaded!", Toast.LENGTH_SHORT).show();
-        }, username, "Sample Image");
+            finish();
+        }, username, "User Uploaded Image");
+    }
+
+    private void updatePostWithImage(String username, String imageUrl) {
+        db.collection("MyPosts")
+                .whereEqualTo("username", username) // Find the most recent post by this user
+                .orderBy("date", Query.Direction.DESCENDING) // Order by date to get the latest
+                .limit(1) // Only update the most recent post
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
+                        String postId = document.getId();
+
+                        // Update the imageUrl field in Firestore
+                        db.collection("MyPosts").document(postId)
+                                .update("imageUrl", imageUrl)
+                                .addOnSuccessListener(aVoid -> Log.d("PhotoActivity", "Post updated with image URL"))
+                                .addOnFailureListener(e -> Log.e("PhotoActivity", "Failed to update post", e));
+                    } else {
+                        Log.e("PhotoActivity", "No post found to update.");
+                    }
+                })
+                .addOnFailureListener(e -> Log.e("PhotoActivity", "Error finding post", e));
     }
 
     public void uploadImage(Uri imgURI, UploadCallback callback, String uid, String name) {
@@ -232,4 +267,5 @@ public class PhotoActivity extends AppCompatActivity {
     public interface UploadCallback {
         void onUploadComplete(String documentID);
     }
+
 }
