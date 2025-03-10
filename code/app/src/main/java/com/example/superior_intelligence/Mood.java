@@ -21,7 +21,7 @@ public class Mood implements Serializable {
         this.emotionalState = emotionalState;
         this.moodExplanation = moodExplanation;
         this.socialSituation = socialSituation;
-    
+    }
 
     public String getMoodTitle() {
         return moodTitle;
