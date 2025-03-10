@@ -32,19 +32,19 @@ import java.util.Locale;
 public class MoodCreateAndEditActivity extends AppCompatActivity {
 
     // Title
-    private EditText headerTitle;
+    EditText headerTitle;
 
     // Emotion
     private ImageView emotionArrow;
     private Spinner emotionSpinner;
-    private TextView selectedMood;
-    private boolean isEmotionSelected = false; // Tracks if an emotion is selected
+    TextView selectedMood;
+    boolean isEmotionSelected = false; // Tracks if an emotion is selected
     // Explanation
-    private EditText triggerExplanation;
+    EditText triggerExplanation;
     // Situation
     private ImageView situationArrow;
     private Spinner situationSpinner;
-    private TextView selectedSituation;
+    TextView selectedSituation;
 
     // Emoji
     private ImageButton emojiButton;
@@ -62,7 +62,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.creating_new_mood_event);
 
-        // 1) Find views
+        // find views
         headerTitle = findViewById(R.id.mood_event_title);
 
         emotionArrow = findViewById(R.id.emotion_arrow);
@@ -82,11 +82,11 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         addPhotoButton = findViewById(R.id.add_photo_button);
         confirmButton = findViewById(R.id.confirm_mood_create_button);
 
-        // 2) Set up the Spinners
+        // set up the spinners
         setupEmotionSpinner();
         setupSituationSpinner();
 
-        // 3) Arrow clicks: Show and immediately open the spinner
+        // Arrow clicks show and immediately open the spinner
         emotionArrow.setOnClickListener(v -> {
             if (emotionSpinner.getVisibility() == View.GONE) {
                 emotionSpinner.setVisibility(View.VISIBLE);
@@ -105,19 +105,19 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
             }
         });
 
-        // 4) Back button: Return to HomeActivity
+        // Back button returns to HomeActivity
         backButton.setOnClickListener(v -> {
             startActivity(new Intent(MoodCreateAndEditActivity.this, HomeActivity.class));
             finish();
         });
 
-        // 5) Photo button: Open PhotoActivity
+        // Photo button opens PhotoActivity
         addPhotoButton.setOnClickListener(v -> {
             Intent intent = new Intent(MoodCreateAndEditActivity.this, PhotoActivity.class);
-            photoActivityLauncher.launch(intent); // Launch PhotoActivity expecting a result
+            photoActivityLauncher.launch(intent);
         });
 
-        // 6) Confirm button: Ensure emotion is selected before proceeding
+        // Confirm button but ensures emotion is selected before proceeding
         confirmButton.setOnClickListener(v -> handleConfirmClick());
     }
 
@@ -137,7 +137,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
      * Ensures that an emotional state is selected before confirming the mood event.
      * If no emotional state is selected, a toast message is displayed.
      */
-    private void handleConfirmClick() {
+    void handleConfirmClick() {
         if (!isEmotionSelected) {
             // Show a Toast message instead of an AlertDialog
             Toast.makeText(this, "An emotional state must be selected.", Toast.LENGTH_SHORT).show();
@@ -156,7 +156,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
     /**
      * Creates a new event object with selected details.
      */
-    private Event createNewEvent() {
+    Event createNewEvent() {
         String eventTitle = headerTitle.getText().toString().trim();
         String eventDate = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault()).format(new Date());
         String overlayColor = "#FFD700";
@@ -276,7 +276,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
     /**
      * Update the emoji icon based on the chosen mood.
      */
-    private int updateEmojiIcon(String mood) {
+    int updateEmojiIcon(String mood) {
         int emojiResId;
 
         if (mood.equalsIgnoreCase("anger")) {
