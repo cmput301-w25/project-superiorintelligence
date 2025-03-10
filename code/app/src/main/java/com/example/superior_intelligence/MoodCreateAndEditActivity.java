@@ -157,11 +157,10 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         String mood = selectedMood.getText().toString();
         String moodExplanation = triggerExplanation.getText().toString();
         String situation = selectedSituation.getText().toString();
-
-        // Ensure imageUrl is either a valid document ID or empty
         String finalImageUrl = (imageUrl != null) ? imageUrl : "";
+        User user = User.getInstance();
 
-        return new Event(eventTitle, eventDate, overlayColor, finalImageUrl, emojiResource, isFollowed, isMyPost, mood, moodExplanation, situation);
+        return new Event(eventTitle, eventDate, overlayColor, finalImageUrl, emojiResource, isFollowed, isMyPost, mood, moodExplanation, situation, user.getUsername());
     }
 
     /**

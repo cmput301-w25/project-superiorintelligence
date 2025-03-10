@@ -16,12 +16,13 @@ public class Event implements Serializable {
     private String mood;
     private String situation;
     private String moodExplanation;
+    private String user;
 
     public Event() {
         // empty constructor for Firestore
     }
 
-    public Event(String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost) {
+    public Event(String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String user) {
         this.title = title;
         this.date = date;
         this.overlayColor = overlayColor;
@@ -29,9 +30,10 @@ public class Event implements Serializable {
         this.emojiResource = emojiResource;
         this.isFollowed = isFollowed;
         this.isMyPost = isMyPost;
+        this.user = user;
     }
 
-    public Event(String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String mood, String moodExplanation, String situation) {
+    public Event(String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String mood, String moodExplanation, String situation, String user) {
         this.title = title;
         this.date = date;
         this.overlayColor = overlayColor;
@@ -42,6 +44,7 @@ public class Event implements Serializable {
         this.situation = situation;
         this.mood = mood;
         this.moodExplanation = moodExplanation;
+        this.user = user;
     }
 
     public String getTitle() {
@@ -127,5 +130,14 @@ public class Event implements Serializable {
     }
     public void setSituation() {
         this.situation = situation;
+    }
+
+    public String getUser()
+    {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
     }
 }
