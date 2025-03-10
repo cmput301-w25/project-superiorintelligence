@@ -16,12 +16,12 @@ public class Mood implements Serializable {
         this.moodTitle = moodTitle;
     }
     //THIS CONSTRUCTOR TO BE UPDATED WITH ALL ATTRIBUTES
-    public Mood(String moodTitle, String emotionalState, String moodExplanation, String socialSituation){
+    public Mood(String moodTitle, String emotionalState, String moodExplanation, String socialSituation) {
         this.moodTitle = moodTitle;
         this.emotionalState = emotionalState;
         this.moodExplanation = moodExplanation;
         this.socialSituation = socialSituation;
-    
+    }
 
     public String getMoodTitle() {
         return moodTitle;
