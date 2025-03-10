@@ -158,6 +158,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
             return;
         }
 
+        // Validate explanation, etc. ...
         String explanation = triggerExplanation.getText().toString().trim();
 
         // Validate explanation if provided
@@ -166,20 +167,13 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
             return;
         }
 
-        // Proceed if valid
-        Event updatedEvent = createNewEvent();
-
-        // Send updated details back to EventDetailsActivity
-        Intent resultIntent = new Intent();
-        resultIntent.putExtra("title", updatedEvent.getTitle());
-        resultIntent.putExtra("mood", updatedEvent.getMood());
-        resultIntent.putExtra("reason", updatedEvent.getMoodExplanation());
-        resultIntent.putExtra("socialSituation", updatedEvent.getSituation());
-        resultIntent.putExtra("overlayColor", updatedEvent.getOverlayColor());
-
-        // Return data and close this activity
-        setResult(RESULT_OK, resultIntent);
-        finish(); // Go back to EventDetailsActivity
+        // Create the new Event object
+        Event newEvent = createNewEvent();
+        Intent intent = new Intent(MoodCreateAndEditActivity.this, HomeActivity.class);
+        intent.putExtra("selectedTab", "myposts");
+        intent.putExtra("newEvent", newEvent);
+        startActivity(intent);
+        finish();
     }
 
 
