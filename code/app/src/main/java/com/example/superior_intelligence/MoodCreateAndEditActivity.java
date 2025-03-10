@@ -285,6 +285,16 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
             emojiResId = R.drawable.happy_icon;
         } else if (mood.equalsIgnoreCase("sadness")) {
             emojiResId = R.drawable.sad_icon;
+        } else if (mood.equalsIgnoreCase("disgust")){
+            emojiResId = R.drawable.disgust;
+        } else if (mood.equalsIgnoreCase("confusion")){
+            emojiResId = R.drawable.confusion;
+        } else if (mood.equalsIgnoreCase("fear")){
+            emojiResId = R.drawable.fear;
+        } else if (mood.equalsIgnoreCase("shame")){
+            emojiResId = R.drawable.shame;
+        } else if (mood.equalsIgnoreCase("surprise")){
+            emojiResId = R.drawable.surprise;
         } else {
             emojiResId = R.drawable.happy_icon; // Default icon
         }
