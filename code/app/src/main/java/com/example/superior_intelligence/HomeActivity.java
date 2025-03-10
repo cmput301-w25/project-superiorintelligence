@@ -11,7 +11,11 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.DocumentReference;
@@ -56,7 +60,6 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         tabMyPosts = findViewById(R.id.tab_myposts);
 
         // Load sample events into the lists (For now until we can add our own)
-        loadSampleEvents();
         loadEventsFromFirebase();
 
         // Creates an adapter, default to Explore list
@@ -114,7 +117,23 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
     }
 
     private void saveEventToFirebase(Event event) {
-        myPostsRef.add(event)
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference myPostsRef = db.collection("MyPosts");
+
+        Map<String, Object> eventData = new HashMap<>();
+        eventData.put("title", event.getTitle());
+        eventData.put("date", event.getDate()); // Ensures date is saved as a String
+        eventData.put("overlayColor", event.getOverlayColor());
+        eventData.put("imageUrl", event.getImageUrl());
+        eventData.put("emojiResource", event.getEmojiResource());
+        eventData.put("isFollowed", event.isFollowed());
+        eventData.put("isMyPost", event.isMyPost());
+        eventData.put("mood", event.getMood());
+        eventData.put("situation", event.getSituation());
+        eventData.put("moodExplanation", event.getMoodExplanation());
+        eventData.put("postUser", event.getUser());
+
+        myPostsRef.add(eventData)
                 .addOnSuccessListener(documentReference -> Log.d("Firebase", "Event saved: " + documentReference.getId()))
                 .addOnFailureListener(e -> Log.w("Firebase", "Error saving event", e));
     }
@@ -123,9 +142,33 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
             if (task.isSuccessful()) {
                 myPostsEvents.clear();
                 for (QueryDocumentSnapshot document : task.getResult()) {
-                    Event event = document.toObject(Event.class);
-                    Log.d("Firebase Debug", "Event loaded: " + event.getTitle() + ", isMyPost: " + event.isMyPost());
-                    myPostsEvents.add(event);
+                    // Extract values safely
+                    String title = document.getString("title");
+
+                    // Convert date from Firestore (Handles Timestamp or String)
+                    Object rawDate = document.get("date");
+                    String date = "Unknown Date";
+                    if (rawDate instanceof String) {
+                        date = (String) rawDate; // Already stored as a String
+                    } else if (rawDate instanceof com.google.firebase.Timestamp) {
+                        date = new java.text.SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+                                .format(((com.google.firebase.Timestamp) rawDate).toDate()); // Convert Timestamp
+                    }
+
+                    String overlayColor = document.getString("overlayColor");
+                    String imageUrl = document.getString("imageUrl");
+                    int emojiResource = document.contains("emojiResource") ? document.getLong("emojiResource").intValue() : 0;
+                    boolean isFollowed = document.contains("isFollowed") && Boolean.TRUE.equals(document.getBoolean("isFollowed"));
+                    boolean isMyPost = document.contains("isMyPost") && Boolean.TRUE.equals(document.getBoolean("isMyPost"));
+                    String mood = document.getString("mood");
+                    String situation = document.getString("situation");
+                    String moodExplanation = document.getString("moodExplanation");
+                    String user = document.getString("user");
+
+                    // Create event object
+                    Event event = new Event(title, date, overlayColor, imageUrl, emojiResource, isFollowed, isMyPost, mood, moodExplanation, situation, user);
+
+                    myPostsEvents.add(event); // Add event to list
                 }
 
                 // Ensure MyPosts only loads if it was selected
@@ -134,26 +177,13 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
                     switchTab(myPostsEvents, tabMyPosts); // Show MyPosts correctly
                 }
 
-                adapter.notifyDataSetChanged();
+                adapter.notifyDataSetChanged(); // Refresh RecyclerView
             } else {
                 Log.w("Firebase", "Error getting documents.", task.getException());
             }
         });
     }
 
-    private void loadSampleEvents() {
-        // (title, date, overlayColor, imageUrl, emojiResource, isFollowed, isMyPost)
-
-        // Explore events
-        exploreEvents.add(new Event("Event 1", "15 Apr 2019", "#A8E6CF", "", 0, false, false));
-        exploreEvents.add(new Event("Event 2", "20 Mar 2022", "#FF8A80",
-                "android.resource://" + getPackageName() + "/drawable/sample_image",
-                R.drawable.angry_icon, false, false));
-
-        // My posts (isMyPost = true)
-        myPostsEvents.add(new Event("My Post", "01 Jan 2025", "#FFD700", "",
-                0, false, true));
-    }
 
     private void switchTab(List<Event> targetList, TextView selectedTab) {
         // Reset all tabs to normal style
@@ -164,9 +194,9 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         // Bold only the selected tab
         selectedTab.setTypeface(null, android.graphics.Typeface.BOLD);
 
-        // Ensure RecyclerView updates correctly
         adapter.setEvents(targetList);
         adapter.notifyDataSetChanged();
+
     }
 
     // Called when user toggles follow/unfollow in EventAdapter

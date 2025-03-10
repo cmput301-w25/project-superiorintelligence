@@ -89,6 +89,12 @@
             android:exported="true">
         </activity>
 
+        <!-- Profile Activity -->
+        <activity
+            android:name=".EventDetailsActivity"
+            android:exported="true">
+        </activity>
+
         <!-- FileProvider for Camera Image Storage -->
         <provider
             android:name="androidx.core.content.FileProvider"
