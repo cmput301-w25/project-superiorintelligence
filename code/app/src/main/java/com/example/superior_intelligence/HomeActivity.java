@@ -40,9 +40,12 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
     private List<Event> myPostsEvents = new ArrayList<>();
 
     private TextView tabExplore, tabFollowed, tabMyPosts;
-    private FirebaseFirestore db;
-    private CollectionReference myPostsRef;
-
+    FirebaseFirestore db;
+    CollectionReference myPostsRef;
+    /**
+     * Initializes the activity, sets up Firestore, event lists, and UI elements.
+     * @param savedInstanceState instance of activity on start up
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,13 +113,20 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         });
     }
 
+    /**
+     * Makes sure the RecyclerView updates when the activity is resumed.
+     */
     @Override
     protected void onResume() {
         super.onResume();
         adapter.notifyDataSetChanged(); // Ensure RecyclerView updates when returning
     }
 
-    private void saveEventToFirebase(Event event) {
+    /**
+     * Saves a new event to Firestore under the "MyPosts" collection.
+     * @param event The event object to be stored in Firestore.
+     */
+    void saveEventToFirebase(Event event) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference myPostsRef = db.collection("MyPosts");
 
@@ -137,7 +147,10 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
                 .addOnSuccessListener(documentReference -> Log.d("Firebase", "Event saved: " + documentReference.getId()))
                 .addOnFailureListener(e -> Log.w("Firebase", "Error saving event", e));
     }
-    private void loadEventsFromFirebase() {
+    /**
+     * Loads events from Firestore under the "MyPosts" collection and updates the UI.
+     */
+    void loadEventsFromFirebase() {
         myPostsRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 myPostsEvents.clear();
@@ -184,7 +197,12 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         });
     }
 
-
+    /**
+     * Switches between Explore, Followed, and MyPosts tabs, updating the UI accordingly.
+     *
+     * @param targetList  The list of events to display.
+     * @param selectedTab The selected tab's TextView to apply bold styling.
+     */
     private void switchTab(List<Event> targetList, TextView selectedTab) {
         // Reset all tabs to normal style
         tabExplore.setTypeface(null, android.graphics.Typeface.NORMAL);
@@ -199,7 +217,12 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
 
     }
 
-    // Called when user toggles follow/unfollow in EventAdapter
+    /**
+     * Handles follow/unfollow toggle events.
+     *
+     * @param event     The event object being followed/unfollowed.
+     * @param isFollowed True if the event is now followed, false otherwise.
+     */
     @Override
     public void onFollowToggled(Event event, boolean isFollowed) {
         // Will be helpful for whoever works on logic (e.g., Toasts, DB saving).
