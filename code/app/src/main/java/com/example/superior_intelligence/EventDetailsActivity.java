@@ -10,6 +10,11 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 //import com.bumptech.glide.Glide;
 
+/**
+ * This class shows a mood event details when a mood event is clicked on.
+ * Contains an edit button to go edit mood details
+ * Contains a back button to go back to home page
+ */
 public class EventDetailsActivity extends AppCompatActivity {
 
     @Override
@@ -52,10 +57,18 @@ public class EventDetailsActivity extends AppCompatActivity {
             finish();
         });
 
+        //Mood oldMood = new Mood(title, mood, reason, situation);
+
+
+
         // Edit button navigates to Mood Create/Edit Page
         editButton.setOnClickListener(view -> {
             Intent editIntent = new Intent(EventDetailsActivity.this, MoodCreateAndEditActivity.class);
             editIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            editIntent.putExtra("title", title);
+            editIntent.putExtra("mood", mood);
+            editIntent.putExtra("reason", reason);
+            editIntent.putExtra("socialSituation", situation);
             startActivity(editIntent);
             finish();
         });

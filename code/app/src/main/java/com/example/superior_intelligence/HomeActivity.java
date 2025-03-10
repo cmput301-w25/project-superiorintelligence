@@ -28,7 +28,9 @@ import com.google.firebase.firestore.EventListener;
 import android.util.Log;
 import androidx.annotation.Nullable;
 
-
+/**
+ *
+ */
 public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFollowToggleListener {
 
     private RecyclerView recyclerView;

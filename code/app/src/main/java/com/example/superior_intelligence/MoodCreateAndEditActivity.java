@@ -56,7 +56,6 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
     private FrameLayout confirmButton;
     private String imageUrl = null;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,6 +104,21 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
             }
         });
 
+
+        // Preset mood's old info
+        Intent intent = getIntent();
+        String title = intent.getStringExtra("title");
+        String mood = intent.getStringExtra("mood");
+        String reason = intent.getStringExtra("reason");
+        String situation = intent.getStringExtra("socialSituation");
+
+        headerTitle.setText(title);
+         /* NOT WORKING
+        selectedMood.setText(mood);
+        triggerExplanation.setText(reason);
+        selectedSituation.setText(situation);
+        */
+
         // Back button returns to HomeActivity
         backButton.setOnClickListener(v -> {
             startActivity(new Intent(MoodCreateAndEditActivity.this, HomeActivity.class));
@@ -113,8 +127,8 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
 
         // Photo button opens PhotoActivity
         addPhotoButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MoodCreateAndEditActivity.this, PhotoActivity.class);
-            photoActivityLauncher.launch(intent);
+            Intent photoIntent = new Intent(MoodCreateAndEditActivity.this, PhotoActivity.class);
+            photoActivityLauncher.launch(photoIntent);
         });
 
         // Confirm button but ensures emotion is selected before proceeding
