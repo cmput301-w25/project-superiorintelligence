@@ -1,6 +1,8 @@
 package com.example.superior_intelligence;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -12,20 +14,23 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 
@@ -39,8 +44,10 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
     private Spinner emotionSpinner;
     private TextView selectedMood;
     private boolean isEmotionSelected = false; // Tracks if an emotion is selected
+
     // Explanation
     private EditText triggerExplanation;
+
     // Situation
     private ImageView situationArrow;
     private Spinner situationSpinner;
@@ -56,13 +63,21 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
     private FrameLayout confirmButton;
     private String imageUrl = null;
 
+    // Location
+    private FusedLocationProviderClient fusedLocationClient;
+    private Double lat = null;
+    private Double lng = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.creating_new_mood_event);
 
-        // 1) Find views
+
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+
         headerTitle = findViewById(R.id.mood_event_title);
 
         emotionArrow = findViewById(R.id.emotion_arrow);
@@ -82,11 +97,20 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         addPhotoButton = findViewById(R.id.add_photo_button);
         confirmButton = findViewById(R.id.confirm_mood_create_button);
 
-        // 2) Set up the Spinners
+        CheckBox mapCheckbox = findViewById(R.id.include_map_checkbox);
+        mapCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                // If the user just checked the box, request location permission & fetch lat/lng
+                handleLocationClick();
+            } else {
+                // If unchecked, reset lat/lng if you want
+                lat = null;
+                lng = null;
+            }
+        });
         setupEmotionSpinner();
         setupSituationSpinner();
 
-        // 3) Arrow clicks: Show and immediately open the spinner
         emotionArrow.setOnClickListener(v -> {
             if (emotionSpinner.getVisibility() == View.GONE) {
                 emotionSpinner.setVisibility(View.VISIBLE);
@@ -105,44 +129,37 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
             }
         });
 
-        // 4) Back button: Return to HomeActivity
+
         backButton.setOnClickListener(v -> {
             startActivity(new Intent(MoodCreateAndEditActivity.this, HomeActivity.class));
             finish();
         });
 
-        // 5) Photo button: Open PhotoActivity
+
         addPhotoButton.setOnClickListener(v -> {
             Intent intent = new Intent(MoodCreateAndEditActivity.this, PhotoActivity.class);
-            photoActivityLauncher.launch(intent); // Launch PhotoActivity expecting a result
+            photoActivityLauncher.launch(intent);
         });
 
-        // 6) Confirm button: Ensure emotion is selected before proceeding
         confirmButton.setOnClickListener(v -> handleConfirmClick());
     }
 
-    // ActivityResultLauncher to receive image document ID from PhotoActivity
+
     private final ActivityResultLauncher<Intent> photoActivityLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                     String uploadedImageDocID = result.getData().getStringExtra("imageDocID");
                     if (uploadedImageDocID != null) {
                         Log.d("MoodCreateAndEditActivity", "Received image ID: " + uploadedImageDocID);
-                        imageUrl = uploadedImageDocID; // Store it for when we create the event
+                        imageUrl = uploadedImageDocID;
                     }
                 }
             });
 
-    /**
-     * Ensures that an emotional state is selected before confirming the mood event.
-     * If no emotional state is selected, a toast message is displayed.
-     */
     private void handleConfirmClick() {
         if (!isEmotionSelected) {
-            // Show a Toast message instead of an AlertDialog
             Toast.makeText(this, "An emotional state must be selected.", Toast.LENGTH_SHORT).show();
         } else {
-            // Proceed to HomeActivity if an emotion is selected
             Event newEvent = createNewEvent();
             Intent intent = new Intent(MoodCreateAndEditActivity.this, HomeActivity.class);
             intent.putExtra("selectedTab", "myposts");
@@ -152,10 +169,6 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         }
     }
 
-
-    /**
-     * Creates a new event object with selected details.
-     */
     private Event createNewEvent() {
         String eventTitle = headerTitle.getText().toString().trim();
         String eventDate = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault()).format(new Date());
@@ -169,15 +182,17 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         String finalImageUrl = (imageUrl != null) ? imageUrl : "";
         User user = User.getInstance();
 
-        return new Event(eventTitle, eventDate, overlayColor, finalImageUrl, emojiResource, isFollowed, isMyPost, mood, moodExplanation, situation, user.getUsername());
+
+        return new Event(eventTitle, eventDate, overlayColor, finalImageUrl,
+                emojiResource, isFollowed, isMyPost,
+                mood, moodExplanation, situation, user.getUsername(),
+                lat, lng);
     }
 
-    /**
-     * Sets up the emotion spinner and updates state when selected.
-     */
+
     private void setupEmotionSpinner() {
         ArrayList<String> emotions = new ArrayList<>();
-        emotions.add("Select a Mood"); // Placeholder item
+        emotions.add("Select a Mood");
         Collections.addAll(emotions, getResources().getStringArray(R.array.emotional_state_list));
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, emotions) {
@@ -204,32 +219,26 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position == 0) {
-                    // Do nothing for placeholder item
                     isEmotionSelected = false;
                     return;
                 }
-
                 String chosenEmotion = parent.getItemAtPosition(position).toString();
                 selectedMood.setText(chosenEmotion);
                 updateEmojiIcon(chosenEmotion);
                 isEmotionSelected = true;
-
                 emotionSpinner.setVisibility(View.GONE);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
-
-        // Set default selection to the placeholder (to prevent preselection of first real emotion)
         emotionSpinner.setSelection(0, false);
     }
-    /**
-     * Sets up the social situation spinner.
-     */
+
+
     private void setupSituationSpinner() {
         ArrayList<String> situations = new ArrayList<>();
-        situations.add("Select a Situation"); // Placeholder item
+        situations.add("Select a Situation");
         Collections.addAll(situations, getResources().getStringArray(R.array.social_situation_list));
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, situations) {
@@ -256,10 +265,8 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position == 0) {
-                    // Do nothing for placeholder item
                     return;
                 }
-
                 String chosenSituation = parent.getItemAtPosition(position).toString();
                 selectedSituation.setText(chosenSituation);
                 situationSpinner.setVisibility(View.GONE);
@@ -268,17 +275,12 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
-
-        // Set default selection to the placeholder (to prevent preselection of first real situation)
         situationSpinner.setSelection(0, false);
     }
 
-    /**
-     * Update the emoji icon based on the chosen mood.
-     */
+
     private int updateEmojiIcon(String mood) {
         int emojiResId;
-
         if (mood.equalsIgnoreCase("anger")) {
             emojiResId = R.drawable.angry_icon;
         } else if (mood.equalsIgnoreCase("happiness")) {
@@ -286,10 +288,54 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         } else if (mood.equalsIgnoreCase("sadness")) {
             emojiResId = R.drawable.sad_icon;
         } else {
-            emojiResId = R.drawable.happy_icon; // Default icon
+            emojiResId = R.drawable.happy_icon; // default
         }
-
         emojiButton.setImageResource(emojiResId);
         return emojiResId;
     }
+
+    private void handleLocationClick() {
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    100
+            );
+            return;
+        }
+
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        lat = location.getLatitude();
+                        lng = location.getLongitude();
+                        Toast.makeText(this, "Location: " + lat + ", " + lng, Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "Could not get location", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Location error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 100) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                handleLocationClick();
+            } else {
+                Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+
 }

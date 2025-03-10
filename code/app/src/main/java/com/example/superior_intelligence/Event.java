@@ -17,12 +17,15 @@ public class Event implements Serializable {
     private String situation;
     private String moodExplanation;
     private String user;
+    private Double lng;
+    private Double lat;
+
 
     public Event() {
         // empty constructor for Firestore
     }
 
-    public Event(String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String user) {
+    public Event(String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String user, Double lat, Double lng) {
         this.title = title;
         this.date = date;
         this.overlayColor = overlayColor;
@@ -31,9 +34,11 @@ public class Event implements Serializable {
         this.isFollowed = isFollowed;
         this.isMyPost = isMyPost;
         this.user = user;
+        this.lat = lat;
+        this.lng = lng;
     }
 
-    public Event(String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String mood, String moodExplanation, String situation, String user) {
+    public Event(String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String mood, String moodExplanation, String situation, String user, Double lat, Double lng) {
         this.title = title;
         this.date = date;
         this.overlayColor = overlayColor;
@@ -45,6 +50,8 @@ public class Event implements Serializable {
         this.mood = mood;
         this.moodExplanation = moodExplanation;
         this.user = user;
+        this.lat = lat;
+        this.lng = lng;
     }
 
     public String getTitle() {
@@ -79,6 +86,14 @@ public class Event implements Serializable {
 
     public boolean isMyPost() {
         return isMyPost;
+    }
+
+    public Double getLat() {
+        return lat;
+    }
+
+    public Double getLng() {
+        return lng;
     }
 
     public void setTitle(String title) {
@@ -140,4 +155,13 @@ public class Event implements Serializable {
     public void setUser(String user) {
         this.user = user;
     }
+
+    public void setLat(Double lat) {
+        this.lat = lat;
+    }
+
+    public void setLng(Double lng) {
+        this.lng = lng;
+    }
 }
+
