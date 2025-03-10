@@ -56,7 +56,6 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
     private FrameLayout confirmButton;
     private String imageUrl = null;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,6 +104,22 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
             }
         });
 
+
+        // Preset mood's old info
+        Intent intent = getIntent();
+        String title = intent.getStringExtra("title");
+        String mood = intent.getStringExtra("mood");
+        String reason = intent.getStringExtra("reason");
+        String situation = intent.getStringExtra("socialSituation");
+
+        headerTitle.setText(title);
+        triggerExplanation.setText(reason);
+         /* NOT WORKING
+        selectedMood.setText(mood);
+
+        selectedSituation.setText(situation);
+        */
+
         // Back button returns to HomeActivity
         backButton.setOnClickListener(v -> {
             startActivity(new Intent(MoodCreateAndEditActivity.this, HomeActivity.class));
@@ -113,8 +128,8 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
 
         // Photo button opens PhotoActivity
         addPhotoButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MoodCreateAndEditActivity.this, PhotoActivity.class);
-            photoActivityLauncher.launch(intent);
+            Intent photoIntent = new Intent(MoodCreateAndEditActivity.this, PhotoActivity.class);
+            photoActivityLauncher.launch(photoIntent);
         });
 
         // Confirm button but ensures emotion is selected before proceeding
@@ -152,13 +167,21 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         }
 
         // Proceed if valid
-        Event newEvent = createNewEvent();
-        Intent intent = new Intent(MoodCreateAndEditActivity.this, HomeActivity.class);
-        intent.putExtra("selectedTab", "myposts");
-        intent.putExtra("newEvent", newEvent);
-        startActivity(intent);
-        finish();
+        Event updatedEvent = createNewEvent();
+
+        // Send updated details back to EventDetailsActivity
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("title", updatedEvent.getTitle());
+        resultIntent.putExtra("mood", updatedEvent.getMood());
+        resultIntent.putExtra("reason", updatedEvent.getMoodExplanation());
+        resultIntent.putExtra("socialSituation", updatedEvent.getSituation());
+        resultIntent.putExtra("overlayColor", updatedEvent.getOverlayColor());
+
+        // Return data and close this activity
+        setResult(RESULT_OK, resultIntent);
+        finish(); // Go back to EventDetailsActivity
     }
+
 
     /**
      * Checks if the explanation is within the allowed limits.
