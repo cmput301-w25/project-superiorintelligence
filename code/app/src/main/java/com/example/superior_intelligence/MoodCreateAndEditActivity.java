@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
@@ -19,6 +20,10 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class MoodCreateAndEditActivity extends AppCompatActivity {
 
@@ -167,44 +172,78 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
      * Sets up the emotion spinner and updates state when selected.
      */
     private void setupEmotionSpinner() {
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
-                this,
-                R.array.emotional_state_list,
-                android.R.layout.simple_spinner_item
-        );
+        ArrayList<String> emotions = new ArrayList<>();
+        emotions.add("Select a Mood"); // Placeholder item
+        Collections.addAll(emotions, getResources().getStringArray(R.array.emotional_state_list));
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, emotions) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                view.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.backgroundGreen));
+                return view;
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                View view = super.getDropDownView(position, convertView, parent);
+                view.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.white));
+                return view;
+            }
+        };
+
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         emotionSpinner.setAdapter(adapter);
         emotionSpinner.setVisibility(View.GONE);
 
-        // Always update bubbles and emoji when a selection is made
         emotionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position == 0) {
+                    // Do nothing for placeholder item
+                    isEmotionSelected = false;
+                    return;
+                }
+
                 String chosenEmotion = parent.getItemAtPosition(position).toString();
                 selectedMood.setText(chosenEmotion);
                 updateEmojiIcon(chosenEmotion);
-
-                // Ensure the Confirm button is enabled when an emotion is selected
                 isEmotionSelected = true;
 
-                // Hide spinner after selection
                 emotionSpinner.setVisibility(View.GONE);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
-    }
 
+        // Set default selection to the placeholder (to prevent preselection of first real emotion)
+        emotionSpinner.setSelection(0, false);
+    }
     /**
      * Sets up the social situation spinner.
      */
     private void setupSituationSpinner() {
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
-                this,
-                R.array.social_situation_list,
-                android.R.layout.simple_spinner_item
-        );
+        ArrayList<String> situations = new ArrayList<>();
+        situations.add("Select a Situation"); // Placeholder item
+        Collections.addAll(situations, getResources().getStringArray(R.array.social_situation_list));
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, situations) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                view.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.white));
+                return view;
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                View view = super.getDropDownView(position, convertView, parent);
+                view.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.white));
+                return view;
+            }
+        };
+
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         situationSpinner.setAdapter(adapter);
         situationSpinner.setVisibility(View.GONE);
@@ -212,6 +251,11 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         situationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position == 0) {
+                    // Do nothing for placeholder item
+                    return;
+                }
+
                 String chosenSituation = parent.getItemAtPosition(position).toString();
                 selectedSituation.setText(chosenSituation);
                 situationSpinner.setVisibility(View.GONE);
@@ -220,6 +264,9 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
+
+        // Set default selection to the placeholder (to prevent preselection of first real situation)
+        situationSpinner.setSelection(0, false);
     }
 
     /**
