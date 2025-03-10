@@ -194,9 +194,9 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         // Bold only the selected tab
         selectedTab.setTypeface(null, android.graphics.Typeface.BOLD);
 
-        // Ensure RecyclerView updates correctly
         adapter.setEvents(targetList);
         adapter.notifyDataSetChanged();
+
     }
 
     // Called when user toggles follow/unfollow in EventAdapter
