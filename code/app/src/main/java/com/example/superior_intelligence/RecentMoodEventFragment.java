@@ -40,12 +40,10 @@ import java.util.List;
 public class RecentMoodEventFragment extends Fragment {
     private RecyclerView recyclerView;
     private MoodEventAdapter adapter;
-    private List<MoodEvent> moodEventsList;
+    private final List<MoodEvent> moodEventsList = new ArrayList<>();
     private FirebaseFirestore db;
-    /**
-     * Required empty public constructor
-     */
-    public RecentMoodEventFragment() { }
+
+    public RecentMoodEventFragment() {}
     @Override
     public View onCreateView(
             @NonNull LayoutInflater  inflater,
@@ -59,8 +57,7 @@ public class RecentMoodEventFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
         recyclerView =  view.findViewById(R.id.recent_mood_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        moodEventsList  = new  ArrayList<>();
-        adapter =  new  MoodEventAdapter(moodEventsList);
+        adapter = new MoodEventAdapter(moodEventsList);
         recyclerView.setAdapter(adapter);
         loadRecentMoodEvents();}
     /**

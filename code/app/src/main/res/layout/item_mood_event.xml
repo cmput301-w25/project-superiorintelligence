@@ -4,42 +4,34 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:padding="12dp"
+    android:background="@color/backgroundGreen">
 
-    android:padding="12dp">
     <!-- Title or mood text -->
     <TextView
-
-
         android:id="@+id/item_mood_title"
         android:layout_width="wrap_content"
-
-
         android:layout_height="wrap_content"
         android:textStyle="bold"
-
         android:textSize="16sp"
-        android:textColor="@android:color/black" />
+        android:textColor="@color/black" />
+
     <!-- Additional details, e.g. date, situation, etc. -->
     <TextView
         android:id="@+id/item_mood_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
-        android:textColor="@android:color/darker_gray"
-
-        />
+        android:textColor="@color/black" />
 
     <TextView
         android:id="@+id/item_mood_situation"
-
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/black" />
+        android:textColor="@color/secondaryGreen" />
     <TextView
         android:id="@+id/item_mood_user"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
-        android:textColor="@android:color/holo_blue_dark"
+        android:textColor="@color/secondaryGreen"
         />
 </LinearLayout>

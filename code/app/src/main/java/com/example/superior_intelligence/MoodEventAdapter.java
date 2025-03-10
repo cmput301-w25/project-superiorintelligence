@@ -1,4 +1,5 @@
 package com.example.superior_intelligence;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -33,9 +34,6 @@ public class MoodEventAdapter extends RecyclerView.Adapter<MoodEventAdapter.Mood
      * @param moodEvents A list of MoodEvent objects to display
      */
     public MoodEventAdapter(List<MoodEvent> moodEvents) {
-        this.moodEvents = moodEvents;}
-
-    public MoodEventAdapter(List<com.example.superior_intelligence.MoodEvent> moodEventsList, List<MoodEvent> moodEvents) {
         this.moodEvents = moodEvents;
     }
 
@@ -50,11 +48,26 @@ public class MoodEventAdapter extends RecyclerView.Adapter<MoodEventAdapter.Mood
     public void onBindViewHolder(@NonNull MoodViewHolder holder, int position)
     {
         MoodEvent event = moodEvents.get(position);
+        String moodTitle = (event.getMood() != null ? event.getMood() : "Unknown Mood");
+        String postTitle = (event.getTitle() != null ? event.getTitle() : "");
+        holder.titleText.setText(moodTitle + (postTitle.isEmpty() ? "" : " - " + postTitle));
+        holder.dateText.setText("Date: " + (event.getDate() != null ? event.getDate() : "N/A"));
+        holder.situationText.setText("Situation: " + (event.getSituation() != null ? event.getSituation() : "N/A"));
+        holder.userText.setText("User: " + (event.getPostUser() != null ? event.getPostUser() : "N/A"));
+        if (event.getOverlayColor() != null && !event.getOverlayColor().isEmpty()) {
+            try {
+                int color = Color.parseColor(event.getOverlayColor());
+                holder.itemView.setBackgroundColor(color);
+            } catch (IllegalArgumentException e) {
+                // If overlayColor is invalid, fallback to default background
+                holder.itemView.setBackgroundResource(R.color.backgroundGreen);
+            }
+        } else {
+            // Default background if overlayColor is not provided
+            holder.itemView.setBackgroundResource(R.color.backgroundGreen);
+        }
+    }
 
-        holder.titleText.setText(event.getMood() + " - " + event.getTitle());
-        holder.dateText.setText("Date: " + event.getDate());
-        holder.situationText.setText("Situation: " + event.getSituation());
-        holder.userText.setText("User: " + event.getPostUser());}
     @Override
     public int getItemCount() {
         return moodEvents.size();
