@@ -39,7 +39,7 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
     private List<Event> followedEvents = new ArrayList<>();
     private List<Event> myPostsEvents = new ArrayList<>();
 
-    private TextView tabExplore, tabFollowed, tabMyPosts;
+    private TextView tabExplore, tabFollowed, tabMyPosts, tabMap;
     private FirebaseFirestore db;
     private CollectionReference myPostsRef;
 
@@ -58,6 +58,7 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         tabExplore = findViewById(R.id.tab_explore);
         tabFollowed = findViewById(R.id.tab_followed);
         tabMyPosts = findViewById(R.id.tab_myposts);
+        tabMap = findViewById(R.id.tab_map);
 
         // Load sample events into the lists (For now until we can add our own)
         loadEventsFromFirebase();
@@ -94,6 +95,13 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         tabExplore.setOnClickListener(v -> switchTab(exploreEvents, tabExplore));
         tabFollowed.setOnClickListener(v -> switchTab(followedEvents, tabFollowed));
         tabMyPosts.setOnClickListener(v -> switchTab(myPostsEvents, tabMyPosts));
+
+        tabMap.setOnClickListener(v -> {
+            // Here we start a new Activity called MoodMapActivity
+            // (Make sure you have a MoodMapActivity.java with the layout for your map.)
+            Intent intent = new Intent(HomeActivity.this, MoodMap.class);
+            startActivity(intent);
+        });
 
         // Launch's MoodCreateAndEditActivity when clicked
         ImageButton addButton = findViewById(R.id.addButton);
@@ -132,6 +140,8 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         eventData.put("situation", event.getSituation());
         eventData.put("moodExplanation", event.getMoodExplanation());
         eventData.put("postUser", event.getUser());
+        eventData.put("lat", event.getLat());
+        eventData.put("lng", event.getLng());
 
         myPostsRef.add(eventData)
                 .addOnSuccessListener(documentReference -> Log.d("Firebase", "Event saved: " + documentReference.getId()))
@@ -166,7 +176,7 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
                     String user = document.getString("user");
 
                     // Create event object
-                    Event event = new Event(title, date, overlayColor, imageUrl, emojiResource, isFollowed, isMyPost, mood, moodExplanation, situation, user);
+                    Event event = new Event(title, date, overlayColor, imageUrl, emojiResource, isFollowed, isMyPost, mood, moodExplanation, situation, user, null,null);
 
                     myPostsEvents.add(event); // Add event to list
                 }
