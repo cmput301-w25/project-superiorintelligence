@@ -59,6 +59,7 @@ public class CreateUserAndLoginActivityTest {
 
         // Allow time for Firestore to update
         Thread.sleep(2000);
+        onView(withId(R.id.signup_page_button)).perform(click()); // go back to login
 
         // Try creating another account with the same username (should fail)
         onView(withId(R.id.signup_name)).perform(replaceText("Another User"));
