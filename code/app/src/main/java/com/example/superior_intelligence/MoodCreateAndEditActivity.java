@@ -139,17 +139,43 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
      */
     void handleConfirmClick() {
         if (!isEmotionSelected) {
-            // Show a Toast message instead of an AlertDialog
             Toast.makeText(this, "An emotional state must be selected.", Toast.LENGTH_SHORT).show();
-        } else {
-            // Proceed to HomeActivity if an emotion is selected
-            Event newEvent = createNewEvent();
-            Intent intent = new Intent(MoodCreateAndEditActivity.this, HomeActivity.class);
-            intent.putExtra("selectedTab", "myposts");
-            intent.putExtra("newEvent", newEvent);
-            startActivity(intent);
-            finish();
+            return;
         }
+
+        String explanation = triggerExplanation.getText().toString().trim();
+
+        // Validate explanation if provided
+        if (!explanation.isEmpty() && !isValidExplanation(explanation)) {
+            Toast.makeText(this, "Reason must be max 20 characters or 3 words.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Proceed if valid
+        Event newEvent = createNewEvent();
+        Intent intent = new Intent(MoodCreateAndEditActivity.this, HomeActivity.class);
+        intent.putExtra("selectedTab", "myposts");
+        intent.putExtra("newEvent", newEvent);
+        startActivity(intent);
+        finish();
+    }
+
+    /**
+     * Checks if the explanation is within the allowed limits.
+     * - Max: 20 characters OR 3 words.
+     * - Allows empty input (optional field).
+     */
+    private boolean isValidExplanation(String explanation) {
+        if (explanation.isEmpty()) {
+            return true; // Empty input is allowed
+        }
+
+        if (explanation.length() > 20) {
+            return false; // Exceeds 20 character limit
+        }
+
+        String[] words = explanation.split("\\s+");
+        return words.length <= 3; // Ensure max 3 words
     }
 
 
