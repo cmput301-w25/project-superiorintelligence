@@ -32,7 +32,7 @@ import androidx.annotation.Nullable;
 public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFollowToggleListener {
 
     private RecyclerView recyclerView;
-    private EventAdapter adapter;
+    EventAdapter adapter;
 
     // Separate lists for each tab
     private List<Event> exploreEvents = new ArrayList<>();
@@ -40,8 +40,8 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
     private List<Event> myPostsEvents = new ArrayList<>();
 
     private TextView tabExplore, tabFollowed, tabMyPosts;
-    private FirebaseFirestore db;
-    private CollectionReference myPostsRef;
+    FirebaseFirestore db;
+    CollectionReference myPostsRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,7 +116,7 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         adapter.notifyDataSetChanged(); // Ensure RecyclerView updates when returning
     }
 
-    private void saveEventToFirebase(Event event) {
+    void saveEventToFirebase(Event event) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference myPostsRef = db.collection("MyPosts");
 
@@ -137,7 +137,7 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
                 .addOnSuccessListener(documentReference -> Log.d("Firebase", "Event saved: " + documentReference.getId()))
                 .addOnFailureListener(e -> Log.w("Firebase", "Error saving event", e));
     }
-    private void loadEventsFromFirebase() {
+    void loadEventsFromFirebase() {
         myPostsRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 myPostsEvents.clear();
@@ -185,7 +185,7 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
     }
 
 
-    private void switchTab(List<Event> targetList, TextView selectedTab) {
+    void switchTab(List<Event> targetList, TextView selectedTab) {
         // Reset all tabs to normal style
         tabExplore.setTypeface(null, android.graphics.Typeface.NORMAL);
         tabFollowed.setTypeface(null, android.graphics.Typeface.NORMAL);
