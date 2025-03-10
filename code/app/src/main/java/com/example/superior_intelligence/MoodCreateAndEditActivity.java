@@ -166,13 +166,21 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         }
 
         // Proceed if valid
-        Event newEvent = createNewEvent();
-        Intent intent = new Intent(MoodCreateAndEditActivity.this, HomeActivity.class);
-        intent.putExtra("selectedTab", "myposts");
-        intent.putExtra("newEvent", newEvent);
-        startActivity(intent);
-        finish();
+        Event updatedEvent = createNewEvent();
+
+        // Send updated details back to EventDetailsActivity
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("title", updatedEvent.getTitle());
+        resultIntent.putExtra("mood", updatedEvent.getMood());
+        resultIntent.putExtra("reason", updatedEvent.getMoodExplanation());
+        resultIntent.putExtra("socialSituation", updatedEvent.getSituation());
+        resultIntent.putExtra("overlayColor", updatedEvent.getOverlayColor());
+
+        // Return data and close this activity
+        setResult(RESULT_OK, resultIntent);
+        finish(); // Go back to EventDetailsActivity
     }
+
 
     /**
      * Checks if the explanation is within the allowed limits.

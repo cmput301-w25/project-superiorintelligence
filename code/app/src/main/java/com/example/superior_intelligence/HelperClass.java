@@ -1,3 +1,8 @@
+/**
+ * Helper class for user data base
+ * contains getters and setters for name and username
+ */
+
 package com.example.superior_intelligence;
 
 public class HelperClass {

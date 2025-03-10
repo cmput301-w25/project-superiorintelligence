@@ -2,6 +2,8 @@
  * completes sub-issue: CreateAccountPage #144
  * link: https://github.com/orgs/cmput301-w25/projects/9/views/1?pane=issue&itemId=100541362&issue=cmput301-w25%7Cproject-superiorintelligence%7C144
  * Creates an account by entering a unique username. Checks database to ensure username is unique and doesn't exist
+ * checkUsernameExists: check to see if the username exists in the database, taosts if it does not, else calls createUser()
+ * createUser: adds a new account with the given username to the database
  */
 package com.example.superior_intelligence;
 
