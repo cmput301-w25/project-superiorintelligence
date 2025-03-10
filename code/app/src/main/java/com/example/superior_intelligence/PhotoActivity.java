@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,7 +11,6 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -27,11 +25,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
-
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -50,6 +45,10 @@ public class PhotoActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private String selectedPhotoDocID = null;
 
+    /**
+     * Creates the activity, setting up Firestore and button click listeners.
+     * @param savedInstanceState The saved instance state.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,6 +80,9 @@ public class PhotoActivity extends AppCompatActivity {
         findViewById(R.id.upload_photo_button).setOnClickListener(view -> checkGalleryPermission());
     }
 
+    /**
+     * Checks if the app has camera permission and requests it if not.
+     */
     private void checkCameraPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             openCamera();
@@ -89,6 +91,9 @@ public class PhotoActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Checks if the app has gallery access permission and requests it if not.
+     */
     private void checkGalleryPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED) {
@@ -101,6 +106,9 @@ public class PhotoActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Handles permission request results.
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -118,6 +126,9 @@ public class PhotoActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Handles launching the camera actions like comfirming or back
+     */
     private final ActivityResultLauncher<Intent> cameraLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                     result -> {
@@ -126,6 +137,9 @@ public class PhotoActivity extends AppCompatActivity {
                         }
                     });
 
+    /**
+     * Opens the device's camera and captures an image.
+     */
     private void openCamera() {
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (cameraIntent.resolveActivity(getPackageManager()) != null) {
@@ -138,6 +152,9 @@ public class PhotoActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Handles launching the gallery actions like comfirming or back
+     */
     private final ActivityResultLauncher<Intent> galleryLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                     result -> {
@@ -147,11 +164,18 @@ public class PhotoActivity extends AppCompatActivity {
                         }
                     });
 
+    /**
+     * Opens the device's gallery and user picks an image
+     */
     private void openGallery() {
         Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         galleryLauncher.launch(galleryIntent);
     }
 
+    /**
+     * Creates a temporary image file in the storage directory.
+     * @return The created image file.
+     */
     protected File createImageFile() {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
@@ -165,10 +189,27 @@ public class PhotoActivity extends AppCompatActivity {
         }
         return imageFile;
     }
-
-    private void processSelectedImage(Uri imageUri) {
+    /**
+     * Processes the selected image by checking its size, displaying it if it's small enough,
+     * and optionally uploading it to Firestore.
+     * @param imageUri The URI of the selected or captured image.
+     */
+    void processSelectedImage(Uri imageUri) {
         Bitmap bitmap = uriToBitmap(imageUri);
         if (bitmap == null) return;
+
+        // Convert the bitmap to a byte array
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 75, stream); // Compress to JPEG format
+        byte[] byteArray = stream.toByteArray();
+        int imageSize = byteArray.length; // Get the size in bytes
+        Log.d("PhotoActivity", "Image size: " + imageSize + " bytes");
+        // Check if the image size exceeds 65536 bytes (64KB)
+        if (imageSize > 65536) {
+            Log.d("PhotoActivity", "Showing size limit exceeded dialog");
+            showSizeLimitExceededDialog(); // Show the warning dialog
+            return;
+        }
 
         ImageView photoImageView = findViewById(R.id.photo);
         ImageView photoIcon = findViewById(R.id.photo_icon);
@@ -180,7 +221,12 @@ public class PhotoActivity extends AppCompatActivity {
         uploadSelectedImage(imageUri);
     }
 
-    private Bitmap uriToBitmap(Uri uri) {
+    /**
+     * Converts a given URI into a Bitmap.
+     * @param uri The image URI.
+     * @return The converted Bitmap.
+     */
+    Bitmap uriToBitmap(Uri uri) {
         try {
             InputStream inputStream = getContentResolver().openInputStream(uri);
             if (inputStream == null) return null;
@@ -194,6 +240,10 @@ public class PhotoActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Uploads the selected image to Firestore.
+     * @param imgURI The image URI.
+     */
     private void uploadSelectedImage(Uri imgURI) {
         User user = User.getInstance();
         String username = user.getUsername();
@@ -210,33 +260,33 @@ public class PhotoActivity extends AppCompatActivity {
             // Notify user and exit PhotoActivity
             Toast.makeText(this, "Image uploaded!", Toast.LENGTH_SHORT).show();
 
-        }, username, "User Uploaded Image");
+        }, username);
+    }
+    AlertDialog sizeLimitDialog;
+    /**
+     * Displays a dialog that the selected image exceeded the size limit (64KB).
+     * The user can dismiss the dialog by clicking the OK button.
+     */
+    private void showSizeLimitExceededDialog() {
+        View dialogView = getLayoutInflater().inflate(R.layout.size_limit_exceeded, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+
+        sizeLimitDialog = builder.create(); // Store the dialog instance
+        sizeLimitDialog.show();
+
+        // Find the OK button and set click listener
+        Button okButton = dialogView.findViewById(R.id.ok_button);
+        okButton.setOnClickListener(v -> sizeLimitDialog.dismiss());
     }
 
-    private void updatePostWithImage(String username, String imageUrl) {
-        db.collection("MyPosts")
-                .whereEqualTo("username", username) // Find the most recent post by this user
-                .orderBy("date", Query.Direction.DESCENDING) // Order by date to get the latest
-                .limit(1) // Only update the most recent post
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (!queryDocumentSnapshots.isEmpty()) {
-                        DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
-                        String postId = document.getId();
-
-                        // Update the imageUrl field in Firestore
-                        db.collection("MyPosts").document(postId)
-                                .update("imageUrl", imageUrl)
-                                .addOnSuccessListener(aVoid -> Log.d("PhotoActivity", "Post updated with image URL"))
-                                .addOnFailureListener(e -> Log.e("PhotoActivity", "Failed to update post", e));
-                    } else {
-                        Log.e("PhotoActivity", "No post found to update.");
-                    }
-                })
-                .addOnFailureListener(e -> Log.e("PhotoActivity", "Error finding post", e));
-    }
-
-    public void uploadImage(Uri imgURI, UploadCallback callback, String uid, String name) {
+    /**
+     * Uploads an image to Firestore.
+     * @param imgURI The image URI.
+     * @param callback The callback to notify upon completion.
+     * @param uid The user ID.
+     */
+    public void uploadImage(Uri imgURI, UploadCallback callback, String uid) {
         String documentID;
 
         Bitmap bitmap = uriToBitmap(imgURI);
@@ -260,21 +310,27 @@ public class PhotoActivity extends AppCompatActivity {
         Map<String, Object> imageData = new HashMap<>();
         imageData.put("imgData", convertedImg);
         imageData.put("imgUser", uid);
-        imageData.put("imgName", name);
         imageData.put("imgDateUpload", currentDate);
         imgDocRef.set(imageData)
                 .addOnSuccessListener(aVoid -> callback.onUploadComplete(documentID))
                 .addOnFailureListener(e -> Log.d("IMG", "Upload failed"));
     }
 
-    private String toBase64(Bitmap bitmap) {
+    /**
+     * Converts a Bitmap to a Base64 string.
+     * @param bitmap The image Bitmap.
+     * @return The Base64 string representation.
+     */
+    String toBase64(Bitmap bitmap) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 75, byteArrayOutputStream);
         return Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
     }
 
+    /**
+     * Interface for upload completion callback.
+     */
     public interface UploadCallback {
         void onUploadComplete(String documentID);
     }
-
 }
