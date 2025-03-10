@@ -1,18 +1,40 @@
 package com.example.superior_intelligence;
 
-import java.io.Serial;
 import java.io.Serializable;
 
 public class Mood implements Serializable {
 
     //attributes
-    private String moodExplaination;
+    private String moodTitle;
+    private String moodExplanation;
+    private String emotionalState;
+    private long timestamp;
 
-    public String getMoodExplaination() {
-        return moodExplaination;
+    //constructors
+    public Mood(String moodTitle){
+        this.moodTitle = moodTitle;
+    }
+    //THIS CONSTRUCTOR TO BE UPDATED WITH ALL ATTRIBUTES
+    public Mood(String moodTitle, String moodExplanation, String emotionalState){
+        this.moodTitle = moodTitle;
+        this.moodExplanation = moodExplanation;
+        this.emotionalState = emotionalState;
     }
 
-    public void setMoodExplaination(String moodExplaination) {
-        this.moodExplaination = moodExplaination;
+    public String getMoodTitle() {
+        return moodTitle;
     }
+
+    public void setMoodTitle(String moodTitle) {
+        this.moodTitle = moodTitle;
+    }
+
+    public String getMoodExplanation() {
+        return moodExplanation;
+    }
+
+    public void setMoodExplanation(String moodExplanation) {
+        this.moodExplanation = moodExplanation;
+    }
+
 }

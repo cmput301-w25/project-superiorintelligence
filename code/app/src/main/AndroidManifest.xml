@@ -56,6 +56,44 @@
             android:theme="@style/Theme.Superior_Intelligence">
         </activity>
 
+        <!-- Home Activity -->
+        <activity
+            android:name=".HomeActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Superior_Intelligence">
+        </activity>
+
+        <!-- Login Page -->
+        <activity android:name=".LoginPageActivity"
+            android:parentActivityName=".MainActivity"
+            android:exported="true"/>
+
+        <!-- Create Account Page -->
+        <activity android:name=".CreateAccountActivity"
+            android:parentActivityName=".LoginPageActivity"
+            android:exported="true"/>
+
+        <!-- Home Page -->
+        <activity android:name=".HomePageActivity"
+            android:parentActivityName=".LoginPageActivity"
+            android:exported="true"/>
+
+        <!-- Mood Create and Edit Activity -->
+        <activity android:name=".MoodCreateAndEditActivity"
+            android:exported="true"/>
+
+        <!-- Profile Activity -->
+        <activity
+            android:name=".ProfileActivity"
+            android:exported="true">
+        </activity>
+
+        <!-- Profile Activity -->
+        <activity
+            android:name=".EventDetailsActivity"
+            android:exported="true">
+        </activity>
+
         <!-- FileProvider for Camera Image Storage -->
         <provider
             android:name="androidx.core.content.FileProvider"

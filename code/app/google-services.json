@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "523869328980",
+    "project_id": "moodgram",
+    "storage_bucket": "moodgram.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:523869328980:android:903d5f4aa5a9970e1cffc1",
+        "android_client_info": {
+          "package_name": "com.example.superior_intelligence"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJFd8QKxgQUGQTP5sNzKQ17-bgdXw0j7A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -64,8 +64,8 @@
             android:id="@+id/photo"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerCrop"
             android:contentDescription="@string/content_desc_profile_image"
+            android:scaleType="centerCrop"
             android:visibility="gone" />
 
         <!-- Small overlay icon (appears initially, disappears when photo is set) -->
