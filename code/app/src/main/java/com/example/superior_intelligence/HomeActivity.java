@@ -1,9 +1,38 @@
+/**
+ * HomeActivity class for managing the main home screen of the application.
+ * This activity handles displaying events, managing tabs (Explore, Followed, MyPosts),
+ * and handling user interactions such as adding new events, switching tabs, and following/unfollowing events.
+ *
+ * Methods:
+ *
+ * - onCreate(Bundle savedInstanceState)
+ *   Initializes the activity, sets up RecyclerView, tabs, and loads data from Firestore.
+ *
+ * - onResume()
+ *   Refreshes the RecyclerView data when the activity resumes.
+ *
+ * - saveEventToFirebase(Event event)
+ *   Saves an event to Firestore under the "MyPosts" collection.
+ *   - @param event The event object to be saved.
+ *
+ * - loadEventsFromFirebase()
+ *   Loads events from Firestore into the MyPosts list and updates the RecyclerView.
+ *
+ * - switchTab(List<Event> targetList, TextView selectedTab)
+ *   Switches between tabs by updating the RecyclerView with the target list and highlighting the selected tab.
+ *   - @param targetList The list of events to display in the RecyclerView.
+ *   - @param selectedTab The tab to be highlighted.
+ *
+ * - onFollowToggled(Event event, boolean isFollowed)
+ *   Called when the user toggles the follow/unfollow state of an event in the adapter.
+ *   - @param event The event whose follow state was toggled.
+ *   - @param isFollowed The new follow state of the event.
+ */
+
 package com.example.superior_intelligence;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,15 +47,9 @@ import java.util.Map;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.SetOptions;
-import com.google.firebase.firestore.EventListener;
 
 import android.util.Log;
-import androidx.annotation.Nullable;
 
 
 public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFollowToggleListener {
