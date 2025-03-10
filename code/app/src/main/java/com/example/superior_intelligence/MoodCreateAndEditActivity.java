@@ -122,6 +122,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         /*
         NOT WORKING
         selectedMood.setText(mood);
+
         selectedSituation.setText(situation);
         */
 
