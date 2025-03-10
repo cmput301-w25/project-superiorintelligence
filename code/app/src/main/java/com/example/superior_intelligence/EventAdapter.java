@@ -124,6 +124,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
             intent.putExtra("reason", event.getMoodExplanation());
             intent.putExtra("situation", event.getSituation());
             intent.putExtra("imageUrl", event.getImageUrl());
+            intent.putExtra("overlayColor", event.getOverlayColor());
+            intent.putExtra("emojiResource", event.getEmojiResource());
             v.getContext().startActivity(intent);
         });
 

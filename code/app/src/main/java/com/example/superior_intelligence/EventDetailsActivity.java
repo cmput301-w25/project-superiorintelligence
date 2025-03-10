@@ -1,6 +1,8 @@
 package com.example.superior_intelligence;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.ImageButton;
@@ -18,7 +20,8 @@ public class EventDetailsActivity extends AppCompatActivity {
 
         ImageView eventImage = findViewById(R.id.event_full_image);
         TextView eventTitle = findViewById(R.id.event_detail_title);
-        TextView eventMood = findViewById(R.id.event_detail_mood);
+        TextView eventMood = findViewById(R.id.event_detail_mood); // This will show "Mood: "
+        TextView selectedMood = findViewById(R.id.selected_mood); // This will show the actual mood word with color
         TextView eventReason = findViewById(R.id.event_detail_reason);
         TextView eventSituation = findViewById(R.id.event_detail_situation);
         ImageButton backButton = findViewById(R.id.back_button); // Find back button
@@ -30,17 +33,41 @@ public class EventDetailsActivity extends AppCompatActivity {
         String reason = intent.getStringExtra("reason");
         String situation = intent.getStringExtra("situation");
         String imageUrl = intent.getStringExtra("imageUrl");
+        String overlayColor = intent.getStringExtra("overlayColor"); // Fetch mood color
 
-        // Set data to views
+        // Set title
         eventTitle.setText(title);
-        eventMood.setText("Mood: " + mood);
-        eventReason.setText("Reason: " + reason);
-        eventSituation.setText("Social Situation: " + situation);
 
-        // Load Image if available
-        //if (imageUrl != null && !imageUrl.isEmpty()) {
-            //Glide.with(this).load(Uri.parse(imageUrl)).into(eventImage);
-        //}
+        // Set Mood label
+        eventMood.setText("Mood: "); // Static label
+
+        // Set Mood value (actual mood word)
+        selectedMood.setText(mood); // Dynamic word like "Excited", "Fear", etc.
+
+        // Set dynamic background color for mood
+        if (overlayColor != null && !overlayColor.isEmpty()) {
+            GradientDrawable bgShape = (GradientDrawable) selectedMood.getBackground();
+            bgShape.setColor(Color.parseColor(overlayColor)); // Set color on drawable dynamically
+        }
+
+        // Set Reason (or empty if not provided)
+        if (reason != null && !reason.isEmpty()) {
+            eventReason.setText("Reason: " + reason);
+        } else {
+            eventReason.setText("Reason: ");
+        }
+
+        // Set Social Situation (or empty if not provided or default "Select a Situation")
+        if (situation != null && !situation.isEmpty() && !situation.equals("Select a Situation")) {
+            eventSituation.setText("Social Situation: " + situation);
+        } else {
+            eventSituation.setText("Social Situation: ");
+        }
+
+        // Load Image if available (optional future use)
+        // if (imageUrl != null && !imageUrl.isEmpty()) {
+        //     Glide.with(this).load(Uri.parse(imageUrl)).into(eventImage);
+        // }
 
         // Back button navigates to Home Page
         backButton.setOnClickListener(v -> {
@@ -50,5 +77,4 @@ public class EventDetailsActivity extends AppCompatActivity {
             finish();
         });
     }
-
 }
