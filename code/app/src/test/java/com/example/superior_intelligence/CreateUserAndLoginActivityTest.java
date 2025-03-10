@@ -25,6 +25,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class CreateUserAndLoginActivityTest {
@@ -49,38 +50,38 @@ public class CreateUserAndLoginActivityTest {
         // go to main page
         onView(withId(R.id.login_button_login_page)).perform(click());
 
-//        // Create a new account
-//        onView(withId(R.id.signup_page_button)).perform(click());
-//        onView(withId(R.id.signup_name)).perform(replaceText(testName));
-//        onView(withId(R.id.signup_username)).perform(replaceText(testUsername));
-//        closeSoftKeyboard();
-//        onView(withId(R.id.signup_button)).perform(click());
-//
-//        // Allow time for Firestore to update
-//        Thread.sleep(2000);
-//
-//        // Try creating another account with the same username (should fail)
-//        onView(withId(R.id.signup_name)).perform(replaceText("Another User"));
-//        onView(withId(R.id.signup_username)).perform(replaceText(testUsername));
-//        closeSoftKeyboard();
-//        onView(withId(R.id.signup_button)).perform(click());
-//
-//        // Check for "Username already exists" error
-//        onView(withId(R.id.signup_username)).check(matches(hasErrorText("Username already exists")));
-//
-//        // Try logging in with a non-existent username (should fail)
-//        onView(withId(R.id.back_button)).perform(click());
-//        onView(withId(R.id.login_username)).perform(replaceText(nonExistentUsername));
-//        closeSoftKeyboard();
-//        onView(withId(R.id.login_button)).perform(click());
-//
-//        // Check for "User does not exist" error
-//        onView(withId(R.id.login_username)).check(matches(hasErrorText("User does not exist")));
-//
-//        // Successfully log in with the created username
-//        onView(withId(R.id.login_username)).perform(replaceText(testUsername));
-//        closeSoftKeyboard();
-//        onView(withId(R.id.login_button)).perform(click());
+        // Create a new account
+        onView(withId(R.id.signup_page_button)).perform(click());
+        onView(withId(R.id.signup_name)).perform(replaceText(testName));
+        onView(withId(R.id.signup_username)).perform(replaceText(testUsername));
+        closeSoftKeyboard();
+        onView(withId(R.id.signup_button)).perform(click());
+
+        // Allow time for Firestore to update
+        Thread.sleep(2000);
+
+        // Try creating another account with the same username (should fail)
+        onView(withId(R.id.signup_name)).perform(replaceText("Another User"));
+        onView(withId(R.id.signup_username)).perform(replaceText(testUsername));
+        closeSoftKeyboard();
+        onView(withId(R.id.signup_button)).perform(click());
+
+        // Check for "Username already exists" error
+        onView(withId(R.id.signup_username)).check(matches(hasErrorText("Username already exists")));
+
+        // Try logging in with a non-existent username (should fail)
+        onView(withId(R.id.back_button)).perform(click());
+        onView(withId(R.id.login_username)).perform(replaceText(nonExistentUsername));
+        closeSoftKeyboard();
+        onView(withId(R.id.login_button)).perform(click());
+
+        // Check for "User does not exist" error
+        onView(withId(R.id.login_username)).check(matches(hasErrorText("User does not exist")));
+
+        // Successfully log in with the created username
+        onView(withId(R.id.login_username)).perform(replaceText(testUsername));
+        closeSoftKeyboard();
+        onView(withId(R.id.login_button)).perform(click());
 
     }
 }
