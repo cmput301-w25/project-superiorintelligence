@@ -3,21 +3,20 @@ package com.example.superior_intelligence;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
-import android.media.Image;
-import android.net.Uri;
 import android.os.Bundle;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-//import com.bumptech.glide.Glide;
 
-/**
- * This class shows a mood event details when a mood event is clicked on.
- * Contains an edit button to go edit mood details
- * Contains a back button to go back to home page
- */
 public class EventDetailsActivity extends AppCompatActivity {
+
+    private TextView eventTitle, eventMood, selectedMood, eventReason, eventSituation;
+    private String title, mood, reason, situation, overlayColor;
+
+    private ActivityResultLauncher<Intent> editEventLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,80 +24,83 @@ public class EventDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.event_details);
 
         ImageView eventImage = findViewById(R.id.event_full_image);
-        TextView eventTitle = findViewById(R.id.event_detail_title);
-        TextView eventMood = findViewById(R.id.event_detail_mood); // This will show "Mood: "
-        TextView selectedMood = findViewById(R.id.selected_mood); // This will show the actual mood word with color
-        TextView eventReason = findViewById(R.id.event_detail_reason);
-        TextView eventSituation = findViewById(R.id.event_detail_situation);
-        ImageButton backButton = findViewById(R.id.back_button); // Find back button
+        eventTitle = findViewById(R.id.event_detail_title);
+        eventMood = findViewById(R.id.event_detail_mood); // "Mood: "
+        selectedMood = findViewById(R.id.selected_mood);  // Dynamic mood
+        eventReason = findViewById(R.id.event_detail_reason);
+        eventSituation = findViewById(R.id.event_detail_situation);
+        ImageButton backButton = findViewById(R.id.back_button);
         ImageButton editButton = findViewById(R.id.editButton);
 
         // Retrieve event data
         Intent intent = getIntent();
-        String title = intent.getStringExtra("title");
-        String mood = intent.getStringExtra("mood");
-        String reason = intent.getStringExtra("reason");
-        String situation = intent.getStringExtra("situation");
-        String imageUrl = intent.getStringExtra("imageUrl");
-        String overlayColor = intent.getStringExtra("overlayColor"); // Fetch mood color
+        title = intent.getStringExtra("title");
+        mood = intent.getStringExtra("mood");
+        reason = intent.getStringExtra("reason");
+        situation = intent.getStringExtra("situation");
+        overlayColor = intent.getStringExtra("overlayColor");
 
-        // Set title
-        eventTitle.setText(title);
+        // Set initial values
+        setEventDetails();
 
-        // Set Mood label
-        eventMood.setText("Mood: "); // Static label
+        // Initialize launcher for editing
+        initEditLauncher();
 
-        // Set Mood value (actual mood word)
-        selectedMood.setText(mood); // Dynamic word like "Excited", "Fear", etc.
-
-        // Set dynamic background color for mood
-        if (overlayColor != null && !overlayColor.isEmpty()) {
-            GradientDrawable bgShape = (GradientDrawable) selectedMood.getBackground();
-            bgShape.setColor(Color.parseColor(overlayColor)); // Set color on drawable dynamically
-        }
-
-        // Set Reason (or empty if not provided)
-        if (reason != null && !reason.isEmpty()) {
-            eventReason.setText("Reason: " + reason);
-        } else {
-            eventReason.setText("Reason: ");
-        }
-
-        // Set Social Situation (or empty if not provided or default "Select a Situation")
-        if (situation != null && !situation.isEmpty() && !situation.equals("Select a Situation")) {
-            eventSituation.setText("Social Situation: " + situation);
-        } else {
-            eventSituation.setText("Social Situation: ");
-        }
-
-        // Load Image if available (optional future use)
-        // if (imageUrl != null && !imageUrl.isEmpty()) {
-        //     Glide.with(this).load(Uri.parse(imageUrl)).into(eventImage);
-        // }
-
-        // Back button navigates to Home Page
+        // Back button
         backButton.setOnClickListener(v -> {
             Intent homeIntent = new Intent(EventDetailsActivity.this, HomeActivity.class);
-            homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // Clears the activity stack
+            homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(homeIntent);
             finish();
         });
 
-        //Mood oldMood = new Mood(title, mood, reason, situation);
-
-
-
-        // Edit button navigates to Mood Create/Edit Page
+        // Edit button
         editButton.setOnClickListener(view -> {
             Intent editIntent = new Intent(EventDetailsActivity.this, MoodCreateAndEditActivity.class);
-            editIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             editIntent.putExtra("title", title);
             editIntent.putExtra("mood", mood);
             editIntent.putExtra("reason", reason);
             editIntent.putExtra("socialSituation", situation);
-            startActivity(editIntent);
-            finish();
+            editIntent.putExtra("overlayColor", overlayColor);
+            editEventLauncher.launch(editIntent); // Launch edit and wait for result
         });
+    }
 
+    private void initEditLauncher() {
+        editEventLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        // Get updated details
+                        title = result.getData().getStringExtra("title");
+                        mood = result.getData().getStringExtra("mood");
+                        reason = result.getData().getStringExtra("reason");
+                        situation = result.getData().getStringExtra("socialSituation");
+                        overlayColor = result.getData().getStringExtra("overlayColor");
+
+                        // Refresh display
+                        setEventDetails();
+                    }
+                }
+        );
+    }
+
+
+    private void setEventDetails() {
+        eventTitle.setText(title);
+        eventMood.setText("Mood: ");
+        selectedMood.setText(mood);
+
+        // Set color dynamically
+        if (overlayColor != null && !overlayColor.isEmpty()) {
+            GradientDrawable bgShape = (GradientDrawable) selectedMood.getBackground().mutate(); // Ensure mutable instance
+            bgShape.setColor(Color.parseColor(overlayColor));
+        }
+
+        // Reason
+        eventReason.setText("Reason: " + (reason != null && !reason.isEmpty() ? reason : ""));
+
+        // Social Situation
+        eventSituation.setText("Social Situation: " + (situation != null && !situation.isEmpty() && !situation.equals("Select a Situation") ? situation : ""));
     }
 }
