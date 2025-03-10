@@ -56,7 +56,6 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
     private FrameLayout confirmButton;
     private String imageUrl = null;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,6 +104,22 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
             }
         });
 
+
+        // Preset mood's old info
+        Intent intent = getIntent();
+        String title = intent.getStringExtra("title");
+        String mood = intent.getStringExtra("mood");
+        String reason = intent.getStringExtra("reason");
+        String situation = intent.getStringExtra("socialSituation");
+
+        headerTitle.setText(title);
+        triggerExplanation.setText(reason);
+         /* NOT WORKING
+        selectedMood.setText(mood);
+
+        selectedSituation.setText(situation);
+        */
+
         // Back button returns to HomeActivity
         backButton.setOnClickListener(v -> {
             startActivity(new Intent(MoodCreateAndEditActivity.this, HomeActivity.class));
@@ -113,8 +128,8 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
 
         // Photo button opens PhotoActivity
         addPhotoButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MoodCreateAndEditActivity.this, PhotoActivity.class);
-            photoActivityLauncher.launch(intent);
+            Intent photoIntent = new Intent(MoodCreateAndEditActivity.this, PhotoActivity.class);
+            photoActivityLauncher.launch(photoIntent);
         });
 
         // Confirm button but ensures emotion is selected before proceeding
@@ -139,17 +154,43 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
      */
     void handleConfirmClick() {
         if (!isEmotionSelected) {
-            // Show a Toast message instead of an AlertDialog
             Toast.makeText(this, "An emotional state must be selected.", Toast.LENGTH_SHORT).show();
-        } else {
-            // Proceed to HomeActivity if an emotion is selected
-            Event newEvent = createNewEvent();
-            Intent intent = new Intent(MoodCreateAndEditActivity.this, HomeActivity.class);
-            intent.putExtra("selectedTab", "myposts");
-            intent.putExtra("newEvent", newEvent);
-            startActivity(intent);
-            finish();
+            return;
         }
+
+        String explanation = triggerExplanation.getText().toString().trim();
+
+        // Validate explanation if provided
+        if (!explanation.isEmpty() && !isValidExplanation(explanation)) {
+            Toast.makeText(this, "Reason must be max 20 characters or 3 words.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Proceed if valid
+        Event newEvent = createNewEvent();
+        Intent intent = new Intent(MoodCreateAndEditActivity.this, HomeActivity.class);
+        intent.putExtra("selectedTab", "myposts");
+        intent.putExtra("newEvent", newEvent);
+        startActivity(intent);
+        finish();
+    }
+
+    /**
+     * Checks if the explanation is within the allowed limits.
+     * - Max: 20 characters OR 3 words.
+     * - Allows empty input (optional field).
+     */
+    private boolean isValidExplanation(String explanation) {
+        if (explanation.isEmpty()) {
+            return true; // Empty input is allowed
+        }
+
+        if (explanation.length() > 20) {
+            return false; // Exceeds 20 character limit
+        }
+
+        String[] words = explanation.split("\\s+");
+        return words.length <= 3; // Ensure max 3 words
     }
 
 
@@ -158,6 +199,9 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
      */
     Event createNewEvent() {
         String eventTitle = headerTitle.getText().toString().trim();
+        if (eventTitle.isEmpty()) {
+            eventTitle = "Untitled"; // Default title
+        }
         String eventDate = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault()).format(new Date());
         String overlayColor = getOverlayColorForMood(selectedMood.getText().toString()); // Dynamic based on mood
         int emojiResource = includeEmojiCheckbox.isChecked() ? updateEmojiIcon(selectedMood.getText().toString()) : 0;
