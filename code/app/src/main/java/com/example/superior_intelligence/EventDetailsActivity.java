@@ -16,9 +16,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.superior_intelligence.HomeActivity;
-import com.example.superior_intelligence.MoodCreateAndEditActivity;
-
 public class EventDetailsActivity extends AppCompatActivity {
 
     private TextView eventTitle, eventMood, selectedMood, eventReason, eventSituation;
