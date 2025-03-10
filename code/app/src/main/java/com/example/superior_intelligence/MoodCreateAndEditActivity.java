@@ -116,6 +116,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         triggerExplanation.setText(reason);
          /* NOT WORKING
         selectedMood.setText(mood);
+
         selectedSituation.setText(situation);
         */
 
