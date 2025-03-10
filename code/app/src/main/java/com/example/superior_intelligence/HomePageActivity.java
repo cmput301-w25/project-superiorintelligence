@@ -21,7 +21,6 @@ import java.util.Set;
 
 /**
  *  This class is for the add button activity of homepage that redirects user to create mood event page
- *  This class is the Homepage for the app with button to add mood event and ...
  *
  */
 public class HomePageActivity extends AppCompatActivity {
