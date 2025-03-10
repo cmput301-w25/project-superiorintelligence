@@ -158,6 +158,9 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
      */
     Event createNewEvent() {
         String eventTitle = headerTitle.getText().toString().trim();
+        if (eventTitle.isEmpty()) {
+            eventTitle = "Untitled"; // Default title
+        }
         String eventDate = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault()).format(new Date());
         String overlayColor = getOverlayColorForMood(selectedMood.getText().toString()); // Dynamic based on mood
         int emojiResource = includeEmojiCheckbox.isChecked() ? updateEmojiIcon(selectedMood.getText().toString()) : 0;
