@@ -1,0 +1,11 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style
+        name="Theme.SuperiorIntelligence" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/buttonGreen</item>
+        <item name="colorPrimaryVariant">@color/secondaryGreen</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+        <item name="colorSecondary">@color/secondaryGreen</item>
+        <item name="colorOnSecondary">@android:color/white</item>
+        <item name="android:colorBackground">@color/backgroundGreen</item>
+        <item name="android:textColor">@color/black</item></style>
+</resources>
