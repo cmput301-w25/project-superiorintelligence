@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.superior_intelligence.R;
-import com.example.superior_intelligence.MoodEvent;
+import com.example.superior_intelligence.Mood;
 
 import java.util.List;
 /**
@@ -24,17 +24,15 @@ import java.util.List;
  * <a href="https://developer.android.com/guide/topics/ui/layout/recyclerview">RecyclerView Docs</a>
  * </p>
  */
+public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder> {
+    private final List<Mood> moodList;
 
-
-
-public class MoodEventAdapter extends RecyclerView.Adapter<MoodEventAdapter.MoodViewHolder> {
-    private final List<MoodEvent> moodEvents;
     /**
-     * Constructor
-     * @param moodEvents A list of MoodEvent objects to display
+     * Constructor.
+     * @param moodList A list of Mood objects to display.
      */
-    public MoodEventAdapter(List<MoodEvent> moodEvents) {
-        this.moodEvents = moodEvents;
+    public MoodAdapter(List<Mood> moodList) {
+        this.moodList = moodList;
     }
 
     @NonNull
@@ -47,16 +45,16 @@ public class MoodEventAdapter extends RecyclerView.Adapter<MoodEventAdapter.Mood
     @Override
     public void onBindViewHolder(@NonNull MoodViewHolder holder, int position)
     {
-        MoodEvent event = moodEvents.get(position);
-        String moodTitle = (event.getMood() != null ? event.getMood() : "Unknown Mood");
-        String postTitle = (event.getTitle() != null ? event.getTitle() : "");
+        Mood mood = moodList.get(position);
+        String moodTitle = (mood.getMood() != null ? mood.getMood() : "Unknown Mood");
+        String postTitle = (mood.getMoodTitle() != null ? mood.getMoodTitle() : "");
         holder.titleText.setText(moodTitle + (postTitle.isEmpty() ? "" : " - " + postTitle));
-        holder.dateText.setText("Date: " + (event.getDate() != null ? event.getDate() : "N/A"));
-        holder.situationText.setText("Situation: " + (event.getSituation() != null ? event.getSituation() : "N/A"));
-        holder.userText.setText("User: " + (event.getPostUser() != null ? event.getPostUser() : "N/A"));
-        if (event.getOverlayColor() != null && !event.getOverlayColor().isEmpty()) {
+        holder.dateText.setText("Date: " + (mood.getDate() != null ? mood.getDate() : "N/A"));
+        holder.situationText.setText("Situation: " + (mood.getSituation() != null ? mood.getSituation() : "N/A"));
+        holder.userText.setText("User: " + (mood.getPostUser() != null ? mood.getPostUser() : "N/A"));
+        if (mood.getOverlayColor() != null && !mood.getOverlayColor().isEmpty()) {
             try {
-                int color = Color.parseColor(event.getOverlayColor());
+                int color = Color.parseColor(mood.getOverlayColor().toString());
                 holder.itemView.setBackgroundColor(color);
             } catch (IllegalArgumentException e) {
                 // If overlayColor is invalid, fallback to default background
@@ -70,35 +68,30 @@ public class MoodEventAdapter extends RecyclerView.Adapter<MoodEventAdapter.Mood
 
     @Override
     public int getItemCount() {
-        return moodEvents.size();
+        return moodList.size();
     }
     /**
      * Clears the adapter's data and adds a fresh list of mood events.
      * Useful for reloading data from Firestore.
      */
-    public void updateData(List<MoodEvent> newEvents) {
-        moodEvents.clear();
-        moodEvents.addAll(newEvents);
-        notifyDataSetChanged();}
+    public void updateData(List<Mood> newMoods) {
+        moodList.clear();
+        moodList.addAll(newMoods);
+        notifyDataSetChanged();
+    }
+
     /**
-     * MoodViewHolder
-     *
-     * <p>
-     *     Holds references to the views in each item layout (item_mood_event.xml).
-     * </p>
+     * MoodViewHolder holds the view references for each item in item_mood_event.xml.
      */
     public static class MoodViewHolder extends RecyclerView.ViewHolder {
-
         TextView titleText, dateText, situationText, userText;
 
-        public MoodViewHolder(@NonNull View itemView)
-
-        {
+        public MoodViewHolder(@NonNull View itemView) {
             super(itemView);
             titleText = itemView.findViewById(R.id.item_mood_title);
             dateText = itemView.findViewById(R.id.item_mood_date);
             situationText = itemView.findViewById(R.id.item_mood_situation);
             userText = itemView.findViewById(R.id.item_mood_user);
         }
-
-    }}
+    }
+}

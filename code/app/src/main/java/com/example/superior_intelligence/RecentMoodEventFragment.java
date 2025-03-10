@@ -15,8 +15,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.superior_intelligence.R;
 
-import com.example.superior_intelligence.MoodEvent;
-import com.example.superior_intelligence.MoodEventAdapter;
+import com.example.superior_intelligence.Mood;
+import com.example.superior_intelligence.MoodAdapter;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -39,9 +39,10 @@ import java.util.List;
  */
 public class RecentMoodEventFragment extends Fragment {
     private RecyclerView recyclerView;
-    private MoodEventAdapter adapter;
-    private final List<MoodEvent> moodEventsList = new ArrayList<>();
+    private MoodAdapter adapter;
+    private final List<Mood> moodEventsList = new ArrayList<>();
     private FirebaseFirestore db;
+    private com.example.superior_intelligence.Mood Mood;
 
     public RecentMoodEventFragment() {}
     @Override
@@ -57,7 +58,7 @@ public class RecentMoodEventFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
         recyclerView =  view.findViewById(R.id.recent_mood_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        adapter = new MoodEventAdapter(moodEventsList);
+        adapter = new MoodAdapter(moodEventsList);
         recyclerView.setAdapter(adapter);
         loadRecentMoodEvents();}
     /**
@@ -77,11 +78,11 @@ public class RecentMoodEventFragment extends Fragment {
                 .limit(50)
                 .get()
                 .addOnSuccessListener(querySnapshot ->{
-                    List<MoodEvent> tempList = new ArrayList<>();
+                    List<Mood> tempList = new ArrayList<>();
                     for (QueryDocumentSnapshot doc : querySnapshot)
                     {
-                        MoodEvent event = doc.toObject(MoodEvent.class);
-                        tempList.add(event);}
+                        Mood event = doc.toObject(Mood.class);
+                        tempList.add(Mood);}
                     adapter.updateData(tempList);
                 })
                 .addOnFailureListener(e -> {
