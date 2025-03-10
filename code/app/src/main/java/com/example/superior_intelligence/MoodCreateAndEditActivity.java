@@ -113,9 +113,10 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         String situation = intent.getStringExtra("socialSituation");
 
         headerTitle.setText(title);
+        triggerExplanation.setText(reason);
          /* NOT WORKING
         selectedMood.setText(mood);
-        triggerExplanation.setText(reason);
+
         selectedSituation.setText(situation);
         */
 
