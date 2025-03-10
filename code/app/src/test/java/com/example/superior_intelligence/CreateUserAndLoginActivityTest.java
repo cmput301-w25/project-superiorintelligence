@@ -30,7 +30,7 @@ import org.junit.runner.RunWith;
 public class CreateUserAndLoginActivityTest {
 
     @Rule
-    public ActivityScenarioRule<MainActivity> scenario = new ActivityScenarioRule<>(MainActivity.class);
+    public ActivityScenarioRule<LoginPageActivity> scenario = new ActivityScenarioRule<>(LoginPageActivity.class);
 
     @BeforeClass
     public static void setup() {
@@ -78,8 +78,7 @@ public class CreateUserAndLoginActivityTest {
         onView(withId(R.id.login_username)).perform(replaceText(testUsername));
         closeSoftKeyboard();
         onView(withId(R.id.login_button)).perform(click());
-
-        // Add more assertions here if needed to confirm login success
+        
     }
 }
 
