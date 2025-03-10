@@ -108,7 +108,7 @@ public class LoginPageActivity extends AppCompatActivity {
                         user.setUsername(username);
 
                         // User exists → Go to HomePageActivity
-                        Intent intent = new Intent(LoginPageActivity.this, HomePageActivity.class);
+                        Intent intent = new Intent(LoginPageActivity.this, HomeActivity.class);
                         startActivity(intent);
                     } else {
                         // User doesn't exist
