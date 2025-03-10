@@ -29,6 +29,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ *
+ *
+ */
 public class MoodCreateAndEditActivity extends AppCompatActivity {
 
     // Title
@@ -114,7 +118,9 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
 
         headerTitle.setText(title);
         triggerExplanation.setText(reason);
-         /* NOT WORKING
+
+        /*
+        NOT WORKING
         selectedMood.setText(mood);
         selectedSituation.setText(situation);
         */

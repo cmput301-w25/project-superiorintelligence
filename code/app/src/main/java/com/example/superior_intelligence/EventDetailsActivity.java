@@ -11,6 +11,10 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+/**
+ * This class shows details of the mood event when the user interact with the event.
+ * Contains button to edit mood
+ */
 public class EventDetailsActivity extends AppCompatActivity {
 
     private TextView eventTitle, eventMood, selectedMood, eventReason, eventSituation;
@@ -66,6 +70,10 @@ public class EventDetailsActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     *
+     * initEditLauncher function retrieve result from the mood event user clicked on
+     */
     private void initEditLauncher() {
         editEventLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -85,7 +93,10 @@ public class EventDetailsActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * setEventDetails function set the retrieved details of moodEvent on the screen
 
+     */
     private void setEventDetails() {
         eventTitle.setText(title);
         eventMood.setText("Mood: ");
