@@ -20,6 +20,10 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class MoodCreateAndEditActivity extends AppCompatActivity {
 
     // Title
@@ -149,7 +153,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
      */
     private Event createNewEvent() {
         String eventTitle = headerTitle.getText().toString().trim();
-        String eventDate = "Today";
+        String eventDate = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault()).format(new Date());
         String overlayColor = "#FFD700";
         int emojiResource = includeEmojiCheckbox.isChecked() ? updateEmojiIcon(selectedMood.getText().toString()) : 0;
         boolean isFollowed = false;
