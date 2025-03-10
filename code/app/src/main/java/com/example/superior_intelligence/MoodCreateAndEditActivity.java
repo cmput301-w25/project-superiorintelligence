@@ -159,7 +159,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
     Event createNewEvent() {
         String eventTitle = headerTitle.getText().toString().trim();
         String eventDate = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault()).format(new Date());
-        String overlayColor = "#FFD700";
+        String overlayColor = getOverlayColorForMood(selectedMood.getText().toString()); // Dynamic based on mood
         int emojiResource = includeEmojiCheckbox.isChecked() ? updateEmojiIcon(selectedMood.getText().toString()) : 0;
         boolean isFollowed = false;
         boolean isMyPost = true;
@@ -302,4 +302,28 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         emojiButton.setImageResource(emojiResId);
         return emojiResId;
     }
+
+    private String getOverlayColorForMood(String mood) {
+        switch (mood.toLowerCase()) {
+            case "anger":
+                return "#FF6347"; // Tomato Red
+            case "happiness":
+                return "#FFD700"; // Yellow (current one)
+            case "sadness":
+                return "#87CEEB"; // Sky Blue
+            case "fear":
+                return "#778899"; // Slate Gray
+            case "shame":
+                return "#FFB6C1"; // Light Pink
+            case "confusion":
+                return "#CC0099"; // Purple
+            case "surprise":
+                return "#FFA500"; // Orange
+            case "disgust":
+                return "#98FB98"; // Pale Green
+            default:
+                return "#FFD700"; // Default to Yellow
+        }
+    }
+
 }
