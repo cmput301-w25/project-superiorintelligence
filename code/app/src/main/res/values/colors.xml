@@ -8,5 +8,15 @@
     <color name="overlayDefault">#B3FFFFFF</color>  <!-- 70% Transparent White -->
     <color name="selected_row_color">#FF5733</color> <!-- Orange highlight for selected item -->
 
+    <!-- Colours for Emotional States -->
+
+    <color name="angerRed">#FF6347</color>
+    <color name="happinessYellow">#FFD700</color>
+    <color name="sadnessBlue">#87CEEB</color>
+    <color name="fearGray">#778899</color>
+    <color name="shamePink">#FFB6C1</color>
+    <color name="confusionPurple">#DDA0DD</color>
+    <color name="surpriseOrange">#FFA500</color>
+    <color name="disgustGreen">#8BC34A</color>
 
 </resources>
