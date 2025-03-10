@@ -1,3 +1,7 @@
+/**
+ * This class shows details of the mood event when the user interact with the event.
+ * Contains button to edit mood
+ */
 package com.example.superior_intelligence;
 
 import android.content.Intent;
@@ -11,10 +15,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
-/**
- * This class shows details of the mood event when the user interact with the event.
- * Contains button to edit mood
- */
 public class EventDetailsActivity extends AppCompatActivity {
 
     private TextView eventTitle, eventMood, selectedMood, eventReason, eventSituation;
