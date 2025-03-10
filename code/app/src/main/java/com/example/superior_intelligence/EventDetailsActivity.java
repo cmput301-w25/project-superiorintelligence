@@ -1,6 +1,7 @@
 package com.example.superior_intelligence;
 
 import android.content.Intent;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.ImageButton;
@@ -22,6 +23,7 @@ public class EventDetailsActivity extends AppCompatActivity {
         TextView eventReason = findViewById(R.id.event_detail_reason);
         TextView eventSituation = findViewById(R.id.event_detail_situation);
         ImageButton backButton = findViewById(R.id.back_button); // Find back button
+        ImageButton editButton = findViewById(R.id.editButton);
 
         // Retrieve event data
         Intent intent = getIntent();
@@ -49,6 +51,15 @@ public class EventDetailsActivity extends AppCompatActivity {
             startActivity(homeIntent);
             finish();
         });
+
+        // Edit button navigates to Mood Create/Edit Page
+        editButton.setOnClickListener(view -> {
+            Intent editIntent = new Intent(EventDetailsActivity.this, MoodCreateAndEditActivity.class);
+            editIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(editIntent);
+            finish();
+        });
+
     }
 
 }
