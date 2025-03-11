@@ -71,7 +71,7 @@
         android:text="Mood: "
         android:textSize="16sp"
         android:textColor="@color/black"
-        app:layout_constraintTop_toBottomOf="@id/view_event_toolbar"
+        app:layout_constraintTop_toBottomOf="@id/event_detail_user"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_margin="16dp"/>
 
@@ -109,6 +109,30 @@
         android:textSize="16sp"
         android:textColor="@color/black"
         app:layout_constraintTop_toBottomOf="@id/event_detail_reason"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_margin="16dp"/>
+
+    <!-- Date -->
+    <TextView
+        android:id="@+id/event_detail_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Date: "
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/view_event_toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_margin="16dp"/>
+
+    <!-- Posted By -->
+    <TextView
+        android:id="@+id/event_detail_user"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Posted by: "
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/event_detail_date"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_margin="16dp"/>
 

@@ -77,7 +77,7 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_page);
-
+        Log.d("HomeActivity", "HomeActivity started");
         db = FirebaseFirestore.getInstance();
         myPostsRef = db.collection("MyPosts");
 
@@ -101,6 +101,7 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         Event newEvent = (Event) getIntent().getSerializableExtra("newEvent");
 
         if (newEvent != null && newEvent.isMyPost()) {
+            Log.d("HomeActivity", "Received new event: " + newEvent.getTitle());
             if (!myPostsEvents.contains(newEvent)) {
                 Log.d("Firebase Debug", "Adding to MyPosts: " + newEvent.getTitle());
                 myPostsEvents.add(newEvent);
@@ -127,8 +128,7 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         tabMyPosts.setOnClickListener(v -> switchTab(myPostsEvents, tabMyPosts));
 
         tabMap.setOnClickListener(v -> {
-            // Here we start a new Activity called MoodMapActivity
-            // (Make sure you have a MoodMapActivity.java with the layout for your map.)
+            switchTab(new ArrayList<>(), tabMap); // Ensure bolding before opening the map
             Intent intent = new Intent(HomeActivity.this, MoodMap.class);
             startActivity(intent);
         });
@@ -213,7 +213,7 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
                     String mood = document.getString("mood");
                     String situation = document.getString("situation");
                     String moodExplanation = document.getString("moodExplanation");
-                    String user = document.getString("user");
+                    String user = document.getString("postUser");
 
                     // Create event object
                     Event event = new Event(title, date, overlayColor, imageUrl, emojiResource, isFollowed, isMyPost, mood, moodExplanation, situation, user, null,null);
@@ -245,12 +245,15 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         tabExplore.setTypeface(null, android.graphics.Typeface.NORMAL);
         tabFollowed.setTypeface(null, android.graphics.Typeface.NORMAL);
         tabMyPosts.setTypeface(null, android.graphics.Typeface.NORMAL);
-
+        tabMap.setTypeface(null, android.graphics.Typeface.NORMAL);
         // Bold only the selected tab
         selectedTab.setTypeface(null, android.graphics.Typeface.BOLD);
 
-        adapter.setEvents(targetList);
-        adapter.notifyDataSetChanged();
+        // If the selected tab is not Mood Map, update the RecyclerView
+        if (selectedTab != tabMap) {
+            adapter.setEvents(targetList);
+            adapter.notifyDataSetChanged();
+        };
 
     }
 

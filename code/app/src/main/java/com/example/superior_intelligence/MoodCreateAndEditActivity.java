@@ -38,21 +38,21 @@ import java.util.Locale;
 public class MoodCreateAndEditActivity extends AppCompatActivity {
 
     // Title
-    private EditText headerTitle;
+    EditText headerTitle;
 
     // Emotion
     private ImageView emotionArrow;
     private Spinner emotionSpinner;
-    private TextView selectedMood;
-    private boolean isEmotionSelected = false; // Tracks if an emotion is selected
+    TextView selectedMood;
+    boolean isEmotionSelected = false; // Tracks if an emotion is selected
 
     // Explanation
-    private EditText triggerExplanation;
+    EditText triggerExplanation;
 
     // Situation
     private ImageView situationArrow;
     private Spinner situationSpinner;
-    private TextView selectedSituation;
+    TextView selectedSituation;
 
     // Emoji
     private ImageButton emojiButton;
@@ -306,7 +306,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
     /**
      * Called when Confirm button is clicked. Validates input, then creates the event.
      */
-    private void handleConfirmClick() {
+    void handleConfirmClick() {
         if (!isEmotionSelected) {
             Toast.makeText(this, "An emotional state must be selected.", Toast.LENGTH_SHORT).show();
             return;
@@ -321,13 +321,15 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
 
         // Create the new Event object
         Event newEvent = createNewEvent();
-
-        // Navigate back to Home, show My Posts
+        Log.d("MoodCreateAndEditActivity", "Navigating to HomeActivity with newEvent: " + newEvent.getTitle());
+        // Navigate back to Home, ensuring the activity stack is cleared
         Intent intent = new Intent(MoodCreateAndEditActivity.this, HomeActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("selectedTab", "myposts");
         intent.putExtra("newEvent", newEvent);
         startActivity(intent);
-        finish();
+        Log.d("MoodCreateAndEditActivity", "Intent to HomeActivity started.");
+        finish(); // Ensure MoodCreateAndEditActivity is destroyed
     }
 
     /**
@@ -347,7 +349,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
     /**
      * Create the Event object with all user inputs.
      */
-    private Event createNewEvent() {
+    Event createNewEvent() {
         String eventTitle = headerTitle.getText().toString().trim();
         String eventDate = new SimpleDateFormat("dd MMM yyyy, HH:mm",
                 Locale.getDefault()).format(new Date());
