@@ -3,7 +3,6 @@ package com.example.superior_intelligence;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.action.ViewActions.click;
-import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
@@ -17,10 +16,13 @@ import static org.hamcrest.Matchers.is;
 import android.Manifest;
 import android.content.Intent;
 
-import androidx.test.espresso.intent.rule.IntentsTestRule;
+import androidx.test.espresso.intent.Intents;
+import androidx.test.espresso.intent.matcher.IntentMatchers;
+import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.rule.GrantPermissionRule;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,8 +35,13 @@ import org.junit.runner.RunWith;
 public class us010201 {
 
     @Rule
-    public IntentsTestRule<MoodCreateAndEditActivity> moodCreateRule =
-            new IntentsTestRule<>(MoodCreateAndEditActivity.class, true, true);
+    public ActivityScenarioRule<MoodCreateAndEditActivity> moodCreateRule =
+            new ActivityScenarioRule<>(MoodCreateAndEditActivity.class);
+
+    @Before
+    public void setup() {
+        Intents.init();
+    }
 
     @Test
     public void testEmotionalStatesList() throws InterruptedException {
