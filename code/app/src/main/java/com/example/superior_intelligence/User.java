@@ -1,3 +1,9 @@
+/**
+ * Used in both CreateAccountActivity and LoginPageActivity
+ * User is a singleton class that holds the logged-in user's data globally throughout the app's lifecycle.
+ * Purpose: Ensures that the user data persists across different activities without needing to pass it explicitly between them.
+ */
+
 package com.example.superior_intelligence;
 
 public class User {

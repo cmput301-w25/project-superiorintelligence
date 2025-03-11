@@ -3,6 +3,8 @@
  * link: https://github.com/orgs/cmput301-w25/projects/9/views/1?pane=issue&itemId=99937029&issue=cmput301-w25%7Cproject-superiorintelligence%7C123
  * Connects to login_page.xml, provide button to enter CreateAccount.java
  * if user enters login and enters username, will check database to see if existing
+ * validateUsername returns true if a username was given, false if empty (bool)
+ * checkUser: checks if username exist in db, error else update db and go to login page
  */
 
 package com.example.superior_intelligence;
@@ -13,20 +15,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
-import com.example.superior_intelligence.CreateAccountActivity;
-import com.example.superior_intelligence.HomePageActivity;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 

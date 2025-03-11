@@ -1,9 +1,38 @@
+/**
+ * HomeActivity class for managing the main home screen of the application.
+ * This activity handles displaying events, managing tabs (Explore, Followed, MyPosts),
+ * and handling user interactions such as adding new events, switching tabs, and following/unfollowing events.
+ *
+ * Methods:
+ *
+ * - onCreate(Bundle savedInstanceState)
+ *   Initializes the activity, sets up RecyclerView, tabs, and loads data from Firestore.
+ *
+ * - onResume()
+ *   Refreshes the RecyclerView data when the activity resumes.
+ *
+ * - saveEventToFirebase(Event event)
+ *   Saves an event to Firestore under the "MyPosts" collection.
+ *   - @param event The event object to be saved.
+ *
+ * - loadEventsFromFirebase()
+ *   Loads events from Firestore into the MyPosts list and updates the RecyclerView.
+ *
+ * - switchTab(List<Event> targetList, TextView selectedTab)
+ *   Switches between tabs by updating the RecyclerView with the target list and highlighting the selected tab.
+ *   - @param targetList The list of events to display in the RecyclerView.
+ *   - @param selectedTab The tab to be highlighted.
+ *
+ * - onFollowToggled(Event event, boolean isFollowed)
+ *   Called when the user toggles the follow/unfollow state of an event in the adapter.
+ *   - @param event The event whose follow state was toggled.
+ *   - @param isFollowed The new follow state of the event.
+ */
+
 package com.example.superior_intelligence;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,17 +47,13 @@ import java.util.Map;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.SetOptions;
-import com.google.firebase.firestore.EventListener;
 
 import android.util.Log;
-import androidx.annotation.Nullable;
 
-
+/**
+ *
+ */
 public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFollowToggleListener {
 
     private RecyclerView recyclerView;
@@ -42,6 +67,11 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
     private TextView tabExplore, tabFollowed, tabMyPosts, tabMap;
     private FirebaseFirestore db;
     private CollectionReference myPostsRef;
+    
+    /**
+     * Initializes the activity, sets up Firestore, event lists, and UI elements.
+     * @param savedInstanceState instance of activity on start up
+     */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,13 +148,20 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         });
     }
 
+    /**
+     * Makes sure the RecyclerView updates when the activity is resumed.
+     */
     @Override
     protected void onResume() {
         super.onResume();
         adapter.notifyDataSetChanged(); // Ensure RecyclerView updates when returning
     }
 
-    private void saveEventToFirebase(Event event) {
+    /**
+     * Saves a new event to Firestore under the "MyPosts" collection.
+     * @param event The event object to be stored in Firestore.
+     */
+    void saveEventToFirebase(Event event) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference myPostsRef = db.collection("MyPosts");
 
@@ -147,7 +184,10 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
                 .addOnSuccessListener(documentReference -> Log.d("Firebase", "Event saved: " + documentReference.getId()))
                 .addOnFailureListener(e -> Log.w("Firebase", "Error saving event", e));
     }
-    private void loadEventsFromFirebase() {
+    /**
+     * Loads events from Firestore under the "MyPosts" collection and updates the UI.
+     */
+    void loadEventsFromFirebase() {
         myPostsRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 myPostsEvents.clear();
@@ -194,7 +234,12 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         });
     }
 
-
+    /**
+     * Switches between Explore, Followed, and MyPosts tabs, updating the UI accordingly.
+     *
+     * @param targetList  The list of events to display.
+     * @param selectedTab The selected tab's TextView to apply bold styling.
+     */
     private void switchTab(List<Event> targetList, TextView selectedTab) {
         // Reset all tabs to normal style
         tabExplore.setTypeface(null, android.graphics.Typeface.NORMAL);
@@ -209,7 +254,12 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
 
     }
 
-    // Called when user toggles follow/unfollow in EventAdapter
+    /**
+     * Handles follow/unfollow toggle events.
+     *
+     * @param event     The event object being followed/unfollowed.
+     * @param isFollowed True if the event is now followed, false otherwise.
+     */
     @Override
     public void onFollowToggled(Event event, boolean isFollowed) {
         // Will be helpful for whoever works on logic (e.g., Toasts, DB saving).

@@ -68,15 +68,13 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
     private Double lat = null;
     private Double lng = null;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.creating_new_mood_event);
 
-
-
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
 
         headerTitle = findViewById(R.id.mood_event_title);
 
@@ -129,21 +127,35 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
             }
         });
 
+        // Preset mood's old info
+        Intent intent = getIntent();
+        String title = intent.getStringExtra("title");
+        String mood = intent.getStringExtra("mood");
+        String reason = intent.getStringExtra("reason");
+        String situation = intent.getStringExtra("socialSituation");
+
+        headerTitle.setText(title);
+        triggerExplanation.setText(reason);
+         /* NOT WORKING
+        selectedMood.setText(mood);
+
+        selectedSituation.setText(situation);
+        */
+
+        // Back button returns to HomeActivity
 
         backButton.setOnClickListener(v -> {
             startActivity(new Intent(MoodCreateAndEditActivity.this, HomeActivity.class));
             finish();
         });
 
-
         addPhotoButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MoodCreateAndEditActivity.this, PhotoActivity.class);
-            photoActivityLauncher.launch(intent);
+            Intent photoIntent = new Intent(MoodCreateAndEditActivity.this, PhotoActivity.class);
+            photoActivityLauncher.launch(photoIntent);
         });
 
         confirmButton.setOnClickListener(v -> handleConfirmClick());
     }
-
 
     private final ActivityResultLauncher<Intent> photoActivityLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -159,17 +171,49 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
     private void handleConfirmClick() {
         if (!isEmotionSelected) {
             Toast.makeText(this, "An emotional state must be selected.", Toast.LENGTH_SHORT).show();
-        } else {
-            Event newEvent = createNewEvent();
-            Intent intent = new Intent(MoodCreateAndEditActivity.this, HomeActivity.class);
-            intent.putExtra("selectedTab", "myposts");
-            intent.putExtra("newEvent", newEvent);
-            startActivity(intent);
-            finish();
+
+        // Validate explanation, etc. ...
+        String explanation = triggerExplanation.getText().toString().trim();
+
+        // Validate explanation if provided
+        if (!explanation.isEmpty() && !isValidExplanation(explanation)) {
+            Toast.makeText(this, "Reason must be max 20 characters or 3 words.", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        // Create the new Event object
+        Event newEvent = createNewEvent();
+        Intent intent = new Intent(MoodCreateAndEditActivity.this, HomeActivity.class);
+        intent.putExtra("selectedTab", "myposts");
+        intent.putExtra("newEvent", newEvent);
+        startActivity(intent);
+        finish();
     }
 
-    private Event createNewEvent() {
+
+    /**
+     * Checks if the explanation is within the allowed limits.
+     * - Max: 20 characters OR 3 words.
+     * - Allows empty input (optional field).
+     */
+    private boolean isValidExplanation(String explanation) {
+        if (explanation.isEmpty()) {
+            return true; // Empty input is allowed
+        }
+
+        if (explanation.length() > 20) {
+            return false; // Exceeds 20 character limit
+        }
+
+        String[] words = explanation.split("\\s+");
+        return words.length <= 3; // Ensure max 3 words
+    }
+
+
+    /**
+     * Creates a new event object with selected details.
+     */
+    Event createNewEvent() {
         String eventTitle = headerTitle.getText().toString().trim();
         String eventDate = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault()).format(new Date());
         String overlayColor = "#FFD700";
@@ -295,7 +339,6 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
     }
 
     private void handleLocationClick() {
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
 
