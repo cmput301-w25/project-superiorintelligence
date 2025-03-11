@@ -18,8 +18,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class EventDetailsActivity extends AppCompatActivity {
 
-    private TextView eventTitle, eventMood, selectedMood, eventReason, eventSituation;
-    private String title, mood, reason, situation, overlayColor;
+    private TextView eventTitle, eventMood, selectedMood, eventReason, eventSituation, eventDate, eventUser;
+    private String title, mood, reason, situation, overlayColor, date, user;
 
     private ActivityResultLauncher<Intent> editEventLauncher;
 
@@ -34,6 +34,8 @@ public class EventDetailsActivity extends AppCompatActivity {
         selectedMood = findViewById(R.id.selected_mood);  // Dynamic mood
         eventReason = findViewById(R.id.event_detail_reason);
         eventSituation = findViewById(R.id.event_detail_situation);
+        eventDate = findViewById(R.id.event_detail_date);
+        eventUser = findViewById(R.id.event_detail_user);
         ImageButton backButton = findViewById(R.id.back_button);
         ImageButton editButton = findViewById(R.id.editButton);
 
@@ -44,6 +46,8 @@ public class EventDetailsActivity extends AppCompatActivity {
         reason = intent.getStringExtra("reason");
         situation = intent.getStringExtra("situation");
         overlayColor = intent.getStringExtra("overlayColor");
+        date = intent.getStringExtra("date");
+        user = intent.getStringExtra("user");
 
         // Set initial values
         setEventDetails();
@@ -107,10 +111,14 @@ public class EventDetailsActivity extends AppCompatActivity {
             bgShape.setColor(Color.parseColor(overlayColor));
         }
 
-        // Reason
-        eventReason.setText("Reason: " + (reason != null && !reason.isEmpty() ? reason : ""));
-
-        // Social Situation
-        eventSituation.setText("Social Situation: " + (situation != null && !situation.isEmpty() && !situation.equals("Select a Situation") ? situation : ""));
+        // Ensure non-null values
+        eventReason.setText("Reason: " + (reason != null ? reason : "No reason provided"));
+        if (situation.equals("Select a Situation")) {
+            eventSituation.setText("Social Situation: No situation provided");
+        } else {
+            eventSituation.setText("Social Situation: " + (situation != null ? situation : "No situation provided"));
+        }
+        eventDate.setText("Date: " + (date != null ? date : "Unknown Date"));
+        eventUser.setText("Posted by: " + (user != null ? user : "Anonymous"));
     }
 }

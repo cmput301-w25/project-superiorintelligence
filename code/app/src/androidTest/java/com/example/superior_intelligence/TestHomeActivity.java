@@ -66,7 +66,7 @@ public class TestHomeActivity {
     @Test
     public void testAddEventToFirestore() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
-        Event testEvent = new Event("New Test Event", "11-03-2020", "", "This is a test event", 1, false, true, "testuser");
+        Event testEvent = new Event("New Test Event", "11-03-2020", "", "This is a test event", 1, false, true, "testuser", (double) 0, (double) 0);
 
         db.collection("events").add(testEvent)
                 .addOnSuccessListener(documentReference -> {
@@ -89,7 +89,7 @@ public class TestHomeActivity {
     public void testRetrieveSpecificEvent() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
 
-        Event testEvent = new Event("Retrieve Event", "11-03-2020", "", "Test retrieval", 1, false, true, "testuser");
+        Event testEvent = new Event("Retrieve Event", "11-03-2020", "", "Test retrieval", 1, false, true, "testuser", (double) 0, (double) 0);
         db.collection("events").add(testEvent).addOnSuccessListener(docRef -> {
             String eventId = docRef.getId();
 
@@ -115,7 +115,7 @@ public class TestHomeActivity {
     public void testUpdateEvent() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
 
-        Event testEvent = new Event("Update Event", "11-03-2020", "", "Before update", 1, false, true, "testuser");
+        Event testEvent = new Event("Update Event", "11-03-2020", "", "Before update", 1, false, true, "testuser", (double) 0, (double) 0);
         db.collection("events").add(testEvent).addOnSuccessListener(docRef -> {
             String eventId = docRef.getId();
 
@@ -149,7 +149,7 @@ public class TestHomeActivity {
     public void testDeleteEvent() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
 
-        Event testEvent = new Event("Delete Event", "11-03-2020", "", "To be deleted", 1, false, true, "testuser");
+        Event testEvent = new Event("Delete Event", "11-03-2020", "", "To be deleted", 1, false, true, "testuser", (double) 0, (double) 0);
         db.collection("events").add(testEvent).addOnSuccessListener(docRef -> {
             String eventId = docRef.getId();
 
