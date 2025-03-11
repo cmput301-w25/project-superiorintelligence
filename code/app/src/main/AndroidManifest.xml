@@ -6,6 +6,11 @@
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
     <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
+    <!-- Include this permission to grab user's general location -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Include only if your app benefits from precise location access. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
 
     <!-- Compatibility with older Android versions -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
@@ -94,6 +99,8 @@
             android:name=".EventDetailsActivity"
             android:exported="true">
         </activity>
+<!--Mood Map-->
+        <activity android:name=".MoodMap" />
 
         <!-- FileProvider for Camera Image Storage -->
         <provider

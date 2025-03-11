@@ -21,6 +21,9 @@ public class Event implements Serializable {
     private String situation;
     private String moodExplanation;
     private String user;
+    private Double lng;
+    private Double lat;
+
 
     /**
      * Empty constructor required for Firestore
@@ -40,7 +43,7 @@ public class Event implements Serializable {
      * @param isMyPost      Whether the event was created by the user.
      * @param user          The username of the event creator.
      */
-    public Event(String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String user) {
+    public Event(String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String user, Double lat, Double lng) {
         this.title = title;
         this.date = date;
         this.overlayColor = overlayColor;
@@ -49,8 +52,10 @@ public class Event implements Serializable {
         this.isFollowed = isFollowed;
         this.isMyPost = isMyPost;
         this.user = user;
+        this.lat = lat;
+        this.lng = lng;
     }
-
+  
     /**
      * Constructor for creating an event with additional mood and situation details.
      *
@@ -66,7 +71,7 @@ public class Event implements Serializable {
      * @param situation      The social situation during the event.
      * @param user           The username of the event creator.
      */
-    public Event(String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String mood, String moodExplanation, String situation, String user) {
+    public Event(String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String mood, String moodExplanation, String situation, String user, Double lat, Double lng) {
         this.title = title;
         this.date = date;
         this.overlayColor = overlayColor;
@@ -78,6 +83,8 @@ public class Event implements Serializable {
         this.mood = mood;
         this.moodExplanation = moodExplanation;
         this.user = user;
+        this.lat = lat;
+        this.lng = lng;
     }
 
     /**
@@ -143,10 +150,21 @@ public class Event implements Serializable {
         return isMyPost;
     }
 
+
+    public Double getLat() {
+        return lat;
+    }
+
+    public Double getLng() {
+        return lng;
+    }
+
+
     /**
      * Sets the event title.
      * @param title The title to set.
      */
+
     public void setTitle(String title) {
         this.title = title;
     }
@@ -263,4 +281,12 @@ public class Event implements Serializable {
         this.user = user;
     }
 
+    public void setLat(Double lat) {
+        this.lat = lat;
+    }
+
+    public void setLng(Double lng) {
+        this.lng = lng;
+    }
 }
+
