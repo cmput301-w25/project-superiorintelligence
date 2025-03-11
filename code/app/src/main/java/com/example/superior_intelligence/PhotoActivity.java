@@ -200,7 +200,7 @@ public class PhotoActivity extends AppCompatActivity {
 
         // Convert the bitmap to a byte array
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 75, stream); // Compress to JPEG format
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 60, stream); // Compress to JPEG format
         byte[] byteArray = stream.toByteArray();
         int imageSize = byteArray.length; // Get the size in bytes
         Log.d("PhotoActivity", "Image size: " + imageSize + " bytes");
