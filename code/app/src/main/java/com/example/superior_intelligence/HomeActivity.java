@@ -44,7 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
+import com.example.superior_intelligence.Database;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.CollectionReference;
@@ -58,6 +58,7 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
 
     private RecyclerView recyclerView;
     private EventAdapter adapter;
+    private Database database;
 
     // Separate lists for each tab
     private List<Event> exploreEvents = new ArrayList<>();
@@ -65,8 +66,6 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
     private List<Event> myPostsEvents = new ArrayList<>();
 
     private TextView tabExplore, tabFollowed, tabMyPosts, tabMap;
-    private FirebaseFirestore db;
-    private CollectionReference myPostsRef;
     
     /**
      * Initializes the activity, sets up Firestore, event lists, and UI elements.
@@ -78,8 +77,8 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_page);
         Log.d("HomeActivity", "HomeActivity started");
-        db = FirebaseFirestore.getInstance();
-        myPostsRef = db.collection("MyPosts");
+
+        database = new Database();
 
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -90,29 +89,23 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         tabMyPosts = findViewById(R.id.tab_myposts);
         tabMap = findViewById(R.id.tab_map);
 
-        // Load sample events into the lists (For now until we can add our own)
-        loadEventsFromFirebase();
-
-        // Creates an adapter, default to Explore list
-        // Passes all 3 lists to the adapter for follow/unfollow logic
         adapter = new EventAdapter(exploreEvents, followedEvents, myPostsEvents, this);
         recyclerView.setAdapter(adapter);
 
-        Event newEvent = (Event) getIntent().getSerializableExtra("newEvent");
+        loadAllEvents();
 
-        if (newEvent != null && newEvent.isMyPost()) {
-            Log.d("HomeActivity", "Received new event: " + newEvent.getTitle());
-            if (!myPostsEvents.contains(newEvent)) {
-                Log.d("Firebase Debug", "Adding to MyPosts: " + newEvent.getTitle());
+        Event newEvent = (Event) getIntent().getSerializableExtra("newEvent");
+        if (newEvent != null) {
+            // If it belongs to the current user
+            if (newEvent.isMyPost() && !myPostsEvents.contains(newEvent)) {
                 myPostsEvents.add(newEvent);
                 adapter.setEvents(myPostsEvents);
                 saveEventToFirebase(newEvent);
             }
+            else if (!newEvent.isMyPost()) {
+                exploreEvents.add(newEvent);
+            }
             adapter.notifyDataSetChanged();
-        }
-        if (newEvent != null && !newEvent.isMyPost()) {
-            Log.d("Firebase Debug", "Adding to Explore: " + newEvent.getTitle());
-            exploreEvents.add(newEvent);
         }
 
         String selectedTab = getIntent().getStringExtra("selectedTab");
@@ -128,9 +121,8 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         tabMyPosts.setOnClickListener(v -> switchTab(myPostsEvents, tabMyPosts));
 
         tabMap.setOnClickListener(v -> {
-            switchTab(new ArrayList<>(), tabMap); // Ensure bolding before opening the map
-            Intent intent = new Intent(HomeActivity.this, MoodMap.class);
-            startActivity(intent);
+            switchTab(new ArrayList<>(), tabMap);
+            startActivity(new Intent(HomeActivity.this, MoodMap.class));
         });
 
         // Launch's MoodCreateAndEditActivity when clicked
@@ -161,78 +153,49 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
      * Saves a new event to Firestore under the "MyPosts" collection.
      * @param event The event object to be stored in Firestore.
      */
-    void saveEventToFirebase(Event event) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        CollectionReference myPostsRef = db.collection("MyPosts");
-
-        Map<String, Object> eventData = new HashMap<>();
-        eventData.put("title", event.getTitle());
-        eventData.put("date", event.getDate()); // Ensures date is saved as a String
-        eventData.put("overlayColor", event.getOverlayColor());
-        eventData.put("imageUrl", event.getImageUrl());
-        eventData.put("emojiResource", event.getEmojiResource());
-        eventData.put("isFollowed", event.isFollowed());
-        eventData.put("isMyPost", event.isMyPost());
-        eventData.put("mood", event.getMood());
-        eventData.put("situation", event.getSituation());
-        eventData.put("moodExplanation", event.getMoodExplanation());
-        eventData.put("postUser", event.getUser());
-        eventData.put("lat", event.getLat());
-        eventData.put("lng", event.getLng());
-
-        myPostsRef.add(eventData)
-                .addOnSuccessListener(documentReference -> Log.d("Firebase", "Event saved: " + documentReference.getId()))
-                .addOnFailureListener(e -> Log.w("Firebase", "Error saving event", e));
+    private void saveEventToFirebase(Event event) {
+        database.saveEventToFirebase(event, success -> {
+            if (success) {
+                Log.d("HomeActivity", "Event saved successfully");
+            } else {
+                Log.e("HomeActivity", "Error saving event");
+            }
+        });
     }
     /**
      * Loads events from Firestore under the "MyPosts" collection and updates the UI.
      */
-    void loadEventsFromFirebase() {
-        myPostsRef.get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
+    private void loadAllEvents() {
+        User currentUser = User.getInstance();
+        database.loadEventsFromFirebase(currentUser, (myPosts, explore, followed) -> {
+            if (myPosts != null && explore != null && followed != null) {
+                // Replace local lists
                 myPostsEvents.clear();
-                for (QueryDocumentSnapshot document : task.getResult()) {
-                    // Extract values safely
-                    String title = document.getString("title");
+                exploreEvents.clear();
+                followedEvents.clear();
 
-                    // Convert date from Firestore (Handles Timestamp or String)
-                    Object rawDate = document.get("date");
-                    String date = "Unknown Date";
-                    if (rawDate instanceof String) {
-                        date = (String) rawDate; // Already stored as a String
-                    } else if (rawDate instanceof com.google.firebase.Timestamp) {
-                        date = new java.text.SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-                                .format(((com.google.firebase.Timestamp) rawDate).toDate()); // Convert Timestamp
-                    }
+                myPostsEvents.addAll(myPosts);
+                exploreEvents.addAll(explore);
+                followedEvents.addAll(followed);
 
-                    String overlayColor = document.getString("overlayColor");
-                    String imageUrl = document.getString("imageUrl");
-                    int emojiResource = document.contains("emojiResource") ? document.getLong("emojiResource").intValue() : 0;
-                    boolean isFollowed = document.contains("isFollowed") && Boolean.TRUE.equals(document.getBoolean("isFollowed"));
-                    boolean isMyPost = document.contains("isMyPost") && Boolean.TRUE.equals(document.getBoolean("isMyPost"));
-                    String mood = document.getString("mood");
-                    String situation = document.getString("situation");
-                    String moodExplanation = document.getString("moodExplanation");
-                    String user = document.getString("postUser");
-
-                    // Create event object
-                    Event event = new Event(title, date, overlayColor, imageUrl, emojiResource, isFollowed, isMyPost, mood, moodExplanation, situation, user, null,null);
-
-                    myPostsEvents.add(event); // Add event to list
-                }
-
-                // Ensure MyPosts only loads if it was selected
+                // Decide which tab to display
                 String selectedTab = getIntent().getStringExtra("selectedTab");
                 if ("myposts".equals(selectedTab)) {
-                    switchTab(myPostsEvents, tabMyPosts); // Show MyPosts correctly
+                    switchTab(myPostsEvents, tabMyPosts);
+                } else if ("followed".equals(selectedTab)) {
+                    switchTab(followedEvents, tabFollowed);
+                } else {
+                    switchTab(exploreEvents, tabExplore);
                 }
 
-                adapter.notifyDataSetChanged(); // Refresh RecyclerView
+                adapter.notifyDataSetChanged();
             } else {
-                Log.w("Firebase", "Error getting documents.", task.getException());
+                // Handle load error
+                Log.w("HomeActivity", "Failed to load events from Firestore");
             }
         });
     }
+
 
     /**
      * Switches between Explore, Followed, and MyPosts tabs, updating the UI accordingly.
@@ -252,6 +215,7 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         // If the selected tab is not Mood Map, update the RecyclerView
         if (selectedTab != tabMap) {
             adapter.setEvents(targetList);
+            recyclerView.setAdapter(adapter);
             adapter.notifyDataSetChanged();
         };
 
