@@ -71,6 +71,16 @@ public class MoodMap extends AppCompatActivity {
         mapView.getMapboxMap().loadStyleUri(
                 Style.MAPBOX_STREETS,
                 style -> {
+                    double edmontonLat = 53.5461;
+                    double edmontonLng = -113.4938;
+
+                    mapView.getMapboxMap().setCamera(
+                            new com.mapbox.maps.CameraOptions.Builder()
+                                    .center(com.mapbox.geojson.Point.fromLngLat(edmontonLng, edmontonLat))
+                                    .zoom(12.0)
+                                    .build()
+                    );
+
                     // Acquire the annotation plugin
                     AnnotationPlugin annotationPlugin =
                             (AnnotationPlugin) mapView.getPlugin(Plugin.MAPBOX_ANNOTATION_PLUGIN_ID);
