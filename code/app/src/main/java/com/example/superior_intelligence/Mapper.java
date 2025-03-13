@@ -16,6 +16,7 @@ public class Mapper {
 
     public static Map<String, Object> eventToMap(Event event) {
         Map<String, Object> eventData = new HashMap<>();
+        eventData.put("id", event.getID()); // Include event ID
         eventData.put("title", event.getTitle());
         eventData.put("date", event.getDate()); // store as string
         eventData.put("overlayColor", event.getOverlayColor());
@@ -34,6 +35,7 @@ public class Mapper {
 
     public static Event docToEvent(DocumentSnapshot document) {
         try {
+            String id = document.getString("id");
             String title = document.getString("title");
             Object rawDate = document.get("date");
             String overlayColor = document.getString("overlayColor");
@@ -61,6 +63,7 @@ public class Mapper {
             Double lng = document.getDouble("lng");
 
             return new Event(
+                    id,
                     title,
                     dateString,
                     overlayColor,
