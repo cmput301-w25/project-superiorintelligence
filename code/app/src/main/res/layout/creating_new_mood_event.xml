@@ -142,7 +142,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/buttonGreen">
+            android:background="@drawable/rounded_background">
 
             <TextView
                 android:id="@+id/mood_trigger_text"
@@ -171,7 +171,8 @@
         android:minHeight="48dp"
         android:background="@drawable/text_input_rounded_box"
         android:padding="12dp"
-        android:hint="Type here (Optional)"
+        android:maxLength="20"
+        android:hint="Type here (Optional) Max: 20 chars / 3 words"
         android:textColor="@color/black"
         android:textSize="16sp"
         android:textStyle="bold"
@@ -251,15 +252,16 @@
         app:layout_constraintStart_toStartOf="parent" />
 
 
+    <!-- Add Photo Button -->
     <FrameLayout
         android:id="@+id/confirm_mood_create_button"
         android:layout_width="120dp"
         android:layout_height="63dp"
-        android:layout_marginBottom="44dp"
+        android:layout_marginBottom="28dp"
         android:background="@drawable/rounded_background"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.845"
+        app:layout_constraintHorizontal_bias="0.848"
         app:layout_constraintStart_toEndOf="@+id/add_photo_button">
 
         <ImageView
@@ -286,7 +288,6 @@
 
     </FrameLayout>
 
-    <!-- Add Photo Button -->
     <ImageButton
         android:id="@+id/add_photo_button"
         android:layout_width="63dp"
@@ -307,6 +308,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="28dp"
         android:background="@drawable/rounded_background"
+        android:backgroundTint="#548583"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:padding="8dp"
@@ -324,16 +326,20 @@
             android:scaleType="centerInside"
             android:src="@drawable/happy_icon" />
 
-        <CheckBox
-            android:id="@+id/include_emoji_checkbox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:textColor="@color/black"
-            android:textSize="14sp" />
     </LinearLayout>
 
     <!-- Emoji + Checkbox Layout -->
+
+    <CheckBox
+        android:id="@+id/include_emoji_checkbox"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@+id/emoji_layout"
+        app:layout_constraintStart_toEndOf="@+id/emoji_layout"
+        app:layout_constraintTop_toTopOf="@+id/emoji_layout" />
+
     <LinearLayout
         android:id="@+id/map_layout"
         android:layout_width="wrap_content"

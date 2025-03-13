@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MoodMap extends AppCompatActivity {
-
     private FirebaseFirestore db;
 
     // Mapbox MapView & Annotation Manager
@@ -35,39 +34,39 @@ public class MoodMap extends AppCompatActivity {
     private CheckBox cbFear;
     private CheckBox cbDisgust;
     private CheckBox cbHappy;
-    private CheckBox cbFollowing; // If you have a 'Following' checkbox in the layout
+    private CheckBox cbFollowing; // Only if this actually exists in map.xml
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // 1) Use the layout containing <com.mapbox.maps.MapView android:id="@+id/mapView" ... />
         setContentView(R.layout.map);
 
-        // 2) Firestore instance
+        // 1) Firestore instance
         db = FirebaseFirestore.getInstance();
 
-        // 3) Back button
+        // 2) Back button
         ImageButton backButton = findViewById(R.id.back_button);
         backButton.setOnClickListener(v -> finish());
 
-        // 4) CheckBoxes for filtering
+        // 3) CheckBoxes for filtering
         cbLast12Hours = findViewById(R.id.cb_last_12_hours);
         cbConfusion   = findViewById(R.id.cb_confusion);
         cbAnger       = findViewById(R.id.cb_anger);
         cbFear        = findViewById(R.id.cb_fear);
         cbDisgust     = findViewById(R.id.cb_disgust);
         cbHappy       = findViewById(R.id.cb_happy);
-        // If you actually have this in XML, uncomment:
-        // cbFollowing   = findViewById(R.id.cb_following);
 
-        // 5) "Apply" button for filters
+        // If you actually have a "Following" checkbox in your layout:
+        //cbFollowing   = findViewById(R.id.follow_checkbox);
+
+        // 4) "Apply" button for filters
         Button applyButton = findViewById(R.id.btn_apply_filters);
         applyButton.setOnClickListener(v -> applyFilters());
 
-        // 6) Initialize MapView
+        // 5) Initialize MapView
         mapView = findViewById(R.id.mapView);
 
-        // 7) Load a Mapbox style, then create an annotation manager for markers
+        // 6) Load a Mapbox style, then create an annotation manager for markers
         mapView.getMapboxMap().loadStyleUri(
                 Style.MAPBOX_STREETS,
                 style -> {
@@ -85,10 +84,10 @@ public class MoodMap extends AppCompatActivity {
                     AnnotationPlugin annotationPlugin =
                             (AnnotationPlugin) mapView.getPlugin(Plugin.MAPBOX_ANNOTATION_PLUGIN_ID);
 
-                    // Create a PointAnnotationManager (no arguments needed in v10+/v11+)
-//                    pointAnnotationManager = annotationPlugin.createPointAnnotationManager();
+                    // Create a PointAnnotationManager
+                    //pointAnnotationManager = annotationPlugin.createAnnotationManager();
 
-                    // If you want to load data by default, call applyFilters() here
+                    // If you want to load data by default, uncomment:
                     // applyFilters();
                 }
         );
@@ -99,11 +98,13 @@ public class MoodMap extends AppCompatActivity {
      * Then calls displayPostsOnMap() to show markers.
      */
     private void applyFilters() {
+        // We assume the "timestamp" field was saved as a long in the "MyPosts" docs
         Query query = db.collection("MyPosts");
 
         // 1) Last 12 hours
         if (cbLast12Hours.isChecked()) {
-            long twelveHoursAgo = System.currentTimeMillis() - (12 * 60 * 60 * 1000);
+            long twelveHoursAgo = System.currentTimeMillis() - (12L * 60L * 60L * 1000L);
+            // Make sure your "MyPosts" collection has a numeric field named "timestamp"
             query = query.whereGreaterThan("timestamp", twelveHoursAgo);
         }
 
@@ -146,7 +147,6 @@ public class MoodMap extends AppCompatActivity {
      * Clears existing markers and adds new ones for each Event with lat/lng.
      */
     private void displayPostsOnMap(List<Event> posts) {
-        // If the map style or annotation manager isn't ready, do nothing
         if (pointAnnotationManager == null) {
             return;
         }
@@ -174,7 +174,6 @@ public class MoodMap extends AppCompatActivity {
                 }
 
                 String mood = (event.getMood() != null) ? event.getMood() : "Unknown Mood";
-                String title = (event.getTitle() != null) ? event.getTitle() : "";
 
                 // Build an annotation
                 PointAnnotationOptions options = new PointAnnotationOptions()
@@ -182,7 +181,6 @@ public class MoodMap extends AppCompatActivity {
                         .withTextField(mood)
                         .withTextSize(12.0f);
 
-                // Add to list
                 annotationOptionsList.add(options);
             }
         }

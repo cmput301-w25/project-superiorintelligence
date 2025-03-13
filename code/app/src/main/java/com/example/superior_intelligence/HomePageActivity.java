@@ -1,27 +1,16 @@
 package com.example.superior_intelligence;
 
 import android.content.Intent;
-import android.graphics.Movie;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-
-import java.util.ArrayList;
-import java.util.Set;
-
 /**
  *  This class is the Homepage for the app with button to add mood event and ...
-
+ *
  */
 public class HomePageActivity extends AppCompatActivity /*implements MoodEventTitleFragment.MoodEventDialogListener*/ {
 

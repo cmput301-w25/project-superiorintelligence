@@ -25,6 +25,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Adapter for displaying a list of events in a RecyclerView.
+ * Handles event display, selection, and follow/unfollow logic.
+ */
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> {
 
     private final List<Event> exploreEvents;
@@ -34,11 +38,22 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
 
     private final Handler handler = new Handler(Looper.getMainLooper());
 
+    /**
+     * Interface for handling follow/unfollow actions.
+     */
     public interface OnFollowToggleListener {
         void onFollowToggled(Event event, boolean isFollowed);
     }
     private final OnFollowToggleListener followToggleListener;
 
+    /**
+     * Constructs an `EventAdapter` with a list of events and a listener for follow toggles.
+     *
+     * @param exploreEvents The list of events to be displayed.
+     * @param followedEvents List of followed events.
+     * @param myPostsEvents List of followed events.
+     * @param followToggleListener The listener handling follow/unfollow actions.
+     */
     public EventAdapter(
             List<Event> exploreEvents,
             List<Event> followedEvents,
@@ -53,6 +68,11 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         this.followToggleListener = followToggleListener;
     }
 
+    /**
+     * Updates the adapter's dataset and refreshes the list.
+     *
+     * @param newList The updated list of events.
+     */
     public void setEvents(List<Event> newList) {
         // Ensure only MyPosts appear in MyPosts tab
         if (currentList == myPostsEvents) {
@@ -124,6 +144,10 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
             intent.putExtra("reason", event.getMoodExplanation());
             intent.putExtra("situation", event.getSituation());
             intent.putExtra("imageUrl", event.getImageUrl());
+            intent.putExtra("overlayColor", event.getOverlayColor());
+            intent.putExtra("emojiResource", event.getEmojiResource());
+            intent.putExtra("date", event.getDate()); 
+            intent.putExtra("user", event.getUser());
             v.getContext().startActivity(intent);
         });
 
@@ -215,17 +239,30 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         void onImageLoadFailed(String error);
     }
 
+    /**
+     * Returns the total number of items in the list.
+     *
+     * @return The size of the event list.
+     */
     @Override
     public int getItemCount() {
         return currentList.size();
     }
 
+    /**
+     * ViewHolder class representing an individual item in the RecyclerView.
+     */
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView eventTitle, eventDate, followText;
         CardView eventOverlay;
         ImageView eventImage, eventEmoticon;
         CheckBox followCheckbox;
 
+        /**
+         * Constructor for initializing the ViewHolder with views.
+         *
+         * @param itemView The view representing an individual list item.
+         */
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             eventTitle = itemView.findViewById(R.id.event_title);
