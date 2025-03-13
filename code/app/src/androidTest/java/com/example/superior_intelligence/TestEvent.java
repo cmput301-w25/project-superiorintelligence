@@ -22,7 +22,7 @@ public class TestEvent {
     @Before
     public void setUp() {
         testTimestamp = new Timestamp(new Date());
-        event = new Event("Test Title", "10 Mar 2024", "#FF0000", "http://example.com/image.jpg",
+        event = new Event("TestID", "Test Title", "10 Mar 2024", "#FF0000", "http://example.com/image.jpg",
                 123, true, true, "Happiness", "Feeling great!", "With friends", "testuser", (double) 0, (double) 0);
     }
 
@@ -31,6 +31,7 @@ public class TestEvent {
      */
     @Test
     public void testEventConstructor() {
+        assertEquals("TestID", event.getID());
         assertEquals("Test Title", event.getTitle());
         assertEquals("10 Mar 2024", event.getDate());
         assertEquals("#FF0000", event.getOverlayColor());
