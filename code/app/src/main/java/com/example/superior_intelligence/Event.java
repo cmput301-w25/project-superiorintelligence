@@ -293,7 +293,7 @@ public class Event implements Serializable {
         this.lng = lng;
     }
 
-    public void setId(String id){
+    public void setID(String id){
         this.id = id;
     }
 
