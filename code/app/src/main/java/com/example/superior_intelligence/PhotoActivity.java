@@ -42,8 +42,8 @@ import java.util.Map;
 public class PhotoActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 100;
     private Uri photoUri;
-    private FirebaseFirestore db;
     private String selectedPhotoDocID = null;
+    private Photobase photobase;
 
     /**
      * Creates the activity, setting up Firestore and button click listeners.
@@ -54,7 +54,7 @@ public class PhotoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.photo_add);
 
-        db = FirebaseFirestore.getInstance();
+        photobase = new Photobase(this);
 
         // Back button returns to MoodCreateAndEditActivity
         ImageButton backButton = findViewById(R.id.back_button);
@@ -180,15 +180,14 @@ public class PhotoActivity extends AppCompatActivity {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File imageFile = null;
-
         try {
-            imageFile = File.createTempFile(imageFileName, ".jpg", storageDir);
+            return File.createTempFile(imageFileName, ".jpg", storageDir);
         } catch (IOException e) {
             Log.e("PhotoActivity", "Error creating file", e);
+            return null;
         }
-        return imageFile;
     }
+
     /**
      * Processes the selected image by checking its size, displaying it if it's small enough,
      * and optionally uploading it to Firestore.
@@ -200,13 +199,13 @@ public class PhotoActivity extends AppCompatActivity {
 
         // Convert the bitmap to a byte array
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 60, stream); // Compress to JPEG format
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream); // Compress to JPEG format
         byte[] byteArray = stream.toByteArray();
         int imageSize = byteArray.length; // Get the size in bytes
+
         Log.d("PhotoActivity", "Image size: " + imageSize + " bytes");
         // Check if the image size exceeds 65536 bytes (64KB)
         if (imageSize > 65536) {
-            Log.d("PhotoActivity", "Showing size limit exceeded dialog");
             showSizeLimitExceededDialog(); // Show the warning dialog
             return;
         }
@@ -248,20 +247,27 @@ public class PhotoActivity extends AppCompatActivity {
         User user = User.getInstance();
         String username = user.getUsername();
 
-        uploadImage(imgURI, documentID -> {
-            Log.d("PhotoActivity", "Image uploaded successfully, ID: " + documentID);
-            selectedPhotoDocID = documentID;
+        photobase.uploadImage(imgURI, username, new Photobase.UploadCallback() {
+            @Override
+            public void onUploadComplete(String documentID) {
+                Log.d("PhotoActivity", "Image uploaded successfully, ID: " + documentID);
+                selectedPhotoDocID = documentID;
 
-            // Send document ID back to MoodCreateAndEditActivity
-            Intent resultIntent = new Intent();
-            resultIntent.putExtra("imageDocID", documentID);
-            setResult(RESULT_OK, resultIntent);
+                // Send document ID back to MoodCreateAndEditActivity
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("imageDocID", documentID);
+                setResult(RESULT_OK, resultIntent);
 
-            // Notify user and exit PhotoActivity
-            Toast.makeText(this, "Image uploaded!", Toast.LENGTH_SHORT).show();
-
-        }, username);
+                // Notify user and exit PhotoActivity
+                Toast.makeText(PhotoActivity.this, "Image uploaded!", Toast.LENGTH_SHORT).show();
+            }
+            @Override
+            public void onUploadFailed(String error){
+                Toast.makeText(PhotoActivity.this, "Upload failed: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
+
     AlertDialog sizeLimitDialog;
     /**
      * Displays a dialog that the selected image exceeded the size limit (64KB).
@@ -278,59 +284,5 @@ public class PhotoActivity extends AppCompatActivity {
         // Find the OK button and set click listener
         Button okButton = dialogView.findViewById(R.id.ok_button);
         okButton.setOnClickListener(v -> sizeLimitDialog.dismiss());
-    }
-
-    /**
-     * Uploads an image to Firestore.
-     * @param imgURI The image URI.
-     * @param callback The callback to notify upon completion.
-     * @param uid The user ID.
-     */
-    public void uploadImage(Uri imgURI, UploadCallback callback, String uid) {
-        String documentID;
-
-        Bitmap bitmap = uriToBitmap(imgURI);
-        if (bitmap == null) {
-            Log.d("IMG", "Bitmap conversion failed");
-            return;
-        }
-
-        String convertedImg = toBase64(bitmap);
-        if (convertedImg == null || convertedImg.length() > 1048576) {
-            Log.d("IMG", "BMP -> B64 conversion failed OR size > 1MB");
-            return;
-        }
-
-        Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-        String currentDate = dateFormat.format(calendar.getTime());
-
-        DocumentReference imgDocRef = db.collection("images").document();
-        documentID = imgDocRef.getId();
-        Map<String, Object> imageData = new HashMap<>();
-        imageData.put("imgData", convertedImg);
-        imageData.put("imgUser", uid);
-        imageData.put("imgDateUpload", currentDate);
-        imgDocRef.set(imageData)
-                .addOnSuccessListener(aVoid -> callback.onUploadComplete(documentID))
-                .addOnFailureListener(e -> Log.d("IMG", "Upload failed"));
-    }
-
-    /**
-     * Converts a Bitmap to a Base64 string.
-     * @param bitmap The image Bitmap.
-     * @return The Base64 string representation.
-     */
-    String toBase64(Bitmap bitmap) {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 75, byteArrayOutputStream);
-        return Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
-    }
-
-    /**
-     * Interface for upload completion callback.
-     */
-    public interface UploadCallback {
-        void onUploadComplete(String documentID);
     }
 }

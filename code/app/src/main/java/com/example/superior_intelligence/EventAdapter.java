@@ -1,14 +1,11 @@
 package com.example.superior_intelligence;
-
+import com.example.superior_intelligence.Photobase;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Handler;
+import android.content.Context;
 import android.os.Looper;
-import android.util.Base64;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,11 +16,8 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Adapter for displaying a list of events in a RecyclerView.
@@ -45,6 +39,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         void onFollowToggled(Event event, boolean isFollowed);
     }
     private final OnFollowToggleListener followToggleListener;
+    private final Context context;
+    private final Photobase photobase;
 
     /**
      * Constructs an `EventAdapter` with a list of events and a listener for follow toggles.
@@ -55,17 +51,20 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
      * @param followToggleListener The listener handling follow/unfollow actions.
      */
     public EventAdapter(
+            @NonNull Context context,
             List<Event> exploreEvents,
             List<Event> followedEvents,
             List<Event> myPostsEvents,
             OnFollowToggleListener followToggleListener
     ) {
+        this.context = context;
         this.exploreEvents = (exploreEvents != null) ? exploreEvents : new ArrayList<>();
         this.followedEvents = (followedEvents != null) ? followedEvents : new ArrayList<>();
         this.myPostsEvents = (myPostsEvents != null) ? myPostsEvents : new ArrayList<>();
 
         this.currentList = this.exploreEvents; // default tab
         this.followToggleListener = followToggleListener;
+        this.photobase = new Photobase(context);
     }
 
     /**
@@ -110,9 +109,9 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         holder.eventOverlay.setCardBackgroundColor(Color.parseColor(colorStr));
         holder.eventOverlay.getBackground().setAlpha(200);
 
-        // Load image from Firestore if exists
+        // Load image using photobase if available
         if (event.getImageUrl() != null && !event.getImageUrl().isEmpty()) {
-            fetchImageFromFirestore(event.getImageUrl(), new ImageLoadCallback() {
+            photobase.loadImage(event.getImageUrl(), new Photobase.ImageLoadCallback() {
                 @Override
                 public void onImageLoaded(Bitmap bitmap) {
                     holder.eventImage.setImageBitmap(bitmap);
@@ -120,12 +119,11 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
 
                 @Override
                 public void onImageLoadFailed(String error) {
-                    Log.e("EventAdapter", "Failed to load image: " + error);
-                    holder.eventImage.setBackgroundResource(R.color.secondaryGreen); // Default background
+                    holder.eventImage.setBackgroundResource(R.color.secondaryGreen);
                 }
             });
         } else {
-            holder.eventImage.setBackgroundResource(R.color.secondaryGreen); // Default if no image
+            holder.eventImage.setBackgroundResource(R.color.secondaryGreen);
         }
 
         // Only show emoji if user selected it
@@ -158,8 +156,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         } else {
             holder.followText.setVisibility(View.VISIBLE);
             holder.followCheckbox.setVisibility(View.VISIBLE);
-
-            // Ensure follow text & checkbox reflect actual state
             holder.followText.setText(event.isFollowed() ? "Following" : "Follow");
             holder.followCheckbox.setOnCheckedChangeListener(null); // Remove listener before updating state
             holder.followCheckbox.setChecked(event.isFollowed());
@@ -201,47 +197,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         }
     }
 
-    // Fetch image from Firestore using document ID
-    private void fetchImageFromFirestore(String documentId, ImageLoadCallback callback) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("images").document(documentId)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        String base64Image = documentSnapshot.getString("imgData");
-                        if (base64Image != null && !base64Image.isEmpty()) {
-                            Bitmap bitmap = base64ToBitmap(base64Image);
-                            callback.onImageLoaded(bitmap); // Return the bitmap
-                        } else {
-                            callback.onImageLoadFailed("No image data found");
-                        }
-                    } else {
-                        callback.onImageLoadFailed("Document does not exist");
-                    }
-                })
-                .addOnFailureListener(e -> callback.onImageLoadFailed("Failed to retrieve image: " + e.getMessage()));
-    }
-
-    // Convert Base64 string to Bitmap
-    private Bitmap base64ToBitmap(String base64Str) {
-        try {
-            byte[] decodedBytes = Base64.decode(base64Str, Base64.DEFAULT);
-            return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
-        } catch (Exception e) {
-            Log.e("EventAdapter", "Error decoding Base64", e);
-            return null;
-        }
-    }
-
-    // Callback interface for image loading
-    public interface ImageLoadCallback {
-        void onImageLoaded(Bitmap bitmap);
-        void onImageLoadFailed(String error);
-    }
-
     /**
      * Returns the total number of items in the list.
-     *
      * @return The size of the event list.
      */
     @Override
@@ -260,7 +217,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
 
         /**
          * Constructor for initializing the ViewHolder with views.
-         *
          * @param itemView The view representing an individual list item.
          */
         public ViewHolder(@NonNull View itemView) {

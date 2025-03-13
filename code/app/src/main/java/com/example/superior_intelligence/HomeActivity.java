@@ -42,18 +42,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import com.example.superior_intelligence.Database;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.CollectionReference;
+
 
 import android.util.Log;
 
-/**
- *
- */
 public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFollowToggleListener {
 
     private RecyclerView recyclerView;
@@ -66,17 +58,11 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
     private List<Event> myPostsEvents = new ArrayList<>();
 
     private TextView tabExplore, tabFollowed, tabMyPosts, tabMap;
-    
-    /**
-     * Initializes the activity, sets up Firestore, event lists, and UI elements.
-     * @param savedInstanceState instance of activity on start up
-     */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_page);
-        Log.d("HomeActivity", "HomeActivity started");
 
         database = new Database();
 
@@ -89,14 +75,13 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         tabMyPosts = findViewById(R.id.tab_myposts);
         tabMap = findViewById(R.id.tab_map);
 
-        adapter = new EventAdapter(exploreEvents, followedEvents, myPostsEvents, this);
+        adapter = new EventAdapter(this, exploreEvents, followedEvents, myPostsEvents, this);
         recyclerView.setAdapter(adapter);
 
         loadAllEvents();
 
         Event newEvent = (Event) getIntent().getSerializableExtra("newEvent");
         if (newEvent != null) {
-            // If it belongs to the current user
             if (newEvent.isMyPost() && !myPostsEvents.contains(newEvent)) {
                 myPostsEvents.add(newEvent);
                 adapter.setEvents(myPostsEvents);
@@ -119,7 +104,6 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         tabExplore.setOnClickListener(v -> switchTab(exploreEvents, tabExplore));
         tabFollowed.setOnClickListener(v -> switchTab(followedEvents, tabFollowed));
         tabMyPosts.setOnClickListener(v -> switchTab(myPostsEvents, tabMyPosts));
-
         tabMap.setOnClickListener(v -> {
             switchTab(new ArrayList<>(), tabMap);
             startActivity(new Intent(HomeActivity.this, MoodMap.class));
@@ -162,8 +146,9 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
             }
         });
     }
+
     /**
-     * Loads events from Firestore under the "MyPosts" collection and updates the UI.
+     * Loads events from Firestore and updates the UI.
      */
     private void loadAllEvents() {
         User currentUser = User.getInstance();
@@ -199,7 +184,6 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
 
     /**
      * Switches between Explore, Followed, and MyPosts tabs, updating the UI accordingly.
-     *
      * @param targetList  The list of events to display.
      * @param selectedTab The selected tab's TextView to apply bold styling.
      */
@@ -209,6 +193,7 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         tabFollowed.setTypeface(null, android.graphics.Typeface.NORMAL);
         tabMyPosts.setTypeface(null, android.graphics.Typeface.NORMAL);
         tabMap.setTypeface(null, android.graphics.Typeface.NORMAL);
+
         // Bold only the selected tab
         selectedTab.setTypeface(null, android.graphics.Typeface.BOLD);
 
@@ -223,7 +208,6 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
 
     /**
      * Handles follow/unfollow toggle events.
-     *
      * @param event     The event object being followed/unfollowed.
      * @param isFollowed True if the event is now followed, false otherwise.
      */
