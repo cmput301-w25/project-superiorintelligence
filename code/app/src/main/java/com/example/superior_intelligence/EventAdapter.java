@@ -41,6 +41,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     private final OnFollowToggleListener followToggleListener;
     private final Context context;
     private final Photobase photobase;
+    private final Userbase userbase;
 
     /**
      * Constructs an `EventAdapter` with a list of events and a listener for follow toggles.
@@ -65,6 +66,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         this.currentList = this.exploreEvents; // default tab
         this.followToggleListener = followToggleListener;
         this.photobase = new Photobase(context);
+        this.userbase = Userbase.getInstance();
     }
 
     /**
@@ -98,6 +100,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Event event = currentList.get(position);
+        String loggedInUsername = User.getInstance().getUsername();
 
         // Set title & date
         holder.eventTitle.setText(event.getTitle());
@@ -149,52 +152,25 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
             v.getContext().startActivity(intent);
         });
 
-        // Completely hide follow options for MyPosts
-        if (event.isMyPost()) {
-            holder.followText.setVisibility(View.GONE);
-            holder.followCheckbox.setVisibility(View.GONE);
-        } else {
-            holder.followText.setVisibility(View.VISIBLE);
-            holder.followCheckbox.setVisibility(View.VISIBLE);
-            holder.followText.setText(event.isFollowed() ? "Following" : "Follow");
-            holder.followCheckbox.setOnCheckedChangeListener(null); // Remove listener before updating state
-            holder.followCheckbox.setChecked(event.isFollowed());
+        // Check follow status and update UI
+        userbase.checkFollowStatus(loggedInUsername, event.getUser(), isFollowing -> {
+            holder.followCheckbox.setChecked(isFollowing);
+            holder.followText.setText(isFollowing ? "Following" : "Follow");
+        });
 
-            // Follow/unfollow logic
-            holder.followCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                event.setFollowed(isChecked);
-                holder.followText.setText(isChecked ? "Following" : "Follow");
-
-                // Move event between Explore & Followed lists
-                if (isChecked) {
-                    if (!followedEvents.contains(event)) {
-                        followedEvents.add(event);
-                        exploreEvents.remove(event);
-                    }
-                } else {
-                    if (!exploreEvents.contains(event)) {
-                        exploreEvents.add(event);
-                        followedEvents.remove(event);
-                    }
-                }
-
-                // Notify HomeActivity of follow status change
-                if (followToggleListener != null) {
-                    followToggleListener.onFollowToggled(event, isChecked);
-                }
-
-                // Ensure RecyclerView refreshes properly
-                handler.post(() -> {
-                    if (currentList == exploreEvents) {
-                        setEvents(exploreEvents);
-                    } else if (currentList == followedEvents) {
-                        setEvents(followedEvents);
-                    } else {
-                        setEvents(myPostsEvents);
-                    }
+        // Follow/unfollow logic
+        holder.followCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                userbase.followUser(loggedInUsername, event.getUser(), success -> {
+                    if (success) holder.followText.setText("Following");
                 });
-            });
-        }
+            } else {
+                userbase.unfollowUser(loggedInUsername, event.getUser(), success -> {
+                    if (success) holder.followText.setText("Follow");
+                });
+            }
+        });
+
     }
 
     /**

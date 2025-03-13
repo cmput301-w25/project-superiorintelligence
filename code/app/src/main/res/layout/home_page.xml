@@ -39,7 +39,7 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginTop="12dp"
-        android:layout_marginEnd="30dp"
+        android:layout_marginEnd="20dp"
         android:layout_marginBottom="12dp"
         android:clickable="true"
         android:focusable="true"
@@ -59,12 +59,28 @@
             android:src="@drawable/profile_icon" />
     </androidx.cardview.widget.CardView>
 
+    <!-- Notification Icon -->
+    <ImageButton
+        android:id="@+id/notification_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        android:contentDescription="Notifications"
+        android:scaleType="fitCenter"
+        android:src="@drawable/notification_icon"
+        app:layout_constraintBottom_toBottomOf="@id/home_toolbar"
+        app:layout_constraintTop_toTopOf="@id/home_toolbar"
+        app:layout_constraintEnd_toStartOf="@id/profile_image"/>
+
     <!-- Menu Button -->
     <ImageButton
         android:id="@+id/menu_button"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_marginStart="30dp"
+        android:layout_marginStart="20dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:clickable="true"
         android:contentDescription="Menu"
@@ -73,7 +89,8 @@
         android:src="@drawable/menu"
         app:layout_constraintBottom_toBottomOf="@id/home_toolbar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/home_toolbar" />
+        app:layout_constraintTop_toTopOf="@id/home_toolbar"
+        tools:src="@drawable/filter_icon" />
 
     <!-- Category Tabs -->
     <LinearLayout
@@ -142,13 +159,15 @@
 
 
     <!-- Scrollable Event List -->
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
         app:layout_constraintBottom_toTopOf="@+id/addButton"
-        app:layout_constraintTop_toBottomOf="@id/category_tabs" />
+        app:layout_constraintTop_toBottomOf="@id/category_tabs"
+        tools:layout_editor_absoluteX="125dp" />
 
     <ImageButton
         android:id="@+id/addButton"
