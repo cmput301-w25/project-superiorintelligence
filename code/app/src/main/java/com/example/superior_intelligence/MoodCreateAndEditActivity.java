@@ -353,7 +353,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         String eventTitle = headerTitle.getText().toString().trim();
         String eventDate = new SimpleDateFormat("dd MMM yyyy, HH:mm",
                 Locale.getDefault()).format(new Date());
-        String overlayColor = "#FFD700";
+
         int emojiResource = includeEmojiCheckbox.isChecked()
                 ? updateEmojiIcon(selectedMood.getText().toString())
                 : 0;
@@ -363,6 +363,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         String moodExplanation = triggerExplanation.getText().toString();
         String situation = selectedSituation.getText().toString();
         String finalImageUrl = (imageUrl != null) ? imageUrl : "";
+        String overlayColor = getOverlayColorForMood(mood);
         User user = User.getInstance();
 
         // Make sure your Event constructor includes lat & lng if you want to store them
