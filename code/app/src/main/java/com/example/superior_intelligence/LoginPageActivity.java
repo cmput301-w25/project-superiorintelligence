@@ -8,6 +8,7 @@
  */
 
 package com.example.superior_intelligence;
+import com.example.superior_intelligence.Userbase;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -18,9 +19,6 @@ import android.widget.ImageButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
-
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoginPageActivity extends AppCompatActivity {
 
@@ -70,6 +68,11 @@ public class LoginPageActivity extends AppCompatActivity {
             }
         });
     }
+
+    /**
+     * Validates that the username field is not empty.
+     * @return true if valid, false otherwise.
+     */
     public Boolean validateUsername() {
         String val = loginUsername.getText().toString();
         if (val.isEmpty()) {
@@ -81,36 +84,27 @@ public class LoginPageActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Checks if the user exists in the database.
+     * If the user exists, the global User instance is updated and HomeActivity is launched.
+     * Otherwise, an error is displayed.
+     */
     public void checkUser() {
         String userUsername = loginUsername.getText().toString().trim();
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        db.collection("users")
-                .whereEqualTo("username", userUsername)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (!queryDocumentSnapshots.isEmpty()) {
-                        DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
-                        String name = document.getString("name");
-                        String username = document.getString("username");
-
-                        // Populate the global User instance
-                        User user = User.getInstance();
-                        user.setName(name);
-                        user.setUsername(username);
-
-                        // User exists → Go to HomePageActivity
-                        Intent intent = new Intent(LoginPageActivity.this, HomeActivity.class);
-                        startActivity(intent);
-                    } else {
-                        // User doesn't exist
-                        loginUsername.setError("User does not exist");
-                        loginUsername.requestFocus();
-                    }
-                })
-                .addOnFailureListener(e -> { // error handling
-                    loginUsername.setError("Failed to connect to Firestore");
-                    loginUsername.requestFocus();
-                });
+        Userbase userbase = new Userbase();
+        userbase.checkUserExists(userUsername, (exists, name, username) -> {
+            if (exists) {
+                // Populate the global User instance
+                User user = User.getInstance();
+                user.setName(name);
+                user.setUsername(username);
+                // Navigate to HomeActivity
+                Intent intent = new Intent(LoginPageActivity.this, HomeActivity.class);
+                startActivity(intent);
+            } else {
+                loginUsername.setError("User does not exist");
+                loginUsername.requestFocus();
+            }
+        });
     }
 }
