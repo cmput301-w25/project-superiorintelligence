@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -99,6 +100,11 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         recyclerView.setAdapter(adapter);
 
         Event newEvent = (Event) getIntent().getSerializableExtra("newEvent");
+
+        // Ensure newEvent has a Unique ID
+        if (newEvent != null && (newEvent.getId() == null || newEvent.getId().isEmpty())) {
+            newEvent.setID(UUID.randomUUID().toString());  // Assign unique ID
+        }
 
         if (newEvent != null && newEvent.isMyPost()) {
             Log.d("HomeActivity", "Received new event: " + newEvent.getTitle());
@@ -165,7 +171,13 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference myPostsRef = db.collection("MyPosts");
 
+        // Ensure ID is set (double check here if needed)
+        if (event.getId() == null || event.getId().isEmpty()) {
+            event.setID(UUID.randomUUID().toString());
+        }
+
         Map<String, Object> eventData = new HashMap<>();
+        eventData.put("id", event.getId());
         eventData.put("title", event.getTitle());
         eventData.put("date", event.getDate()); // Ensures date is saved as a String
         eventData.put("overlayColor", event.getOverlayColor());
@@ -180,8 +192,9 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         eventData.put("lat", event.getLat());
         eventData.put("lng", event.getLng());
 
-        myPostsRef.add(eventData)
-                .addOnSuccessListener(documentReference -> Log.d("Firebase", "Event saved: " + documentReference.getId()))
+        // Use UUID as document ID
+        myPostsRef.document(event.getId()).set(eventData)
+                .addOnSuccessListener(aVoid -> Log.d("Firebase", "Event saved with custom UUID"))
                 .addOnFailureListener(e -> Log.w("Firebase", "Error saving event", e));
     }
     /**
@@ -193,6 +206,7 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
                 myPostsEvents.clear();
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     // Extract values safely
+                    String id = document.getString("id"); // Fetch ID
                     String title = document.getString("title");
 
                     // Convert date from Firestore (Handles Timestamp or String)
@@ -216,7 +230,7 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
                     String user = document.getString("postUser");
 
                     // Create event object
-                    Event event = new Event(title, date, overlayColor, imageUrl, emojiResource, isFollowed, isMyPost, mood, moodExplanation, situation, user, null,null);
+                    Event event = new Event(id, title, date, overlayColor, imageUrl, emojiResource, isFollowed, isMyPost, mood, moodExplanation, situation, user, null,null);
 
                     myPostsEvents.add(event); // Add event to list
                 }

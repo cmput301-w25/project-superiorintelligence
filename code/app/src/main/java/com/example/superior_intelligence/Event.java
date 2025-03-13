@@ -3,6 +3,9 @@ package com.example.superior_intelligence;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+
 import com.google.firebase.Timestamp;
 
 /**
@@ -10,6 +13,7 @@ import com.google.firebase.Timestamp;
  * Includes properties like title, date, overlay color, mood, and situation.
  */
 public class Event implements Serializable {
+    private String id;
     private String title;
     private Object date;
     private String overlayColor;
@@ -34,6 +38,7 @@ public class Event implements Serializable {
     /**
      * Constructor for creating an event with basic details.
      *
+     * @param id            Unique ID of event.
      * @param title         The title of the event.
      * @param date          The date of the event as a String.
      * @param overlayColor  The color overlay associated with the event.
@@ -42,8 +47,11 @@ public class Event implements Serializable {
      * @param isFollowed    Whether the event is followed by the user.
      * @param isMyPost      Whether the event was created by the user.
      * @param user          The username of the event creator.
+     * @param lat           Latitude of location
+     * @param lng           Longitude of location
      */
-    public Event(String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String user, Double lat, Double lng) {
+    public Event(String id, String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String user, Double lat, Double lng) {
+        this.id = id;
         this.title = title;
         this.date = date;
         this.overlayColor = overlayColor;
@@ -59,6 +67,7 @@ public class Event implements Serializable {
     /**
      * Constructor for creating an event with additional mood and situation details.
      *
+     * @param id             The unique ID of event.
      * @param title          The title of the event.
      * @param date           The date of the event as a String.
      * @param overlayColor   The color overlay associated with the event.
@@ -71,7 +80,8 @@ public class Event implements Serializable {
      * @param situation      The social situation during the event.
      * @param user           The username of the event creator.
      */
-    public Event(String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String mood, String moodExplanation, String situation, String user, Double lat, Double lng) {
+    public Event(String id, String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String mood, String moodExplanation, String situation, String user, Double lat, Double lng) {
+        this.id = id;
         this.title = title;
         this.date = date;
         this.overlayColor = overlayColor;
@@ -287,6 +297,15 @@ public class Event implements Serializable {
 
     public void setLng(Double lng) {
         this.lng = lng;
+    }
+
+    public String setID(String id){
+        // Generates a unique id for a mood event.
+        return (this.id = id);
+    }
+
+    public String getId() {
+        return id;
     }
 }
 

@@ -19,7 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class EventDetailsActivity extends AppCompatActivity {
 
     private TextView eventTitle, eventMood, selectedMood, eventReason, eventSituation, eventDate, eventUser;
-    private String title, mood, reason, situation, overlayColor, date, user;
+    private String eventId, title, mood, reason, situation, overlayColor, date, user;
 
     private ActivityResultLauncher<Intent> editEventLauncher;
 
@@ -66,6 +66,8 @@ public class EventDetailsActivity extends AppCompatActivity {
         // Edit button
         editButton.setOnClickListener(view -> {
             Intent editIntent = new Intent(EventDetailsActivity.this, MoodCreateAndEditActivity.class);
+
+            editIntent.putExtra("id", eventId); // Include event ID for updating
             editIntent.putExtra("title", title);
             editIntent.putExtra("mood", mood);
             editIntent.putExtra("reason", reason);
