@@ -28,12 +28,16 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 public class MoodCreateAndEditActivity extends AppCompatActivity {
@@ -407,7 +411,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         return emojiResId;
     }
 
-    private String getOverlayColorForMood(String mood) {
+    String getOverlayColorForMood(String mood) {
         switch (mood.toLowerCase()) {
             case "anger":
                 return "#FF6347"; // Tomato Red
@@ -429,4 +433,51 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
                 return "#FFD700"; // Default to Yellow
         }
     }
+
+    void updateEvent(String id) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference myPostsRef = db.collection("MyPosts");
+
+        String eventTitle = headerTitle.getText().toString().trim();
+        int emojiResource = includeEmojiCheckbox.isChecked() ? updateEmojiIcon(selectedMood.getText().toString()) : 0;
+        boolean isFollowed = false; // assuming it's user's own post
+        boolean isMyPost = true; // assuming it's user's own post
+        String mood = selectedMood.getText().toString();
+        String moodExplanation = triggerExplanation.getText().toString();
+        String situation = selectedSituation.getText().toString();
+        String finalImageUrl = (imageUrl != null) ? imageUrl : "";
+        String overlayColor = getOverlayColorForMood(mood);
+        String username = User.getInstance().getUsername(); // assuming user singleton is used
+
+        // Build the updated data map
+        Map<String, Object> updatedEventData = new HashMap<>();
+        updatedEventData.put("id", id); // Keep existing ID
+        updatedEventData.put("title", eventTitle);
+        updatedEventData.put("overlayColor", overlayColor);
+        updatedEventData.put("imageUrl", finalImageUrl);
+        updatedEventData.put("emojiResource", emojiResource);
+        updatedEventData.put("isFollowed", isFollowed);
+        updatedEventData.put("isMyPost", isMyPost);
+        updatedEventData.put("mood", mood);
+        updatedEventData.put("moodExplanation", moodExplanation);
+        updatedEventData.put("situation", situation);
+        updatedEventData.put("postUser", username);
+
+        // Now perform Firestore update
+        myPostsRef.document(id).set(updatedEventData)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("MoodCreateAndEditActivity", "Event updated successfully!");
+                    // Go back to HomeActivity and refresh posts
+                    Intent returnIntent = new Intent(MoodCreateAndEditActivity.this, HomeActivity.class);
+                    returnIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    returnIntent.putExtra("selectedTab", "myposts"); // go to MyPosts tab by default
+                    startActivity(returnIntent);
+                    finish(); // Close MoodCreateAndEditActivity
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("MoodCreateAndEditActivity", "Failed to update event", e);
+                    Toast.makeText(MoodCreateAndEditActivity.this, "Failed to update event.", Toast.LENGTH_SHORT).show();
+                });
+    }
+
 }

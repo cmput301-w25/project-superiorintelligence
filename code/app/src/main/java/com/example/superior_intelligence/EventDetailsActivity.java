@@ -19,7 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class EventDetailsActivity extends AppCompatActivity {
 
     private TextView eventTitle, eventMood, selectedMood, eventReason, eventSituation, eventDate, eventUser;
-    private String title, mood, reason, situation, overlayColor, date, user;
+    private String id, title, mood, reason, situation, overlayColor, date, user;
 
     private ActivityResultLauncher<Intent> editEventLauncher;
 
@@ -41,6 +41,7 @@ public class EventDetailsActivity extends AppCompatActivity {
 
         // Retrieve event data
         Intent intent = getIntent();
+        id = intent.getStringExtra("id");
         title = intent.getStringExtra("title");
         mood = intent.getStringExtra("mood");
         reason = intent.getStringExtra("reason");
@@ -66,6 +67,7 @@ public class EventDetailsActivity extends AppCompatActivity {
         // Edit button
         editButton.setOnClickListener(view -> {
             Intent editIntent = new Intent(EventDetailsActivity.this, MoodCreateAndEditActivity.class);
+            editIntent.putExtra("id", id); //Pass event ID for proper update tracking
             editIntent.putExtra("title", title);
             editIntent.putExtra("mood", mood);
             editIntent.putExtra("reason", reason);
@@ -83,7 +85,9 @@ public class EventDetailsActivity extends AppCompatActivity {
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+
                         // Get updated details
+                        id = result.getData().getStringExtra("id"); // Retrieve ID again to ensure it's the same
                         title = result.getData().getStringExtra("title");
                         mood = result.getData().getStringExtra("mood");
                         reason = result.getData().getStringExtra("reason");
