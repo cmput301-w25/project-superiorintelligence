@@ -48,18 +48,31 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/view_event_toolbar" />
 
-    <!-- User Profile Picture (Top-Right) -->
-    <ImageView
-        android:id="@+id/user_profile_picture"
+    <!-- Profile Picture Container -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/profile_image"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_marginEnd="16dp"
-        android:contentDescription="@string/content_desc_profile_image"
-        android:scaleType="centerCrop"
-        android:background="@drawable/profile_icon"
-        app:layout_constraintTop_toTopOf="@id/view_event_toolbar"
-        app:layout_constraintBottom_toBottomOf="@id/view_event_toolbar"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="12dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardCornerRadius="70dp"
+        app:cardElevation="4dp"
+        app:layout_constraintBottom_toBottomOf="@+id/view_event_toolbar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/view_event_toolbar"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/profile_image_png"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/content_desc_profile_image"
+            android:scaleType="centerCrop"
+            android:src="@drawable/profile_icon" />
+    </androidx.cardview.widget.CardView>
 
     <!-- ScrollView for Content -->
     <ScrollView

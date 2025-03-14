@@ -79,13 +79,12 @@
             android:parentActivityName=".LoginPageActivity"
             android:exported="true"/>
 
-        <!-- Home Page -->
-        <activity android:name=".HomePageActivity"
-            android:parentActivityName=".LoginPageActivity"
-            android:exported="true"/>
-
         <!-- Mood Create and Edit Activity -->
         <activity android:name=".MoodCreateAndEditActivity"
+            android:exported="true"/>
+
+        <!-- Notification Activity -->
+        <activity android:name=".NotificationActivity"
             android:exported="true"/>
 
         <!-- Profile Activity -->
@@ -94,7 +93,13 @@
             android:exported="true">
         </activity>
 
-        <!-- Profile Activity -->
+        <!-- Other User Details Activity -->
+        <activity
+            android:name=".OtherUserProfileActivity"
+            android:exported="true">
+        </activity>
+
+        <!-- Current User Details Activity -->
         <activity
             android:name=".EventDetailsActivity"
             android:exported="true">

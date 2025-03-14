@@ -40,6 +40,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     }
     private final Context context;
     private final Photobase photobase;
+    private final Userbase userbase;
 
     /**
      * Constructs an `EventAdapter` with a list of events and a listener for follow toggles.
@@ -61,6 +62,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
 
         this.currentList = this.exploreEvents; // default tab
         this.photobase = new Photobase(context);
+        this.userbase = Userbase.getInstance();
     }
 
     /**
@@ -94,6 +96,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Event event = currentList.get(position);
+        String loggedInUsername = User.getInstance().getUsername();
 
         // Set title & date
         holder.eventTitle.setText(event.getTitle());
