@@ -25,11 +25,16 @@ public class Database {
     public void saveEventToFirebase(@NonNull Event event, @NonNull OnEventSavedCallback callback) {
         // Convert Event to a Map
         // (Same as your old saveEventToFirebase method in HomeActivity)
+
+        // Ensure event has an ID (UUID)
+        if (event.getID() == null || event.getID().isEmpty()) {
+            event.setID(java.util.UUID.randomUUID().toString());
+        }
         try {
-            // We use a helper method:
-            myPostsRef.add(Mapper.eventToMap(event))
-                    .addOnSuccessListener(documentReference -> {
-                        Log.d("EventRepository", "Event saved: " + documentReference.getId());
+            // Use UUID as the document ID
+            myPostsRef.document(event.getID()).set(Mapper.eventToMap(event))
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d("EventRepository", "Event saved with ID: " + event.getID());
                         callback.onEventSaved(true);
                     })
                     .addOnFailureListener(e -> {

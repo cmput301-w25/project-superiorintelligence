@@ -38,7 +38,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     public interface OnFollowToggleListener {
         void onFollowToggled(Event event, boolean isFollowed);
     }
-    private final OnFollowToggleListener followToggleListener;
     private final Context context;
     private final Photobase photobase;
     private final Userbase userbase;
@@ -49,14 +48,12 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
      * @param exploreEvents The list of events to be displayed.
      * @param followedEvents List of followed events.
      * @param myPostsEvents List of followed events.
-     * @param followToggleListener The listener handling follow/unfollow actions.
      */
     public EventAdapter(
             @NonNull Context context,
             List<Event> exploreEvents,
             List<Event> followedEvents,
-            List<Event> myPostsEvents,
-            OnFollowToggleListener followToggleListener
+            List<Event> myPostsEvents
     ) {
         this.context = context;
         this.exploreEvents = (exploreEvents != null) ? exploreEvents : new ArrayList<>();
@@ -64,7 +61,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         this.myPostsEvents = (myPostsEvents != null) ? myPostsEvents : new ArrayList<>();
 
         this.currentList = this.exploreEvents; // default tab
-        this.followToggleListener = followToggleListener;
         this.photobase = new Photobase(context);
         this.userbase = Userbase.getInstance();
     }
@@ -149,28 +145,15 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
             intent.putExtra("emojiResource", event.getEmojiResource());
             intent.putExtra("date", event.getDate()); 
             intent.putExtra("user", event.getUser());
+
+            if (event.getComments() != null && !event.getComments().isEmpty()) {
+                intent.putStringArrayListExtra("comments", new ArrayList<>(event.getComments()));
+            } else {
+                intent.putStringArrayListExtra("comments", new ArrayList<>()); // Send empty list
+            }
+
             v.getContext().startActivity(intent);
         });
-
-        // Check follow status and update UI
-        userbase.checkFollowStatus(loggedInUsername, event.getUser(), isFollowing -> {
-            holder.followCheckbox.setChecked(isFollowing);
-            holder.followText.setText(isFollowing ? "Following" : "Follow");
-        });
-
-        // Follow/unfollow logic
-        holder.followCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                userbase.followUser(loggedInUsername, event.getUser(), success -> {
-                    if (success) holder.followText.setText("Following");
-                });
-            } else {
-                userbase.unfollowUser(loggedInUsername, event.getUser(), success -> {
-                    if (success) holder.followText.setText("Follow");
-                });
-            }
-        });
-
     }
 
     /**
@@ -202,8 +185,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
             eventOverlay = itemView.findViewById(R.id.event_overlay);
             eventImage = itemView.findViewById(R.id.event_image);
             eventEmoticon = itemView.findViewById(R.id.event_emoticon);
-            followText = itemView.findViewById(R.id.follow_text);
-            followCheckbox = itemView.findViewById(R.id.follow_checkbox);
         }
     }
 }

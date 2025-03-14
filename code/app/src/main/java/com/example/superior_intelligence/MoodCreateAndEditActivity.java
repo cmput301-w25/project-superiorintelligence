@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
+import java.util.UUID;
 
 public class MoodCreateAndEditActivity extends AppCompatActivity {
 
@@ -350,10 +351,11 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
      * Create the Event object with all user inputs.
      */
     Event createNewEvent() {
+        String eventID = UUID.randomUUID().toString();
         String eventTitle = headerTitle.getText().toString().trim();
         String eventDate = new SimpleDateFormat("dd MMM yyyy, HH:mm",
                 Locale.getDefault()).format(new Date());
-        String overlayColor = "#FFD700";
+
         int emojiResource = includeEmojiCheckbox.isChecked()
                 ? updateEmojiIcon(selectedMood.getText().toString())
                 : 0;
@@ -363,11 +365,12 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         String moodExplanation = triggerExplanation.getText().toString();
         String situation = selectedSituation.getText().toString();
         String finalImageUrl = (imageUrl != null) ? imageUrl : "";
+        String overlayColor = getOverlayColorForMood(mood);
         User user = User.getInstance();
 
         // Make sure your Event constructor includes lat & lng if you want to store them
         return new Event(
-                eventTitle, eventDate, overlayColor, finalImageUrl,
+                eventID, eventTitle, eventDate, overlayColor, finalImageUrl,
                 emojiResource, isFollowed, isMyPost,
                 mood, moodExplanation, situation, user.getUsername(),
                 lat, lng
