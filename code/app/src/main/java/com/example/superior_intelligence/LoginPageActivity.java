@@ -11,6 +11,7 @@ package com.example.superior_intelligence;
 import com.example.superior_intelligence.Userbase;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -43,7 +44,10 @@ public class LoginPageActivity extends AppCompatActivity {
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish(); // Closes the current activity and returns to MainActivity
+                Intent intent = new Intent(LoginPageActivity.this, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+                finish(); // Close current activity to prevent returning to it
             }
         });
 
@@ -94,6 +98,12 @@ public class LoginPageActivity extends AppCompatActivity {
         Userbase userbase = new Userbase();
         userbase.checkUserExists(userUsername, (exists, name, username) -> {
             if (exists) {
+                // Save user details in SharedPreferences
+                SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString("name", name);
+                editor.putString("username", username);
+                editor.apply(); // Save changes
                 // Populate the global User instance
                 User user = User.getInstance();
                 user.setName(name);

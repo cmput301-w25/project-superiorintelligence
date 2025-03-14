@@ -41,6 +41,7 @@ public class CreateUserAndLoginActivityTest {
         FirebaseFirestore.getInstance().useEmulator(androidLocalhost, portNumber);
     }
 
+    // Test signup and login functionality
     @Test
     public void testCreateAndLoginFlow() throws InterruptedException {
         String testName = "Test User";
@@ -85,5 +86,20 @@ public class CreateUserAndLoginActivityTest {
         onView(withId(R.id.login_button)).perform(click());
 
     }
+
+    // Test signout functionality
+    @Test
+    public void testSignOut() throws InterruptedException {
+
+        //Currently on app home page, logged in under testName and testUsername
+        onView(withId(R.id.profile_image)).perform(click()); // Navigate to profile page
+        onView(withId(R.id.signout)).perform(click()); // press signout button
+
+
+
+
+
+    }
+
 }
 
