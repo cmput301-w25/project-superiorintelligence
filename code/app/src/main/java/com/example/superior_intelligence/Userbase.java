@@ -37,6 +37,28 @@ public class Userbase {
                 });
     }
 
+    public void getUserDetails(String username, UserDetailsCallback callback) {
+        if (username == null || username.isEmpty()) {
+            callback.onUserDetailsFetched(false, null, null);
+            return;
+        }
+
+        db.collection("users")
+                .whereEqualTo("username", username)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (!querySnapshot.isEmpty()) {
+                        DocumentSnapshot document = querySnapshot.getDocuments().get(0);
+                        String name = document.getString("name");
+                        callback.onUserDetailsFetched(true, username, name);
+                    } else {
+                        callback.onUserDetailsFetched(false, null, null);
+                    }
+                })
+                .addOnFailureListener(e -> callback.onUserDetailsFetched(false, null, null));
+    }
+
+
     public void createUser(String name, String username, UserCreationCallback callback) {
         // In this example, we use a simple User (or HelperClass) object.
         // You can also rename HelperClass to something like SignUpUser if you prefer.
@@ -82,18 +104,37 @@ public class Userbase {
     }
 
 
+    /**
+     * Callback interface for checking user status.
+     */
     public interface UserCheckCallback {
         void onUserChecked(boolean exists, String name, String username);
     }
 
+    /**
+     * Callback interface for fetching user details.
+     */
+    public interface UserDetailsCallback {
+        void onUserDetailsFetched(boolean exists, String username, String name);
+    }
+
+    /**
+     * Callback interface for creating a user.
+     */
     public interface UserCreationCallback {
         void onUserCreated(boolean success);
     }
 
+    /**
+     * Callback interface for checking following status.
+     */
     public interface FollowCheckCallback {
         void onFollowChecked(boolean isFollowing);
     }
 
+    /**
+     * Callback interface for following another user.
+     */
     public interface FollowActionCallback {
         void onFollowAction(boolean success);
     }

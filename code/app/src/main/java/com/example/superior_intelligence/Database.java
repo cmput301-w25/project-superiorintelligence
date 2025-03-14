@@ -78,7 +78,10 @@ public class Database {
                                 continue;
                             }
 
-                            if (loggedInUsername.equals(event.getUser())) {
+                            Log.d("DatabaseDebug", "loggedInUsername: " + loggedInUsername);
+                            Log.d("DatabaseDebug", "event.getUser(): " + event.getUser());
+
+                            if (loggedInUsername != null && loggedInUsername.equals(event.getUser())) {
                                 myPosts.add(event);
                                 processedCount[0]++;
                                 if (processedCount[0] == totalDocuments) {

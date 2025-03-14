@@ -19,6 +19,7 @@ import android.widget.TextView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,11 +33,12 @@ public class EventDetailsActivity extends AppCompatActivity {
     private EditText commentInput;
     private RecyclerView commentsRecyclerView;
     private String title, mood, reason, situation, overlayColor, date, user, imageDocID, currentUser;
-    private  ImageView eventImage, userProfileImage;
+    private  ImageView eventImage;
     private ActivityResultLauncher<Intent> editEventLauncher;
     private boolean isMyPost;
     private List<String> commentsList;
-    private ImageButton sendCommentButton, backButton, userProfileButton;
+    private ImageButton sendCommentButton, backButton;
+    private CardView profileCard;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -205,6 +207,7 @@ public class EventDetailsActivity extends AppCompatActivity {
         noCommentsText = findViewById(R.id.no_comments_text);
         commentsRecyclerView = findViewById(R.id.comments_recycler_view);
         commentsList = getIntent().getStringArrayListExtra("comments");
+        profileCard = findViewById(R.id.profile_image);
 
         if (isMyPost) {
             // Views for user's own post
@@ -220,7 +223,17 @@ public class EventDetailsActivity extends AppCompatActivity {
             });
         } else {
             // Views for another user's post
-            userProfileImage = findViewById(R.id.user_profile_picture); // FIX: Should be an ImageView
+
+            profileCard.setOnClickListener(view -> {
+                if (user != null) {
+                    Intent profileIntent = new Intent(EventDetailsActivity.this, OtherUserProfileActivity.class);
+                    profileIntent.putExtra("username", user);
+                    startActivity(profileIntent);
+                } else {
+                    Log.e("EventDetailsActivity", "User not found, cannot open profile.");
+                }
+            });
+
             commentInput = findViewById(R.id.comment_input);
             sendCommentButton = findViewById(R.id.send_comment_button);
 
@@ -239,9 +252,8 @@ public class EventDetailsActivity extends AppCompatActivity {
                 Intent homeIntent = new Intent(EventDetailsActivity.this, HomeActivity.class);
                 homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(homeIntent);
-                finish(); // Finish current activity
+                finish();
             } else {
-                // Otherwise, just finish the activity
                 finish();
             }
         });

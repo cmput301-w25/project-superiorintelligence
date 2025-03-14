@@ -86,11 +86,10 @@
         android:contentDescription="Menu"
         android:focusable="true"
         android:scaleType="fitCenter"
-        android:src="@drawable/menu"
         app:layout_constraintBottom_toBottomOf="@id/home_toolbar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/home_toolbar"
-        tools:src="@drawable/filter_icon" />
+        android:src="@drawable/filter_icon" />
 
     <!-- Category Tabs -->
     <LinearLayout

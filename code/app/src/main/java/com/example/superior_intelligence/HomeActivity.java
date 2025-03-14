@@ -122,6 +122,13 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
             Intent intent = new Intent(HomeActivity.this, ProfileActivity.class);
             startActivity(intent);
         });
+
+        // Launch's NotificationActivity when clicked
+        ImageButton notificationButton = findViewById(R.id.notification_button);
+        notificationButton.setOnClickListener(view -> {
+            Intent intent = new Intent(HomeActivity.this, NotificationActivity.class);
+            startActivity(intent);
+        });
     }
 
     /**
