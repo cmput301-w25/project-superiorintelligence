@@ -2,6 +2,8 @@ package com.example.superior_intelligence;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import com.google.firebase.Timestamp;
 
@@ -24,12 +26,13 @@ public class Event implements Serializable {
     private String user;
     private Double lng;
     private Double lat;
-
+    private List<String> comments;
 
     /**
      * Empty constructor required for Firestore
      */
     public Event() {
+        this.comments = new ArrayList<>();
     }
 
     /**
@@ -45,7 +48,7 @@ public class Event implements Serializable {
      * @param isMyPost      Whether the event was created by the user.
      * @param user          The username of the event creator.
      */
-    public Event(String id, String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String user, Double lat, Double lng) {
+    public Event(String id, String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String user, Double lat, Double lng, List<String> comments) {
         this.id = id;
         this.title = title;
         this.date = date;
@@ -57,6 +60,7 @@ public class Event implements Serializable {
         this.user = user;
         this.lat = lat;
         this.lng = lng;
+        this.comments = (comments != null) ? comments : new ArrayList<>();
     }
   
     /**
@@ -300,5 +304,21 @@ public class Event implements Serializable {
     public String getID(){
         return this.id;
     }
+
+    public List<String> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<String> comments) {
+        this.comments = comments;
+    }
+
+    public void addComment(String comment) {
+        if (this.comments == null) {
+            this.comments = new ArrayList<>();
+        }
+        this.comments.add(comment);
+    }
+
 }
 

@@ -39,9 +39,19 @@ public class User {
         this.username = username;
     }
 
-    // Method to reset user data (e.g., logout)
+    /**
+     * Method to reset user data
+     */
     public void clearUserData() {
         name = null;
         username = null;
+    }
+
+    /**
+     * Checks if we are currently referencing the current user
+     * @param username the user currently logged in.
+     */
+    public boolean isCurrentUser(String username) {
+        return this.username != null && this.username.equals(username);
     }
 }

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mood_event_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -22,17 +21,12 @@
         android:id="@+id/event_detail_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:minHeight="48dp"
-        android:minWidth="48dp"
-        android:layout_marginTop="0dp"
-        android:background="@android:color/transparent"
-        android:hint="Event Title"
-        android:textColor="@color/black"
+        android:text="@string/event_title"
         android:textSize="22sp"
         android:textStyle="bold"
+        android:textColor="@color/black"
+        android:shadowColor="@android:color/black"
         android:gravity="center"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
         app:layout_constraintTop_toTopOf="@+id/view_event_toolbar"
         app:layout_constraintBottom_toBottomOf="@+id/view_event_toolbar"
         app:layout_constraintStart_toStartOf="parent"
@@ -43,111 +37,156 @@
         android:id="@+id/back_button"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        android:layout_marginStart="20dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:clickable="true"
         android:contentDescription="@string/content_desc_back_icon"
         android:focusable="true"
         android:scaleType="fitCenter"
         android:src="@drawable/back_arrow"
-        app:layout_constraintTop_toTopOf="@+id/view_event_toolbar"
         app:layout_constraintBottom_toBottomOf="@+id/view_event_toolbar"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <!-- Event Image (if available) -->
-    <ImageView
-        android:id="@+id/event_full_image"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginTop="30dp"
-        android:contentDescription="Event Image"
-        android:scaleType="centerCrop"
-        app:layout_constraintTop_toBottomOf="@id/event_detail_situation" />
-
-    <!-- Mood -->
-    <TextView
-        android:id="@+id/event_detail_mood"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Mood: "
-        android:textSize="16sp"
-        android:textColor="@color/black"
-        app:layout_constraintTop_toBottomOf="@id/event_detail_user"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_margin="16dp"/>
-
-    <!-- Reason -->
-
-    <TextView
-        android:id="@+id/selected_mood"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/coloured_bg_for_event_details"
-        android:text="Excited"
-        android:textColor="@color/black"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@+id/event_detail_mood"
-        app:layout_constraintStart_toEndOf="@+id/event_detail_mood"
-        app:layout_constraintTop_toTopOf="@+id/event_detail_mood" />
-
-    <TextView
-        android:id="@+id/event_detail_reason"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Reason: Passed my exam!"
-        android:textSize="16sp"
-        android:textColor="@color/black"
-        app:layout_constraintTop_toBottomOf="@id/event_detail_mood"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_margin="16dp"/>
-
-    <!-- Social Situation -->
-    <TextView
-        android:id="@+id/event_detail_situation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Social Situation: With Friends"
-        android:textSize="16sp"
-        android:textColor="@color/black"
-        app:layout_constraintTop_toBottomOf="@id/event_detail_reason"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_margin="16dp"/>
-
-    <!-- Date -->
-    <TextView
-        android:id="@+id/event_detail_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Date: "
-        android:textSize="16sp"
-        android:textColor="@color/black"
-        app:layout_constraintTop_toBottomOf="@id/view_event_toolbar"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_margin="16dp"/>
-
-    <!-- Posted By -->
-    <TextView
-        android:id="@+id/event_detail_user"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Posted by: "
-        android:textSize="16sp"
-        android:textColor="@color/black"
-        app:layout_constraintTop_toBottomOf="@id/event_detail_date"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_margin="16dp"/>
+        app:layout_constraintTop_toTopOf="@+id/view_event_toolbar" />
 
     <!-- Edit Button -->
     <ImageButton
         android:id="@+id/editButton"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginEnd="30dp"
-        android:layout_marginBottom="32dp"
-        android:background="@drawable/edit_button"
-        android:contentDescription="EditButton"
-        android:elevation="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:contentDescription="@string/content_desc_profile_image"
+        android:focusable="true"
+        android:scaleType="centerCrop"
+        android:src="@android:drawable/ic_menu_edit"
+        app:layout_constraintTop_toTopOf="@id/view_event_toolbar"
+        app:layout_constraintBottom_toBottomOf="@id/view_event_toolbar"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- ScrollView Wrapping Everything Below Toolbar -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/view_event_toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="16dp">
+
+            <!-- Date -->
+            <TextView
+                android:id="@+id/event_detail_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/date"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_margin="16dp"/>
+
+            <!-- Posted By -->
+            <TextView
+                android:id="@+id/event_detail_user"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/posted_by"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_margin="16dp"/>
+
+            <!-- Mood -->
+            <TextView
+                android:id="@+id/event_detail_mood"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mood"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_margin="16dp"/>
+
+            <TextView
+                android:id="@+id/selected_mood"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/coloured_bg_for_event_details"
+                android:text="@string/excited"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:layout_marginStart="16dp"/>
+
+            <!-- Reason -->
+            <TextView
+                android:id="@+id/event_detail_reason"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/reason_passed_my_exam"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_margin="16dp"/>
+
+            <!-- Social Situation -->
+            <TextView
+                android:id="@+id/event_detail_situation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/social_situation_with_friends"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_margin="16dp"/>
+
+            <!-- Event Image -->
+            <ImageView
+                android:id="@+id/event_full_image"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:layout_marginTop="16dp"
+                android:contentDescription="@string/event_image"
+                android:scaleType="centerCrop"
+                android:adjustViewBounds="true"
+                android:visibility="gone"
+                app:layout_constraintDimensionRatio="4:3"/>
+
+            <!-- Comments Section Title -->
+            <TextView
+                android:id="@+id/comments_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/comments"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:layout_margin="16dp"
+                android:visibility="visible"/>
+
+            <!-- Placeholder for No Comments -->
+            <TextView
+                android:id="@+id/no_comments_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No comments yet"
+                android:textSize="16sp"
+                android:textStyle="italic"
+                android:textColor="@color/black"
+                android:gravity="center"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:visibility="gone" />
+
+            <!-- Comments List -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/comments_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:overScrollMode="always"
+                android:background="@android:color/white"
+                android:padding="8dp"
+                android:visibility="gone"/>
+        </LinearLayout>
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -75,7 +75,7 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         tabMyPosts = findViewById(R.id.tab_myposts);
         tabMap = findViewById(R.id.tab_map);
 
-        adapter = new EventAdapter(this, exploreEvents, followedEvents, myPostsEvents, this);
+        adapter = new EventAdapter(this, exploreEvents, followedEvents, myPostsEvents);
         recyclerView.setAdapter(adapter);
 
         loadAllEvents();
@@ -120,6 +120,13 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         CardView profileImage = findViewById(R.id.profile_image);
         profileImage.setOnClickListener(v -> {
             Intent intent = new Intent(HomeActivity.this, ProfileActivity.class);
+            startActivity(intent);
+        });
+
+        // Launch's NotificationActivity when clicked
+        ImageButton notificationButton = findViewById(R.id.notification_button);
+        notificationButton.setOnClickListener(view -> {
+            Intent intent = new Intent(HomeActivity.this, NotificationActivity.class);
             startActivity(intent);
         });
     }
