@@ -44,7 +44,6 @@ public class Photobase {
 
     /**
      * Loads an image from Firestore using a document ID.
-     *
      * @param documentId The Firestore document ID.
      * @param callback   Callback for image loading.
      */
@@ -73,7 +72,6 @@ public class Photobase {
 
     /**
      * Uploads an image to Firestore.
-     *
      * @param imageUri The URI of the image to upload.
      * @param uid      The user ID to associate with the image.
      * @param callback Callback for upload completion.

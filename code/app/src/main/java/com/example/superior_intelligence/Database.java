@@ -6,8 +6,7 @@ import androidx.annotation.NonNull;
 
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-
+import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,11 +25,16 @@ public class Database {
     public void saveEventToFirebase(@NonNull Event event, @NonNull OnEventSavedCallback callback) {
         // Convert Event to a Map
         // (Same as your old saveEventToFirebase method in HomeActivity)
+
+        // Ensure event has an ID (UUID)
+        if (event.getID() == null || event.getID().isEmpty()) {
+            event.setID(java.util.UUID.randomUUID().toString());
+        }
         try {
-            // We use a helper method:
-            myPostsRef.add(Mapper.eventToMap(event))
-                    .addOnSuccessListener(documentReference -> {
-                        Log.d("EventRepository", "Event saved: " + documentReference.getId());
+            // Use UUID as the document ID
+            myPostsRef.document(event.getID()).set(Mapper.eventToMap(event))
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d("EventRepository", "Event saved with ID: " + event.getID());
                         callback.onEventSaved(true);
                     })
                     .addOnFailureListener(e -> {
@@ -56,26 +60,51 @@ public class Database {
                         List<Event> followed = new ArrayList<>();
 
                         String loggedInUsername = currentUser.getUsername();
+                        List<DocumentSnapshot> documents = task.getResult().getDocuments();
 
-                        // Loop all docs
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            // Convert doc to Event
-                            Event event = Mapper.docToEvent(document);
-                            if (event == null) continue;
-
-                            // Decide which list it belongs to
-                            if (loggedInUsername.equals(event.getUser())) {
-                                myPosts.add(event);
-                            } else if (event.isFollowed()) {
-                                followed.add(event);
-                            } else {
-                                explore.add(event);
-                            }
+                        if (documents.isEmpty()) {
+                            callback.onEventsLoaded(myPosts, explore, followed);
+                            return;
                         }
 
-                        callback.onEventsLoaded(myPosts, explore, followed);
+                        final int totalDocuments = documents.size();
+                        final int[] processedCount = {0};
+
+                        // Loop all docs
+                        for (DocumentSnapshot document : documents) {
+                            Event event = Mapper.docToEvent(document);
+                            if (event == null) {
+                                processedCount[0]++;
+                                continue;
+                            }
+
+                            Log.d("DatabaseDebug", "loggedInUsername: " + loggedInUsername);
+                            Log.d("DatabaseDebug", "event.getUser(): " + event.getUser());
+
+                            if (loggedInUsername != null && loggedInUsername.equals(event.getUser())) {
+                                myPosts.add(event);
+                                processedCount[0]++;
+                                if (processedCount[0] == totalDocuments) {
+                                    callback.onEventsLoaded(myPosts, explore, followed);
+                                }
+                            } else {
+                                Userbase.getInstance().checkFollowStatus(loggedInUsername, event.getUser(), isFollowing -> {
+                                    if (isFollowing) {
+                                        followed.add(event);
+                                    } else {
+                                        explore.add(event);
+                                    }
+                                    processedCount[0]++;
+
+                                    // Once all documents are processed, trigger callback
+                                    if (processedCount[0] == totalDocuments) {
+                                        callback.onEventsLoaded(myPosts, explore, followed);
+                                    }
+                                });
+                            }
+                        }
                     } else {
-                        callback.onEventsLoaded(null, null, null); // indicate failure
+                        callback.onEventsLoaded(null, null, null); // Indicate failure
                     }
                 });
     }
