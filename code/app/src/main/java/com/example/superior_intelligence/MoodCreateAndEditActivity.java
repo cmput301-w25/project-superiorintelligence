@@ -355,7 +355,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
      * Create the Event object with all user inputs.
      */
     Event createNewEvent() {
-        String eventID = UUID.randomUUID().toString();
+        String eventID = UUID.randomUUID().toString(); // Generates a unique ID for event.
         String eventTitle = headerTitle.getText().toString().trim();
         String eventDate = new SimpleDateFormat("dd MMM yyyy, HH:mm",
                 Locale.getDefault()).format(new Date());
@@ -369,8 +369,8 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         String moodExplanation = triggerExplanation.getText().toString();
         String situation = selectedSituation.getText().toString();
         String finalImageUrl = (imageUrl != null) ? imageUrl : "";
-        String overlayColor = getOverlayColorForMood(mood);
         User user = User.getInstance();
+        String overlayColor = getOverlayColorForMood(mood);
 
         // Make sure your Event constructor includes lat & lng if you want to store them
         return new Event(

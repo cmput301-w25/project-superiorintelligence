@@ -5,6 +5,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+
 import com.google.firebase.Timestamp;
 
 /**
@@ -26,19 +29,17 @@ public class Event implements Serializable {
     private String user;
     private Double lng;
     private Double lat;
-    private List<String> comments;
 
     /**
      * Empty constructor required for Firestore
      */
     public Event() {
-        this.comments = new ArrayList<>();
     }
 
     /**
      * Constructor for creating an event with basic details.
      *
-     * @param id            The unique ID of event.
+     * @param id            Unique ID of event.
      * @param title         The title of the event.
      * @param date          The date of the event as a String.
      * @param overlayColor  The color overlay associated with the event.
@@ -47,8 +48,10 @@ public class Event implements Serializable {
      * @param isFollowed    Whether the event is followed by the user.
      * @param isMyPost      Whether the event was created by the user.
      * @param user          The username of the event creator.
+     * @param lat           Latitude of location
+     * @param lng           Longitude of location
      */
-    public Event(String id, String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String user, Double lat, Double lng, List<String> comments) {
+    public Event(String id, String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String user, Double lat, Double lng) {
         this.id = id;
         this.title = title;
         this.date = date;
@@ -60,12 +63,12 @@ public class Event implements Serializable {
         this.user = user;
         this.lat = lat;
         this.lng = lng;
-        this.comments = (comments != null) ? comments : new ArrayList<>();
     }
   
     /**
      * Constructor for creating an event with additional mood and situation details.
      *
+     * @param id             The unique ID of event.
      * @param title          The title of the event.
      * @param date           The date of the event as a String.
      * @param overlayColor   The color overlay associated with the event.
@@ -303,21 +306,6 @@ public class Event implements Serializable {
 
     public String getID(){
         return this.id;
-    }
-
-    public List<String> getComments() {
-        return comments;
-    }
-
-    public void setComments(List<String> comments) {
-        this.comments = comments;
-    }
-
-    public void addComment(String comment) {
-        if (this.comments == null) {
-            this.comments = new ArrayList<>();
-        }
-        this.comments.add(comment);
     }
 
 }
