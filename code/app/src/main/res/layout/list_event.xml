@@ -24,6 +24,17 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <!-- Comment Icon (Top Left) -->
+        <ImageView
+            android:id="@+id/comment_icon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/comment_icon"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Emoticon (Optional) -->
         <ImageView
@@ -36,35 +47,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"/>
-
-        <!-- Follow Section (Text + Checkbox) -->
-        <LinearLayout
-            android:id="@+id/follow_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="8dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <!-- Follow Text -->
-            <TextView
-                android:id="@+id/follow_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="4dp"
-                android:text="Following"
-                android:textColor="@color/black"
-                android:textSize="14sp" />
-
-            <!-- Follow Checkbox -->
-            <CheckBox
-                android:id="@+id/follow_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
 
         <!-- Rounded Semi-Transparent Overlay -->
         <androidx.cardview.widget.CardView

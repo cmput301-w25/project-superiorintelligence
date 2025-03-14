@@ -73,5 +73,14 @@
     <string name="mood_explanation_hint">Quick explanation for your mood!</string>
     <string name="map_toolbar">Mood Map</string>
     <string name="select_emotion_prompt">Select Emotion Prompt</string>
+    <string name="comments">Comments</string>
+    <string name="posted_by">Posted by:</string>
+    <string name="date">Date:</string>
+    <string name="social_situation_with_friends">Social Situation: With Friends</string>
+    <string name="reason_passed_my_exam">Reason: Passed my exam!</string>
+    <string name="mood">Mood:</string>
+    <string name="event_image">Event Image</string>
+    <string name="event_title">Event Title</string>
+    <string name="excited">Excited</string>
 
 </resources>

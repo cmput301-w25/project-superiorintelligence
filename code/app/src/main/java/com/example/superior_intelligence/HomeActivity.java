@@ -75,7 +75,7 @@ public class HomeActivity extends AppCompatActivity implements EventAdapter.OnFo
         tabMyPosts = findViewById(R.id.tab_myposts);
         tabMap = findViewById(R.id.tab_map);
 
-        adapter = new EventAdapter(this, exploreEvents, followedEvents, myPostsEvents, this);
+        adapter = new EventAdapter(this, exploreEvents, followedEvents, myPostsEvents);
         recyclerView.setAdapter(adapter);
 
         loadAllEvents();
