@@ -96,34 +96,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="4dp" />
 
-    <LinearLayout
+    <!-- Follow Request Button -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/follow_request_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/follow_toggle_layout"
         android:padding="12dp"
+        android:text="Follow"
+        android:textSize="16sp"
         android:background="@drawable/rounded_background"
-        android:clickable="true"
-        android:focusable="true"
-        android:orientation="horizontal"
+        android:textColor="@color/black"
         app:layout_constraintTop_toBottomOf="@id/profile_username"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="12dp">
-
-        <TextView
-            android:id="@+id/follow_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Follow"
-            android:textSize="16sp"
-            android:textColor="@color/black"
-            android:paddingEnd="8dp"/>
-
-        <Switch
-            android:id="@+id/follow_toggle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
+        android:layout_marginTop="12dp"/>
 
     <!-- Recent Posts Header -->
     <TextView
@@ -134,7 +120,7 @@
         android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@color/black"
-        app:layout_constraintTop_toBottomOf="@id/follow_toggle_layout"
+        app:layout_constraintTop_toBottomOf="@id/follow_request_button"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginTop="20dp"
         android:layout_marginStart="24dp"/>
