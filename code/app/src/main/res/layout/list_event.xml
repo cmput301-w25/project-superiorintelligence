@@ -21,80 +21,50 @@
             android:background="@color/secondaryGreen"
             android:contentDescription="event"
             android:scaleType="fitXY"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
-
-        <!-- Emoticon (Optional) -->
+        <!-- Comment Icon (Top Left) -->
         <ImageView
-            android:id="@+id/event_emoticon"
+            android:id="@+id/comment_icon"
             android:layout_width="32dp"
             android:layout_height="32dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
             android:scaleType="centerInside"
-            android:visibility="gone"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"/>
-
-        <!-- Follow Section (Text + Checkbox) -->
-        <LinearLayout
-            android:id="@+id/follow_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="8dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
+            android:src="@drawable/comment_icon"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Follow Text -->
-            <TextView
-                android:id="@+id/follow_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="4dp"
-                android:text="Following"
-                android:textColor="@color/black"
-                android:textSize="14sp" />
+        <!-- Emoticon (Optional, Top Right) -->
+        <ImageView
+            android:id="@+id/event_emoticon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            android:scaleType="centerInside"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Follow Checkbox -->
-            <CheckBox
-                android:id="@+id/follow_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <!-- Rounded Semi-Transparent Overlay -->
+        <!-- Rounded Semi-Transparent Overlay for Event Details -->
         <androidx.cardview.widget.CardView
             android:id="@+id/event_overlay"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:cardCornerRadius="28dp"
+            app:cardCornerRadius="12dp"
             app:cardElevation="0dp"
             app:cardBackgroundColor="#99FFFFFF"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="8dp">
-
-                <!-- Event Date -->
-                <TextView
-                    android:id="@+id/event_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Day Month Year"
-                    android:textSize="12sp"
-                    android:textColor="@color/black"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"/>
+                android:layout_height="wrap_content"
+                android:padding="12dp">
 
                 <!-- Event Title -->
                 <TextView
@@ -102,13 +72,29 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Event Title"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/black"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/event_date"
-                    android:layout_marginTop="4dp"/>
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                    android:layout_alignParentStart="true"
+                    android:layout_marginEnd="8dp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <!-- Event Date -->
+                <TextView
+                    android:id="@+id/event_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Day Month Year"
+                    android:textSize="14sp"
+                    android:textColor="@color/black"
+                    android:layout_below="@id/event_title"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginTop="4dp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+            </RelativeLayout>
         </androidx.cardview.widget.CardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -149,7 +149,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
-                android:text="What triggered this mood?"
+                android:text="What is the reason for this mood?"
                 android:textColor="@color/black"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -171,8 +171,8 @@
         android:minHeight="48dp"
         android:background="@drawable/text_input_rounded_box"
         android:padding="12dp"
-        android:maxLength="20"
-        android:hint="Type here (Optional) Max: 20 chars / 3 words"
+        android:maxLength="200"
+        android:hint="Type here (Optional) Max: 200 chars"
         android:textColor="@color/black"
         android:textSize="16sp"
         android:textStyle="bold"
@@ -288,6 +288,7 @@
 
     </FrameLayout>
 
+    <!-- Add Photo Button -->
     <ImageButton
         android:id="@+id/add_photo_button"
         android:layout_width="63dp"
@@ -314,8 +315,8 @@
         android:padding="8dp"
         app:layout_constraintBottom_toTopOf="@+id/map_layout"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/selected_situation"
-        app:layout_constraintVertical_bias="0.186">
+        app:layout_constraintTop_toBottomOf="@+id/selected_situation" >
+        <!--app:layout_constraintVertical_bias="0.186"-->
 
         <ImageButton
             android:id="@+id/emoji_button"

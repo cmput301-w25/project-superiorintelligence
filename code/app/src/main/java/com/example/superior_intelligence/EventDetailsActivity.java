@@ -1,124 +1,215 @@
-/**
- * This class shows details of the mood event when the user interact with the event.
- * Contains button to edit mood
- */
-
 package com.example.superior_intelligence;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class EventDetailsActivity extends AppCompatActivity {
 
     private TextView eventTitle, eventMood, selectedMood, eventReason, eventSituation, eventDate, eventUser;
-    private String title, mood, reason, situation, overlayColor, date, user;
+    private TextView noCommentsText;
+    private EditText commentInput;
+    private RecyclerView commentsRecyclerView;
+    private ImageView eventImage;
+    private ImageButton sendCommentButton, backButton;
+    private CardView profileCard;
 
     private ActivityResultLauncher<Intent> editEventLauncher;
+
+    private boolean isMyPost;
+    private Event currentEvent;
+    private List<String> commentsList;
+    private String currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.event_details);
 
-        ImageView eventImage = findViewById(R.id.event_full_image);
-        eventTitle = findViewById(R.id.event_detail_title);
-        eventMood = findViewById(R.id.event_detail_mood); // "Mood: "
-        selectedMood = findViewById(R.id.selected_mood);  // Dynamic mood
-        eventReason = findViewById(R.id.event_detail_reason);
-        eventSituation = findViewById(R.id.event_detail_situation);
-        eventDate = findViewById(R.id.event_detail_date);
-        eventUser = findViewById(R.id.event_detail_user);
-        ImageButton backButton = findViewById(R.id.back_button);
-        ImageButton editButton = findViewById(R.id.editButton);
+        currentUser = User.getInstance().getUsername();
 
-        // Retrieve event data
-        Intent intent = getIntent();
-        title = intent.getStringExtra("title");
-        mood = intent.getStringExtra("mood");
-        reason = intent.getStringExtra("reason");
-        situation = intent.getStringExtra("situation");
-        overlayColor = intent.getStringExtra("overlayColor");
-        date = intent.getStringExtra("date");
-        user = intent.getStringExtra("user");
+        // Retrieve entire Event object
+        currentEvent = (Event) getIntent().getSerializableExtra("event");
 
-        // Set initial values
-        setEventDetails();
-
-        // Initialize launcher for editing
-        initEditLauncher();
-
-        // Back button
-        backButton.setOnClickListener(v -> {
-            Intent homeIntent = new Intent(EventDetailsActivity.this, HomeActivity.class);
-            homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(homeIntent);
+        if (currentEvent == null) {
+            Log.e("EventDetailsActivity", "No event data passed!");
             finish();
-        });
+            return;
+        }
 
-        // Edit button
-        editButton.setOnClickListener(view -> {
-            Intent editIntent = new Intent(EventDetailsActivity.this, MoodCreateAndEditActivity.class);
-            editIntent.putExtra("title", title);
-            editIntent.putExtra("mood", mood);
-            editIntent.putExtra("reason", reason);
-            editIntent.putExtra("socialSituation", situation);
-            editIntent.putExtra("overlayColor", overlayColor);
-            editEventLauncher.launch(editIntent); // Launch edit and wait for result
-        });
+        isMyPost = currentUser != null && currentUser.equals(currentEvent.getUser());
+        commentsList = currentEvent.getComments() != null ? currentEvent.getComments() : new ArrayList<>();
+
+        // Load appropriate layout
+        setContentView(isMyPost ? R.layout.event_details : R.layout.others_event_details);
+
+        // Initialize UI elements
+        initializeUI();
+        setEventDetails();
+        setupCommentsSection();
+        initEditLauncher(); // Set up editing capability
+
+        // Back button handler
+        backButton.setOnClickListener(v -> finish());
+
+        // Edit button (only for own posts)
+        if (isMyPost) {
+            ImageButton editButton = findViewById(R.id.editButton);
+            editButton.setOnClickListener(view -> {
+                Intent editIntent = new Intent(EventDetailsActivity.this, MoodCreateAndEditActivity.class);
+                editIntent.putExtra("event", currentEvent); // Pass whole Event object
+                editEventLauncher.launch(editIntent);
+            });
+
+            Button deleteButton = findViewById(R.id.delete_button);
+            deleteButton.setOnClickListener(view -> {
+                String currId = currentEvent.getID();
+                // delete currId from database
+
+                // go back to home page
+                finish();
+            });
+        }
     }
 
     /**
-     * initEditLauncher function retrieve result from the mood event user clicked on
+     * Initializes the launcher to handle edit results.
      */
     private void initEditLauncher() {
         editEventLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                        // Get updated details
-                        title = result.getData().getStringExtra("title");
-                        mood = result.getData().getStringExtra("mood");
-                        reason = result.getData().getStringExtra("reason");
-                        situation = result.getData().getStringExtra("socialSituation");
-                        overlayColor = result.getData().getStringExtra("overlayColor");
-
-                        // Refresh display
-                        setEventDetails();
+                        Event updatedEvent = (Event) result.getData().getSerializableExtra("newEvent");
+                        if (updatedEvent != null) {
+                            // Return to HomeActivity with updated event
+                            Intent returnIntent = new Intent();
+                            returnIntent.putExtra("newEvent", updatedEvent);
+                            returnIntent.putExtra("selectedTab", "myposts");
+                            setResult(RESULT_OK, returnIntent);
+                            finish(); // Close details activity
+                        }
                     }
                 }
         );
     }
 
     /**
-     * setEventDetails function set the retrieved details of moodEvent on the screen
+     * Sets event details into UI.
      */
     private void setEventDetails() {
-        eventTitle.setText(title);
+        eventTitle.setText(currentEvent.getTitle());
         eventMood.setText("Mood: ");
-        selectedMood.setText(mood);
+        selectedMood.setText(currentEvent.getMood());
 
         // Set color dynamically
+        String overlayColor = currentEvent.getOverlayColor();
         if (overlayColor != null && !overlayColor.isEmpty()) {
-            GradientDrawable bgShape = (GradientDrawable) selectedMood.getBackground().mutate(); // Ensure mutable instance
+            GradientDrawable bgShape = (GradientDrawable) selectedMood.getBackground().mutate();
             bgShape.setColor(Color.parseColor(overlayColor));
         }
 
-        // Ensure non-null values
-        eventReason.setText("Reason: " + (reason != null ? reason : "No reason provided"));
-        if (situation.equals("Select a Situation")) {
+        eventReason.setText("Reason: " + (currentEvent.getMoodExplanation() != null ? currentEvent.getMoodExplanation() : "No reason provided"));
+        String situation = currentEvent.getSituation();
+        if ("Select a Situation".equals(situation)) {
             eventSituation.setText("Social Situation: No situation provided");
         } else {
             eventSituation.setText("Social Situation: " + (situation != null ? situation : "No situation provided"));
         }
-        eventDate.setText("Date: " + (date != null ? date : "Unknown Date"));
-        eventUser.setText("Posted by: " + (user != null ? user : "Anonymous"));
+        eventDate.setText("Date: " + (currentEvent.getDate() != null ? currentEvent.getDate() : "Unknown Date"));
+        eventUser.setText("Posted by: " + (currentEvent.getUser() != null ? currentEvent.getUser() : "Anonymous"));
+
+        // Handle image loading
+        String imageDocID = currentEvent.getImageUrl();
+        if (imageDocID != null && !imageDocID.isEmpty()) {
+            Photobase photobase = new Photobase(this);
+            photobase.loadImage(imageDocID, new Photobase.ImageLoadCallback() {
+                @Override
+                public void onImageLoaded(Bitmap bitmap) {
+                    eventImage.setVisibility(View.VISIBLE);
+                    eventImage.setImageBitmap(bitmap);
+                }
+
+                @Override
+                public void onImageLoadFailed(String error) {
+                    eventImage.setVisibility(View.GONE);
+                    Log.e("EventDetailsActivity", "Failed to load event image: " + error);
+                }
+            });
+        } else {
+            eventImage.setVisibility(View.GONE);
+        }
+    }
+
+    /**
+     * Initializes and sets up comments section.
+     */
+    private void setupCommentsSection() {
+        if (commentsList.isEmpty()) {
+            commentsRecyclerView.setVisibility(View.GONE);
+            noCommentsText.setVisibility(View.VISIBLE);
+        } else {
+            noCommentsText.setVisibility(View.GONE);
+            commentsRecyclerView.setVisibility(View.VISIBLE);
+            commentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+            commentsRecyclerView.setAdapter(new CommentsAdapter(commentsList));
+        }
+    }
+
+    /**
+     * Initializes common UI elements.
+     */
+    private void initializeUI() {
+        eventImage = findViewById(R.id.event_full_image);
+        eventTitle = findViewById(R.id.event_detail_title);
+        eventMood = findViewById(R.id.event_detail_mood);
+        selectedMood = findViewById(R.id.selected_mood);
+        eventReason = findViewById(R.id.event_detail_reason);
+        eventSituation = findViewById(R.id.event_detail_situation);
+        eventDate = findViewById(R.id.event_detail_date);
+        eventUser = findViewById(R.id.event_detail_user);
+        backButton = findViewById(R.id.back_button);
+        noCommentsText = findViewById(R.id.no_comments_text);
+        commentsRecyclerView = findViewById(R.id.comments_recycler_view);
+        profileCard = findViewById(R.id.profile_image);
+
+        // For others' posts, enable commenting
+        if (!isMyPost) {
+            commentInput = findViewById(R.id.comment_input);
+            sendCommentButton = findViewById(R.id.send_comment_button);
+            sendCommentButton.setOnClickListener(view -> {
+                String newComment = commentInput.getText().toString().trim();
+                if (!newComment.isEmpty()) {
+                    commentsList.add(newComment);
+                    commentInput.setText("");
+                    setupCommentsSection();
+                }
+            });
+
+            profileCard.setOnClickListener(view -> {
+                if (currentEvent.getUser() != null) {
+                    Intent profileIntent = new Intent(EventDetailsActivity.this, OtherUserProfileActivity.class);
+                    profileIntent.putExtra("username", currentEvent.getUser());
+                    startActivity(profileIntent);
+                }
+            });
+        }
     }
 }

@@ -28,14 +28,27 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 
 public class MoodCreateAndEditActivity extends AppCompatActivity {
+
+    // Unique ID for Mood Event
+    private String eventID;
+    private String eventDate;
+
+    // Passing an event
+    private Event currentEvent;
+
 
     // Title
     EditText headerTitle;
@@ -142,18 +155,33 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
             }
         });
 
-        // If editing an existing post, retrieve old data
+        // Retrieve whole Event object if passed for editing
         Intent intent = getIntent();
-        String title = intent.getStringExtra("title");
-        String mood = intent.getStringExtra("mood");
-        String reason = intent.getStringExtra("reason");
-        String situation = intent.getStringExtra("socialSituation");
+        currentEvent = (Event) intent.getSerializableExtra("event"); // Get full Event object
 
-        headerTitle.setText(title);
-        triggerExplanation.setText(reason);
-        // If you want to set the spinner text, you’d also need to set the spinner selection
-        // selectedMood.setText(mood);
-        // selectedSituation.setText(situation);
+        if (currentEvent != null) {
+            // Pre-fill fields using getters
+            eventID = currentEvent.getID();
+            eventDate = currentEvent.getDate(); // Preserved date
+            imageUrl = currentEvent.getImageUrl();
+
+            headerTitle.setText(currentEvent.getTitle());
+            triggerExplanation.setText(currentEvent.getMoodExplanation());
+
+            // Set mood spinner
+            if (currentEvent.getMood() != null) {
+                ArrayAdapter<String> moodAdapter = (ArrayAdapter<String>) emotionSpinner.getAdapter();
+                int moodPosition = moodAdapter.getPosition(currentEvent.getMood());
+                if (moodPosition >= 0) emotionSpinner.setSelection(moodPosition);
+            }
+
+            // Set situation spinner
+            if (currentEvent.getSituation() != null) {
+                ArrayAdapter<String> situationAdapter = (ArrayAdapter<String>) situationSpinner.getAdapter();
+                int situationPosition = situationAdapter.getPosition(currentEvent.getSituation());
+                if (situationPosition >= 0) situationSpinner.setSelection(situationPosition);
+            }
+        }
 
         // Back button returns to HomeActivity
         backButton.setOnClickListener(v -> {
@@ -161,14 +189,14 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
             finish();
         });
 
-        // Add photo
+        // Add photo button
         addPhotoButton.setOnClickListener(v -> {
             Intent photoIntent = new Intent(MoodCreateAndEditActivity.this, PhotoActivity.class);
             photoActivityLauncher.launch(photoIntent);
         });
 
         // Confirm button
-        confirmButton.setOnClickListener(v -> handleConfirmClick());
+        confirmButton.setOnClickListener(v -> handleConfirmClick()); // Existing logic
     }
 
     /**
@@ -315,45 +343,62 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         // Validate explanation
         String explanation = triggerExplanation.getText().toString().trim();
         if (!explanation.isEmpty() && !isValidExplanation(explanation)) {
-            Toast.makeText(this, "Reason must be max 20 characters or 3 words.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Reason must be max 200.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Create the new Event object
-        Event newEvent = createNewEvent();
-        Log.d("MoodCreateAndEditActivity", "Navigating to HomeActivity with newEvent: " + newEvent.getTitle());
-        // Navigate back to Home, ensuring the activity stack is cleared
-        Intent intent = new Intent(MoodCreateAndEditActivity.this, HomeActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra("selectedTab", "myposts");
-        intent.putExtra("newEvent", newEvent);
-        startActivity(intent);
-        Log.d("MoodCreateAndEditActivity", "Intent to HomeActivity started.");
-        finish(); // Ensure MoodCreateAndEditActivity is destroyed
+        String title = headerTitle.getText().toString().trim();
+
+        Database database = new Database(); // Instance to handle Firestore
+
+        if (eventID == null || eventID.isEmpty()) {
+            // CREATE new Event scenario
+            Event newEvent = createNewEvent();
+            Log.d("MoodCreateAndEditActivity", "Navigating to HomeActivity with newEvent: " + newEvent.getTitle());
+
+            // Save to Firestore first, then navigate back
+            database.saveEventToFirebase(newEvent, success -> {
+                if (success) {
+                    Log.d("MoodCreateAndEditActivity", "Event successfully saved to Firestore.");
+                    Intent intent = new Intent(MoodCreateAndEditActivity.this, HomeActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("selectedTab", "myposts");
+                    intent.putExtra("newEvent", newEvent);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    Toast.makeText(MoodCreateAndEditActivity.this, "Failed to save event.", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        } else {
+            // UPDATE existing Event scenario using `currentEvent.getDate()`
+            String preservedDate = currentEvent.getDate(); // Fallback to eventDate if needed
+            Event updatedEvent = createUpdatedEvent(eventID, preservedDate);
+
+            // Update in Firestore
+            database.updateEvent(updatedEvent, success -> {
+                if (success) {
+                    Toast.makeText(MoodCreateAndEditActivity.this, "Event updated successfully!", Toast.LENGTH_SHORT).show();
+                    Intent returnIntent = new Intent();
+                    returnIntent.putExtra("newEvent", updatedEvent);
+                    returnIntent.putExtra("selectedTab", "myposts");
+                    setResult(RESULT_OK, returnIntent);
+                    finish(); // Close and return
+                } else {
+                    Toast.makeText(MoodCreateAndEditActivity.this, "Failed to update event.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     /**
-     * Checks that explanation is at most 20 chars OR 3 words.
+     * Create the Event object when editing an existing event.
      */
-    private boolean isValidExplanation(String explanation) {
-        if (explanation.isEmpty()) {
-            return true; // optional field
-        }
-        if (explanation.length() > 20) {
-            return false;
-        }
-        String[] words = explanation.split("\\s+");
-        return words.length <= 3;
-    }
+    Event createUpdatedEvent(String existingId, String eventDate) { // Accept date from caller
 
-    /**
-     * Create the Event object with all user inputs.
-     */
-    Event createNewEvent() {
         String eventTitle = headerTitle.getText().toString().trim();
-        String eventDate = new SimpleDateFormat("dd MMM yyyy, HH:mm",
-                Locale.getDefault()).format(new Date());
-        String overlayColor = "#FFD700";
+
         int emojiResource = includeEmojiCheckbox.isChecked()
                 ? updateEmojiIcon(selectedMood.getText().toString())
                 : 0;
@@ -363,11 +408,53 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         String moodExplanation = triggerExplanation.getText().toString();
         String situation = selectedSituation.getText().toString();
         String finalImageUrl = (imageUrl != null) ? imageUrl : "";
+        String overlayColor = getOverlayColorForMood(mood);
+        User user = User.getInstance();
+
+        return new Event(
+                existingId, eventTitle, eventDate, overlayColor, finalImageUrl,
+                emojiResource, isFollowed, isMyPost,
+                mood, moodExplanation, situation, user.getUsername(),
+                lat, lng
+        );
+    }
+
+
+    /**
+     * Checks that explanation is at most 200 characters
+     */
+    private boolean isValidExplanation(String explanation) {
+        if (explanation.length() > 200) {
+            return false;
+        }
+        return true;
+
+    }
+
+    /**
+     * Create the Event object with all user inputs.
+     */
+    Event createNewEvent() {
+        String eventID = UUID.randomUUID().toString();
+        String eventTitle = headerTitle.getText().toString().trim();
+        String eventDate = new SimpleDateFormat("dd MMM yyyy, HH:mm",
+                Locale.getDefault()).format(new Date());
+
+        int emojiResource = includeEmojiCheckbox.isChecked()
+                ? updateEmojiIcon(selectedMood.getText().toString())
+                : 0;
+        boolean isFollowed = false;
+        boolean isMyPost = true;
+        String mood = selectedMood.getText().toString();
+        String moodExplanation = triggerExplanation.getText().toString();
+        String situation = selectedSituation.getText().toString();
+        String finalImageUrl = (imageUrl != null) ? imageUrl : "";
+        String overlayColor = getOverlayColorForMood(mood);
         User user = User.getInstance();
 
         // Make sure your Event constructor includes lat & lng if you want to store them
         return new Event(
-                eventTitle, eventDate, overlayColor, finalImageUrl,
+                eventID, eventTitle, eventDate, overlayColor, finalImageUrl,
                 emojiResource, isFollowed, isMyPost,
                 mood, moodExplanation, situation, user.getUsername(),
                 lat, lng
@@ -426,4 +513,5 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
                 return "#FFD700"; // Default to Yellow
         }
     }
+
 }

@@ -1,14 +1,11 @@
 package com.example.superior_intelligence;
-
+import com.example.superior_intelligence.Photobase;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Handler;
+import android.content.Context;
 import android.os.Looper;
-import android.util.Base64;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,11 +16,8 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Adapter for displaying a list of events in a RecyclerView.
@@ -31,60 +25,15 @@ import java.util.Objects;
  */
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> {
 
-    private final List<Event> exploreEvents;
-    private final List<Event> followedEvents;
-    private final List<Event> myPostsEvents;
-    private List<Event> currentList;
+    private List<Event> currentList = new ArrayList<>();
+    private final Context context;
 
-    private final Handler handler = new Handler(Looper.getMainLooper());
-
-    /**
-     * Interface for handling follow/unfollow actions.
-     */
-    public interface OnFollowToggleListener {
-        void onFollowToggled(Event event, boolean isFollowed);
-    }
-    private final OnFollowToggleListener followToggleListener;
-
-    /**
-     * Constructs an `EventAdapter` with a list of events and a listener for follow toggles.
-     *
-     * @param exploreEvents The list of events to be displayed.
-     * @param followedEvents List of followed events.
-     * @param myPostsEvents List of followed events.
-     * @param followToggleListener The listener handling follow/unfollow actions.
-     */
-    public EventAdapter(
-            List<Event> exploreEvents,
-            List<Event> followedEvents,
-            List<Event> myPostsEvents,
-            OnFollowToggleListener followToggleListener
-    ) {
-        this.exploreEvents = (exploreEvents != null) ? exploreEvents : new ArrayList<>();
-        this.followedEvents = (followedEvents != null) ? followedEvents : new ArrayList<>();
-        this.myPostsEvents = (myPostsEvents != null) ? myPostsEvents : new ArrayList<>();
-
-        this.currentList = this.exploreEvents; // default tab
-        this.followToggleListener = followToggleListener;
+    public EventAdapter(@NonNull Context context) {
+        this.context = context;
     }
 
-    /**
-     * Updates the adapter's dataset and refreshes the list.
-     *
-     * @param newList The updated list of events.
-     */
     public void setEvents(List<Event> newList) {
-        // Ensure only MyPosts appear in MyPosts tab
-        if (currentList == myPostsEvents) {
-            currentList = new ArrayList<>();
-            for (Event event : newList) {
-                if (event.isMyPost()) {
-                    currentList.add(event);
-                }
-            }
-        } else {
-            currentList = newList;
-        }
+        this.currentList = newList; // Directly set the list
         notifyDataSetChanged();
     }
 
@@ -100,178 +49,55 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Event event = currentList.get(position);
 
-        // Set title & date
+        // Set title and date
         holder.eventTitle.setText(event.getTitle());
         holder.eventDate.setText(event.getDate());
 
-        // Set overlay color
-        String colorStr = (event.getOverlayColor() != null && !event.getOverlayColor().isEmpty())
-                ? event.getOverlayColor() : "#99FFFFFF";
-        holder.eventOverlay.setCardBackgroundColor(Color.parseColor(colorStr));
-        holder.eventOverlay.getBackground().setAlpha(200);
-
-        // Load image from Firestore if exists
-        if (event.getImageUrl() != null && !event.getImageUrl().isEmpty()) {
-            fetchImageFromFirestore(event.getImageUrl(), new ImageLoadCallback() {
-                @Override
-                public void onImageLoaded(Bitmap bitmap) {
-                    holder.eventImage.setImageBitmap(bitmap);
-                }
-
-                @Override
-                public void onImageLoadFailed(String error) {
-                    Log.e("EventAdapter", "Failed to load image: " + error);
-                    holder.eventImage.setBackgroundResource(R.color.secondaryGreen); // Default background
-                }
-            });
+        // Set overlay color dynamically
+        String colorStr = event.getOverlayColor();
+        if (colorStr != null && !colorStr.isEmpty()) {
+            holder.eventOverlay.setCardBackgroundColor(Color.parseColor(colorStr));
         } else {
-            holder.eventImage.setBackgroundResource(R.color.secondaryGreen); // Default if no image
+            holder.eventOverlay.setCardBackgroundColor(Color.parseColor("#99FFFFFF")); // Default fallback color
         }
 
-        // Only show emoji if user selected it
+        // Set emoji if present
         if (event.getEmojiResource() != 0) {
             holder.eventEmoticon.setVisibility(View.VISIBLE);
             holder.eventEmoticon.setImageResource(event.getEmojiResource());
         } else {
-            holder.eventEmoticon.setVisibility(View.GONE);
+            holder.eventEmoticon.setVisibility(View.GONE); // Hide emoji if none
         }
 
-        // Click listener to open EventDetailsActivity
+        // Handle click to open details
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(v.getContext(), EventDetailsActivity.class);
-            intent.putExtra("title", event.getTitle());
-            intent.putExtra("mood", event.getMood());
-            intent.putExtra("reason", event.getMoodExplanation());
-            intent.putExtra("situation", event.getSituation());
-            intent.putExtra("imageUrl", event.getImageUrl());
-            intent.putExtra("overlayColor", event.getOverlayColor());
-            intent.putExtra("emojiResource", event.getEmojiResource());
-            intent.putExtra("date", event.getDate()); 
-            intent.putExtra("user", event.getUser());
-            v.getContext().startActivity(intent);
+            Intent intent = new Intent(context, EventDetailsActivity.class);
+            intent.putExtra("event", event); // Pass entire event object
+            context.startActivity(intent);
         });
-
-        // Completely hide follow options for MyPosts
-        if (event.isMyPost()) {
-            holder.followText.setVisibility(View.GONE);
-            holder.followCheckbox.setVisibility(View.GONE);
-        } else {
-            holder.followText.setVisibility(View.VISIBLE);
-            holder.followCheckbox.setVisibility(View.VISIBLE);
-
-            // Ensure follow text & checkbox reflect actual state
-            holder.followText.setText(event.isFollowed() ? "Following" : "Follow");
-            holder.followCheckbox.setOnCheckedChangeListener(null); // Remove listener before updating state
-            holder.followCheckbox.setChecked(event.isFollowed());
-
-            // Follow/unfollow logic
-            holder.followCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                event.setFollowed(isChecked);
-                holder.followText.setText(isChecked ? "Following" : "Follow");
-
-                // Move event between Explore & Followed lists
-                if (isChecked) {
-                    if (!followedEvents.contains(event)) {
-                        followedEvents.add(event);
-                        exploreEvents.remove(event);
-                    }
-                } else {
-                    if (!exploreEvents.contains(event)) {
-                        exploreEvents.add(event);
-                        followedEvents.remove(event);
-                    }
-                }
-
-                // Notify HomeActivity of follow status change
-                if (followToggleListener != null) {
-                    followToggleListener.onFollowToggled(event, isChecked);
-                }
-
-                // Ensure RecyclerView refreshes properly
-                handler.post(() -> {
-                    if (currentList == exploreEvents) {
-                        setEvents(exploreEvents);
-                    } else if (currentList == followedEvents) {
-                        setEvents(followedEvents);
-                    } else {
-                        setEvents(myPostsEvents);
-                    }
-                });
-            });
-        }
     }
 
-    // Fetch image from Firestore using document ID
-    private void fetchImageFromFirestore(String documentId, ImageLoadCallback callback) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("images").document(documentId)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        String base64Image = documentSnapshot.getString("imgData");
-                        if (base64Image != null && !base64Image.isEmpty()) {
-                            Bitmap bitmap = base64ToBitmap(base64Image);
-                            callback.onImageLoaded(bitmap); // Return the bitmap
-                        } else {
-                            callback.onImageLoadFailed("No image data found");
-                        }
-                    } else {
-                        callback.onImageLoadFailed("Document does not exist");
-                    }
-                })
-                .addOnFailureListener(e -> callback.onImageLoadFailed("Failed to retrieve image: " + e.getMessage()));
-    }
-
-    // Convert Base64 string to Bitmap
-    private Bitmap base64ToBitmap(String base64Str) {
-        try {
-            byte[] decodedBytes = Base64.decode(base64Str, Base64.DEFAULT);
-            return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
-        } catch (Exception e) {
-            Log.e("EventAdapter", "Error decoding Base64", e);
-            return null;
-        }
-    }
-
-    // Callback interface for image loading
-    public interface ImageLoadCallback {
-        void onImageLoaded(Bitmap bitmap);
-        void onImageLoadFailed(String error);
-    }
-
-    /**
-     * Returns the total number of items in the list.
-     *
-     * @return The size of the event list.
-     */
     @Override
     public int getItemCount() {
         return currentList.size();
     }
 
-    /**
-     * ViewHolder class representing an individual item in the RecyclerView.
-     */
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView eventTitle, eventDate, followText;
+        // Declare all required views here
+        TextView eventTitle, eventDate;
         CardView eventOverlay;
-        ImageView eventImage, eventEmoticon;
-        CheckBox followCheckbox;
+        ImageView eventEmoticon, eventImage, commentIcon;
 
-        /**
-         * Constructor for initializing the ViewHolder with views.
-         *
-         * @param itemView The view representing an individual list item.
-         */
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            // Initialize all views here
             eventTitle = itemView.findViewById(R.id.event_title);
             eventDate = itemView.findViewById(R.id.event_date);
             eventOverlay = itemView.findViewById(R.id.event_overlay);
-            eventImage = itemView.findViewById(R.id.event_image);
             eventEmoticon = itemView.findViewById(R.id.event_emoticon);
-            followText = itemView.findViewById(R.id.follow_text);
-            followCheckbox = itemView.findViewById(R.id.follow_checkbox);
+            eventImage = itemView.findViewById(R.id.event_image);
+            commentIcon = itemView.findViewById(R.id.comment_icon);
         }
     }
+
 }
