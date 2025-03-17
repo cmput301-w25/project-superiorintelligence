@@ -66,6 +66,7 @@ public class Event implements Serializable {
     /**
      * Constructor for creating an event with additional mood and situation details.
      *
+     * @param id             The unique ID for mood events.
      * @param title          The title of the event.
      * @param date           The date of the event as a String.
      * @param overlayColor   The color overlay associated with the event.
