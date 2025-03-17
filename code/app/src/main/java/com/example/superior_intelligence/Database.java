@@ -9,6 +9,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Database {
     private final FirebaseFirestore db;
@@ -23,9 +24,6 @@ public class Database {
      * Saves a new Event object to Firestore.
      */
     public void saveEventToFirebase(@NonNull Event event, @NonNull OnEventSavedCallback callback) {
-        // Convert Event to a Map
-        // (Same as your old saveEventToFirebase method in HomeActivity)
-
         // Ensure event has an ID (UUID)
         if (event.getID() == null || event.getID().isEmpty()) {
             event.setID(java.util.UUID.randomUUID().toString());
@@ -45,8 +43,32 @@ public class Database {
             Log.e("EventRepository", "Failed to convert event", e);
             callback.onEventSaved(false);
         }
-
     }
+
+    /**
+     * Updates an existing Event in Firestore.
+     */
+    public void updateEvent(@NonNull Event event, @NonNull OnEventUpdateListener callback) {
+        try {
+            // Convert Event to a Map using your existing Mapper utility
+            Map<String, Object> updatedEventData = Mapper.eventToMap(event);
+
+            // Update the document in Firestore
+            myPostsRef.document(event.getID()).set(updatedEventData)
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d("EventRepository", "Event updated with ID: " + event.getID());
+                        callback.onEventUpdated(true);
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.w("EventRepository", "Error updating event", e);
+                        callback.onEventUpdated(false);
+                    });
+        } catch (Exception e) {
+            Log.e("EventRepository", "Failed to convert event for update", e);
+            callback.onEventUpdated(false);
+        }
+    }
+
     /**
      * Loads all events from Firestore, separating them into explore/followed/myPosts
      * based on the current logged in user.
@@ -108,11 +130,19 @@ public class Database {
                     }
                 });
     }
+
     /**
-     * Simple callback for saving events.
+     * Callback for saving events.
      */
     public interface OnEventSavedCallback {
         void onEventSaved(boolean success);
+    }
+
+    /**
+     * Callback for updating events.
+     */
+    public interface OnEventUpdateListener {
+        void onEventUpdated(boolean success);
     }
 
     /**
@@ -121,5 +151,4 @@ public class Database {
     public interface OnEventsLoadedCallback {
         void onEventsLoaded(List<Event> myPosts, List<Event> explore, List<Event> followed);
     }
-
 }
