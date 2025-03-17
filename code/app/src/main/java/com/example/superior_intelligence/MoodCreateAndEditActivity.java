@@ -421,7 +421,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
 
 
     /**
-     * Checks that explanation is at most 20 chars OR 3 words.
+     * Checks that explanation is at most 200 characters
      */
     private boolean isValidExplanation(String explanation) {
         if (explanation.length() > 200) {
