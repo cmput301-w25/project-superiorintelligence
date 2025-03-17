@@ -3,10 +3,12 @@ package com.example.superior_intelligence;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Movie;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -18,6 +20,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +39,7 @@ public class EventDetailsActivity extends AppCompatActivity {
     private CardView profileCard;
 
     private ActivityResultLauncher<Intent> editEventLauncher;
+    private ActivityResultLauncher<Intent> deleteEventLauncher;
 
     private boolean isMyPost;
     private Event currentEvent;
@@ -78,16 +85,26 @@ public class EventDetailsActivity extends AppCompatActivity {
                 editEventLauncher.launch(editIntent);
             });
 
+            /*
             Button deleteButton = findViewById(R.id.delete_button);
             deleteButton.setOnClickListener(view -> {
                 String currId = currentEvent.getID();
                 // delete currId from database
-
+                //deleteCurEvent(currId);
                 // go back to home page
                 finish();
             });
+             */
         }
     }
+
+    /*
+    private void deleteCurEvent(String currId){
+        Database db = new Database();
+        db.deleteEvent(currId);
+    }
+
+     */
 
     /**
      * Initializes the launcher to handle edit results.
