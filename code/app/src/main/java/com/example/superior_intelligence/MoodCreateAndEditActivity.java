@@ -343,7 +343,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         // Validate explanation
         String explanation = triggerExplanation.getText().toString().trim();
         if (!explanation.isEmpty() && !isValidExplanation(explanation)) {
-            Toast.makeText(this, "Reason must be max 20 characters or 3 words.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Reason must be max 200.", Toast.LENGTH_SHORT).show();
             return;
         }
 
