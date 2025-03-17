@@ -37,7 +37,7 @@ public class EventDetailsActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> editEventLauncher;
     private boolean isMyPost;
     private List<String> commentsList;
-    private ImageButton sendCommentButton, backButton;
+    private ImageButton sendCommentButton, backButton, deleteButton;
     private CardView profileCard;
 
     @Override
@@ -58,6 +58,8 @@ public class EventDetailsActivity extends AppCompatActivity {
         noCommentsText = findViewById(R.id.no_comments_text);
         ImageButton backButton = findViewById(R.id.back_button);
         ImageButton editButton = findViewById(R.id.editButton);
+        // connect delete button to xml
+
 
         // Retrieve event data
         Intent intent = getIntent();
@@ -109,6 +111,11 @@ public class EventDetailsActivity extends AppCompatActivity {
             editIntent.putExtra("socialSituation", situation);
             editIntent.putExtra("overlayColor", overlayColor);
             editEventLauncher.launch(editIntent); // Launch edit and wait for result
+        });
+
+        // Delete button
+        deleteButton.setOnClickListener(view -> {
+
         });
     }
 
