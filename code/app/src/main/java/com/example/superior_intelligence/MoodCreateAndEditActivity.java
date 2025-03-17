@@ -343,7 +343,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         // Validate explanation
         String explanation = triggerExplanation.getText().toString().trim();
         if (!explanation.isEmpty() && !isValidExplanation(explanation)) {
-            Toast.makeText(this, "Reason must be max 20 characters or 3 words.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Reason must be max 200.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -421,17 +421,14 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
 
 
     /**
-     * Checks that explanation is at most 20 chars OR 3 words.
+     * Checks that explanation is at most 200 characters
      */
     private boolean isValidExplanation(String explanation) {
-        if (explanation.isEmpty()) {
-            return true; // optional field
-        }
-        if (explanation.length() > 20) {
+        if (explanation.length() > 200) {
             return false;
         }
-        String[] words = explanation.split("\\s+");
-        return words.length <= 3;
+        return true;
+
     }
 
     /**
