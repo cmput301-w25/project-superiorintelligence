@@ -7,6 +7,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -75,6 +76,15 @@ public class EventDetailsActivity extends AppCompatActivity {
                 Intent editIntent = new Intent(EventDetailsActivity.this, MoodCreateAndEditActivity.class);
                 editIntent.putExtra("event", currentEvent); // Pass whole Event object
                 editEventLauncher.launch(editIntent);
+            });
+
+            Button deleteButton = findViewById(R.id.delete_button);
+            deleteButton.setOnClickListener(view -> {
+                String currId = currentEvent.getID();
+                // delete currId from database
+
+                // go back to home page
+                finish();
             });
         }
     }
