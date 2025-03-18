@@ -45,7 +45,7 @@ public class Event implements Serializable {
      * @param imageUrl      The URL of the image associated with the event.
      * @param emojiResource The emoji resource ID for the mood.
      * @param isFollowed    Whether the event is followed by the user.
-     * @param isMyPost      Whether the event was created by the user.
+     * @param isMyPost      Whether the event was created by the user.25
      * @param user          The username of the event creator.
      */
     public Event(String id, String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String user, Double lat, Double lng, List<String> comments) {
