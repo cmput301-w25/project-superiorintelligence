@@ -85,26 +85,26 @@ public class EventDetailsActivity extends AppCompatActivity {
                 editEventLauncher.launch(editIntent);
             });
 
-            /*
+
             Button deleteButton = findViewById(R.id.delete_button);
             deleteButton.setOnClickListener(view -> {
                 String currId = currentEvent.getID();
                 // delete currId from database
-                //deleteCurEvent(currId);
+                deleteCurEvent(currId);
                 // go back to home page
                 finish();
             });
-             */
+
         }
     }
 
-    /*
+
     private void deleteCurEvent(String currId){
         Database db = new Database();
         db.deleteEvent(currId);
     }
 
-     */
+
 
     /**
      * Initializes the launcher to handle edit results.
