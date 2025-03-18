@@ -5,6 +5,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import java.util.Map;
 public class Database {
     private final FirebaseFirestore db;
     private final CollectionReference myPostsRef;
+    private DocumentReference docRef;
 
     public Database() {
         db = FirebaseFirestore.getInstance();
@@ -132,6 +134,14 @@ public class Database {
     }
 
     /**
+     * Delete Event from Firestore
+     */
+    public void deleteEvent(String eventID){
+        myPostsRef.document(eventID).delete();
+
+    }
+
+    /**
      * Callback for saving events.
      */
     public interface OnEventSavedCallback {
@@ -150,5 +160,9 @@ public class Database {
      */
     public interface OnEventsLoadedCallback {
         void onEventsLoaded(List<Event> myPosts, List<Event> explore, List<Event> followed);
+    }
+
+    public CollectionReference getMyPostsRef() {
+        return myPostsRef;
     }
 }
