@@ -1,15 +1,10 @@
 package com.example.superior_intelligence;
-import com.example.superior_intelligence.Photobase;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.os.Handler;
 import android.content.Context;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -26,10 +21,14 @@ import java.util.List;
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> {
 
     private List<Event> currentList = new ArrayList<>();
-    private final Context context;
+    private Context context;
 
     public EventAdapter(@NonNull Context context) {
         this.context = context;
+    }
+
+    public EventAdapter(ArrayList<Event> eventList) {
+
     }
 
     public void setEvents(List<Event> newList) {
