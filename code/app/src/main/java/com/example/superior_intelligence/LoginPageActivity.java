@@ -91,7 +91,7 @@ public class LoginPageActivity extends AppCompatActivity {
      */
     public void checkUser() {
         String userUsername = loginUsername.getText().toString().trim();
-        Userbase userbase = new Userbase();
+        Userbase userbase = Userbase.getInstance();
         userbase.checkUserExists(userUsername, (exists, name, username) -> {
             if (exists) {
                 // Populate the global User instance

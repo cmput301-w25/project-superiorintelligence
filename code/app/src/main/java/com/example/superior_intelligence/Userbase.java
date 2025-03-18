@@ -27,11 +27,10 @@ public class Userbase {
 
     public void checkUserExists(String username, UserCheckCallback callback) {
         db.collection("users")
-                .whereEqualTo("username", username)
+                .document(username)
                 .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (!queryDocumentSnapshots.isEmpty()) {
-                        DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
+                .addOnSuccessListener(document -> {
+                    if (document.exists()) {
                         String name = document.getString("name");
                         callback.onUserChecked(true, name, username);
                     } else {
@@ -50,11 +49,10 @@ public class Userbase {
         }
 
         db.collection("users")
-                .whereEqualTo("username", username)
+                .document(username)
                 .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    if (!querySnapshot.isEmpty()) {
-                        DocumentSnapshot document = querySnapshot.getDocuments().get(0);
+                .addOnSuccessListener(document -> {
+                    if (document.exists()) {
                         String name = document.getString("name");
                         callback.onUserDetailsFetched(true, username, name);
                     } else {
@@ -70,36 +68,12 @@ public class Userbase {
         // You can also rename HelperClass to something like SignUpUser if you prefer.
         HelperClass userData = new HelperClass(name, username);
         db.collection("users")
-                .add(userData)
-                .addOnSuccessListener(documentReference -> callback.onUserCreated(true))
+                .document(username)
+                .set(userData)
+                .addOnSuccessListener(aVoid -> callback.onUserCreated(true))
                 .addOnFailureListener(e -> callback.onUserCreated(false));
     }
 
-    public void followUser(String currentUser, String targetUser, FollowActionCallback callback) {
-        db.collection("users").document(currentUser)
-                .collection("following")
-                .document(targetUser)
-                .delete()
-                .addOnSuccessListener(aVoid -> {
-                    // Remove from "followers" list of target user
-                    db.collection("users").document(targetUser)
-                            .collection("followers")
-                            .document(currentUser)
-                            .delete()
-                            .addOnSuccessListener(aVoid2 -> {
-                                Log.d("Userbase", currentUser + " unfollowed " + targetUser);
-                                callback.onFollowAction(true);
-                            })
-                            .addOnFailureListener(e -> {
-                                Log.e("Userbase", "Failed to remove from followers list", e);
-                                callback.onFollowAction(false);
-                            });
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("Userbase", "Failed to remove from following list", e);
-                    callback.onFollowAction(false);
-                });
-    }
 
     public void unfollowUser(String currentUser, String targetUser, FollowActionCallback callback) {
         db.collection("users").document(currentUser)
@@ -116,11 +90,15 @@ public class Userbase {
     public void checkFollowStatus(String currentUser, String targetUser, FollowCheckCallback callback) {
         db.collection("user")
                 .document(currentUser)
-                .collection("following")
-                .document(targetUser)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
-                    callback.onFollowChecked(documentSnapshot.exists());
+                    if (!documentSnapshot.exists()) {
+                        callback.onFollowChecked(false);
+                    } else {
+                        List<String> following = (List<String>) documentSnapshot.get("following");
+                        boolean isFollowing = (following != null && following.contains(targetUser));
+                        callback.onFollowChecked(isFollowing);
+                    }
                 })
                 .addOnFailureListener(e -> callback.onFollowChecked(false));
     }
@@ -194,19 +172,6 @@ public class Userbase {
                 });
     }
 
-    public void getUserFollowers(String username, UserListCallback callback) {
-        db.collection("users").document(username)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        List<String> followers = (List<String>) documentSnapshot.get("followers");
-                        callback.onUserListRetrieved(followers != null ? followers : new ArrayList<>());
-                    } else {
-                        callback.onUserListRetrieved(new ArrayList<>());
-                    }
-                })
-                .addOnFailureListener(e -> callback.onUserListRetrieved(new ArrayList<>()));
-    }
 
     public void getUserFollowing(String username, UserListCallback callback) {
         db.collection("users").document(username)

@@ -34,7 +34,7 @@ public class CreateAccountActivity extends AppCompatActivity {
         signupUsername = findViewById(R.id.signup_username);
         signupButton = findViewById(R.id.signup_button);
 
-        userbase = new Userbase();
+        userbase = Userbase.getInstance();
 
         // Handle signup button click
         signupButton.setOnClickListener(new View.OnClickListener() {
@@ -67,17 +67,12 @@ public class CreateAccountActivity extends AppCompatActivity {
      * Uses the Userbase to check if the username already exists.
      */
     private void checkUsernameExists(final String name, final String username) {
-        userbase.checkUserExists(username, new Userbase.UserCheckCallback() {
-            @Override
-            public void onUserChecked(boolean exists, String existingName, String existingUsername) {
-                if (exists) {
-                    // Username already exists then show error
-                    signupUsername.setError("Username already exists");
-                    signupUsername.requestFocus();
-                } else {
-                    // Username is unique then create account
-                    createUser(name, username);
-                }
+        userbase.checkUserExists(username, (exists, existingName, existingUsername) -> {
+            if (exists) {
+                signupUsername.setError("Username already exists");
+                signupUsername.requestFocus();
+            } else {
+                createUser(name, username);
             }
         });
     }
@@ -86,24 +81,20 @@ public class CreateAccountActivity extends AppCompatActivity {
      * Creates a new user using the userbase.
      */
     private void createUser(final String name, final String username) {
-        userbase.createUser(name, username, new Userbase.UserCreationCallback() {
-            @Override
-            public void onUserCreated(boolean success) {
-                if (success) {
-                    Toast.makeText(CreateAccountActivity.this, "Signup successful", Toast.LENGTH_SHORT).show();
+        userbase.createUser(name, username, success -> {
+            if (success) {
+                Toast.makeText(CreateAccountActivity.this, "Signup successful", Toast.LENGTH_SHORT).show();
 
-                    // Populate the global User instance
-                    User user = User.getInstance();
-                    user.setName(name);
-                    user.setUsername(username);
+                // Populate the global User instance
+                User user = User.getInstance();
+                user.setName(name);
+                user.setUsername(username);
 
-                    // Navigate to LoginPageActivity
-                    Intent intent = new Intent(CreateAccountActivity.this, LoginPageActivity.class);
-                    startActivity(intent);
-                    finish(); // Close current activity
-                } else {
-                    Toast.makeText(CreateAccountActivity.this, "Failed to create account", Toast.LENGTH_SHORT).show();
-                }
+                // Navigate to LoginPageActivity
+                startActivity(new Intent(CreateAccountActivity.this, LoginPageActivity.class));
+                finish();
+            } else {
+                Toast.makeText(CreateAccountActivity.this, "Failed to create account", Toast.LENGTH_SHORT).show();
             }
         });
     }
