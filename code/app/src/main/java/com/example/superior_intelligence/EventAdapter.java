@@ -34,23 +34,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     }
 
     public void setEvents(List<Event> newList) {
-<<<<<<< HEAD
-        // Ensure only MyPosts appear in MyPosts tab
-        Log.d("EventAdapter", "Updating list with " + newList.size() + " events.");
-        if (currentList == myPostsEvents) {
-            currentList = new ArrayList<>();
-            for (Event event : newList) {
-                Log.d("EventAdapter", "Event: " + event.getTitle());
-                if (event.isMyPost()) {
-                    currentList.add(event);
-                }
-            }
-        } else {
-            currentList = newList;
-        }
-=======
         this.currentList = newList; // Directly set the list
->>>>>>> main
         notifyDataSetChanged();
     }
 
