@@ -2,6 +2,7 @@
  * The purpose of this code is to test and ensure the correct impplementation of CreateAccountActivity and LoginPageActivity
  * test CreateUniqueUserTest ensures newly created usernames are unique and do not already exist in the database
  * test LoginTest ensures users may only log in if they have a username found in the database
+ * tests signout as well
  * this file uses espresso for the test implementation
  */
 package com.example.superior_intelligence;
