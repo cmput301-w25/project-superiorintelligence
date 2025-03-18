@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_mood"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/delete_text_view"
+            android:layout_width="255dp"
+            android:layout_height="85dp"
+            android:layout_weight="1"
+            android:textColor="@color/black"
+            android:paddingStart="20dp"
+            android:paddingTop="20dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="20dp"
+            android:text="Are you sure you want to delete this mood event?"
+            android:textSize="20sp"
+            tools:layout_editor_absoluteX="56dp"
+            tools:layout_editor_absoluteY="199dp" />
+        <!--
+        <Button
+            android:id="@+id/delete_confirm_button"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DELETE"
+            android:textSize="15sp"
+            android:textColor="@color/black"
+            app:layout_constraintEnd_toEndOf="@id/delete_text_view"
+            app:layout_constraintBottom_toBottomOf="@id/delete_text_view"
+            tools:layout_editor_absoluteX="210dp"
+            tools:layout_editor_absoluteY="270dp" />
+
+        <Button
+            android:id="@+id/cancel_delete_button"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CANCEL"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="@id/delete_text_view"
+            app:layout_constraintBottom_toBottomOf="@id/delete_text_view"
+            tools:layout_editor_absoluteX="210dp"
+            tools:layout_editor_absoluteY="270dp" />
+        -->
+</androidx.constraintlayout.widget.ConstraintLayout>
