@@ -27,10 +27,14 @@ import java.util.List;
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> {
 
     private List<Event> currentList = new ArrayList<>();
-    private final Context context;
+    private Context context;
 
     public EventAdapter(@NonNull Context context) {
         this.context = context;
+    }
+
+    public EventAdapter(ArrayList<Event> eventList) {
+
     }
 
     public void setEvents(List<Event> newList) {
