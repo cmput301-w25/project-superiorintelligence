@@ -114,47 +114,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="4dp" />
 
-    <!-- User Preferences Button -->
-    <LinearLayout
-        android:id="@+id/user_preferences"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="@drawable/rounded_background"
-        app:layout_constraintTop_toBottomOf="@id/profile_username"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"
-        android:layout_marginHorizontal="24dp">
-
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:contentDescription="@string/content_desc_tool_icon"
-            android:src="@android:drawable/ic_menu_manage"
-            app:tint="@color/black" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/user_preferences_text"
-            android:textColor="@color/black"
-            android:textSize="16sp"
-            android:layout_weight="1"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"/>
-
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:contentDescription="@string/content_desc_arrow_icon"
-            android:src="@drawable/simple_arrow"
-            app:tint="@color/black" />
-    </LinearLayout>
-
     <!-- Mood Following Button -->
     <LinearLayout
         android:id="@+id/mood_following"
@@ -165,7 +124,7 @@
         android:background="@drawable/rounded_background"
         android:clickable="true"
         android:focusable="true"
-        app:layout_constraintTop_toBottomOf="@id/user_preferences"
+        app:layout_constraintTop_toBottomOf="@id/profile_username"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="12dp"
@@ -196,9 +155,9 @@
             app:tint="@color/black" />
     </LinearLayout>
 
-    <!-- Privacy Button -->
+    <!-- Sign out Button -->
     <LinearLayout
-        android:id="@+id/privacy"
+        android:id="@+id/signout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -215,14 +174,14 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:contentDescription="@string/content_desc_lock_icon"
+            android:contentDescription="sign out button"
             android:src="@android:drawable/ic_lock_lock"
             app:tint="@color/black" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/privacy_text"
+            android:text="Sign out"
             android:textColor="@color/black"
             android:textSize="16sp"
             android:layout_weight="1"
@@ -235,7 +194,6 @@
             android:contentDescription="@string/content_desc_arrow_icon"
             android:src="@drawable/simple_arrow"
             app:tint="@color/black" />
-
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
