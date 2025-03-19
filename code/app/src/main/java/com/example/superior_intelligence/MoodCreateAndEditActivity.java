@@ -128,8 +128,8 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
             if (isChecked) {
                 handleLocationClick();
             } else {
-                lat = null;
-                lng = null;
+                lat = (double)0;
+                lng = (double)0;
             }
         });
 
