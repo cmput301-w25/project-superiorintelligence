@@ -242,6 +242,7 @@ public class Userbase {
                                         });
 
                                 removeFollowRequest(requester, requested);
+                                removeNotification(requester, requested);
                                 callback.onFollowAction(true);
                             })
                             .addOnFailureListener(e -> callback.onFollowAction(false));
@@ -259,6 +260,22 @@ public class Userbase {
                 .add(notificationData)
                 .addOnSuccessListener(documentReference -> Log.d("Userbase", "Notification added"))
                 .addOnFailureListener(e -> Log.e("Userbase", "Failed to add notification", e));
+    }
+
+    public void removeNotification(String requester, String requested) {
+        Log.d("FollowDebug", "Removing notification for " + requested + " about " + requester + "'s request.");
+        db.collection("notifications")
+                .whereEqualTo("recipient", requested)
+                .whereEqualTo("message", requester + " wants to follow your mood events.")
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                        db.collection("notifications").document(doc.getId()).delete()
+                                .addOnSuccessListener(aVoid -> Log.d("FollowDebug", "Notification deleted: " + doc.getId()))
+                                .addOnFailureListener(e -> Log.e("FollowDebug", "Failed to delete notification: " + doc.getId(), e));
+                    }
+                })
+                .addOnFailureListener(e -> Log.e("FollowDebug", "Failed to find notifications for " + requested, e));
     }
 
 

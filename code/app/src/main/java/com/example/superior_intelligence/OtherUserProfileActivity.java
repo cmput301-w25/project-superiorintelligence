@@ -96,7 +96,7 @@ public class OtherUserProfileActivity extends AppCompatActivity {
         switch (followStatus) {
             case FOLLOWING:
                 followRequestButton.setText("Unfollow");
-                followRequestButton.setEnabled(false);
+                followRequestButton.setEnabled(true);
                 break;
             case REQUEST_SENT:
                 followRequestButton.setText("Pending Request");
