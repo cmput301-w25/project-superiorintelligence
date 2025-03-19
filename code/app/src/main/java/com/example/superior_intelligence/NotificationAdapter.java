@@ -44,7 +44,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
             // Accept request
             holder.acceptButton.setOnClickListener(v -> {
-                Userbase.getInstance().acceptFollowRequest(User.getInstance().getUsername(), username, success -> {
+                Userbase.getInstance().acceptFollowRequest(username, User.getInstance().getUsername(), success -> {
                     if (success) {
                         // Remove request from Firestore
                         Userbase.getInstance().removeFollowRequest(username, User.getInstance().getUsername());
