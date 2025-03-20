@@ -3,35 +3,6 @@
  * see link: https://github.com/orgs/cmput301-w25/projects/9?pane=issue&itemId=102361986&issue=cmput301-w25%7Cproject-superiorintelligence%7C197
  * user is able to search up other users based on their username which is stored in firestore
  */
-//
-//package com.example.superior_intelligence;
-//
-//import android.os.Bundle;
-//import android.view.View;
-//import android.widget.ImageButton;
-//
-//import androidx.appcompat.app.AppCompatActivity;
-//
-//public class SearchUsersActivity extends AppCompatActivity {
-//    @Override
-//    protected void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        setContentView(R.layout.search_users);
-//
-//        // Back button to returns to HomeActivity
-//        ImageButton backButton = findViewById(R.id.back_button);
-//        backButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                finish(); // Closes the current activity and returns to the previous screen
-//            }
-//        });
-//
-//
-//
-//
-//    }
-//}
 
 package com.example.superior_intelligence;
 
@@ -149,6 +120,7 @@ public class SearchUsersActivity extends AppCompatActivity {
 
     // search users based on username,
     // implemented so it will pick all users that start with the given letter search
+    // so for example ba will find barbs, but ar will not
     private void searchUsers(String searchQuery) {
         userList.clear();
         // Use orderBy with startAt and endAt for prefix matching
