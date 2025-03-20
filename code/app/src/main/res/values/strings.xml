@@ -18,6 +18,7 @@
     <string name="photo_access_permission_header_title">Access Permission</string>
     <string name="create_untitled_mood_event">Untitled</string>
     <string name="mood_events_page_header">Mood Events</string>
+    <string name="mood_History_header">Mood Events History</string>
 
     <!-- Body Text -->
     <string name="permission_camera_message">Allow APP to access your Camera to take pictures.</string>
