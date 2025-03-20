@@ -79,6 +79,11 @@
             android:parentActivityName=".LoginPageActivity"
             android:exported="true"/>
 
+        <!-- Search For Users Activity -->
+        <activity android:name=".SearchUsersActivity"
+            android:exported="true"/>
+
+
         <!-- Mood Create and Edit Activity -->
         <activity android:name=".MoodCreateAndEditActivity"
             android:exported="true"/>
