@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.os.Handler;
 import android.content.Context;
 import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,10 +27,14 @@ import java.util.List;
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> {
 
     private List<Event> currentList = new ArrayList<>();
-    private final Context context;
+    private Context context;
 
     public EventAdapter(@NonNull Context context) {
         this.context = context;
+    }
+
+    public EventAdapter(ArrayList<Event> eventList) {
+
     }
 
     public void setEvents(List<Event> newList) {

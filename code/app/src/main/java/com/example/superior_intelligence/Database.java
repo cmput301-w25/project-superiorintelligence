@@ -86,6 +86,8 @@ public class Database {
                         String loggedInUsername = currentUser.getUsername();
                         List<DocumentSnapshot> documents = task.getResult().getDocuments();
 
+                        Log.d("DatabaseDebug", "Total posts found in Firestore: " + documents.size());
+
                         if (documents.isEmpty()) {
                             callback.onEventsLoaded(myPosts, explore, followed);
                             return;
@@ -98,17 +100,20 @@ public class Database {
                         for (DocumentSnapshot document : documents) {
                             Event event = Mapper.docToEvent(document);
                             if (event == null) {
+                                Log.e("DatabaseDebug", "Failed to convert document to Event: " + document.getId());
                                 processedCount[0]++;
                                 continue;
                             }
 
                             Log.d("DatabaseDebug", "loggedInUsername: " + loggedInUsername);
                             Log.d("DatabaseDebug", "event.getUser(): " + event.getUser());
+                            Log.d("DatabaseDebug", "Event Title: " + event.getTitle() + " | User: " + event.getUser());
 
                             if (loggedInUsername != null && loggedInUsername.equals(event.getUser())) {
                                 myPosts.add(event);
                                 processedCount[0]++;
                                 if (processedCount[0] == totalDocuments) {
+                                    Log.d("DatabaseDebug", "Final Event Counts -> MyPosts: " + myPosts.size() + ", Explore: " + explore.size() + ", Followed: " + followed.size());
                                     callback.onEventsLoaded(myPosts, explore, followed);
                                 }
                             } else {
@@ -122,12 +127,14 @@ public class Database {
 
                                     // Once all documents are processed, trigger callback
                                     if (processedCount[0] == totalDocuments) {
+                                        Log.d("DatabaseDebug", "Final Event Counts -> MyPosts: " + myPosts.size() + ", Explore: " + explore.size() + ", Followed: " + followed.size());
                                         callback.onEventsLoaded(myPosts, explore, followed);
                                     }
                                 });
                             }
                         }
                     } else {
+                        Log.e("DatabaseDebug", "Failed to fetch events from Firestore", task.getException());
                         callback.onEventsLoaded(null, null, null); // Indicate failure
                     }
                 });

@@ -2,6 +2,7 @@
  * The purpose of this code is to test and ensure the correct impplementation of CreateAccountActivity and LoginPageActivity
  * test CreateUniqueUserTest ensures newly created usernames are unique and do not already exist in the database
  * test LoginTest ensures users may only log in if they have a username found in the database
+ * tests signout as well
  * this file uses espresso for the test implementation
  */
 package com.example.superior_intelligence;
@@ -41,6 +42,8 @@ public class CreateUserAndLoginActivityTest {
         FirebaseFirestore.getInstance().useEmulator(androidLocalhost, portNumber);
     }
 
+    // Test signup, login and signout functionality
+    // ensure emulator is cleared before each run
     @Test
     public void testCreateAndLoginFlow() throws InterruptedException {
         String testName = "Test User";
@@ -84,6 +87,12 @@ public class CreateUserAndLoginActivityTest {
         closeSoftKeyboard();
         onView(withId(R.id.login_button)).perform(click());
 
+        //Currently on app home page, logged in under testName and testUsername
+        Thread.sleep(2000);
+        onView(withId(R.id.profile_image)).perform(click()); // Navigate to profile page
+        onView(withId(R.id.signout)).perform(click()); // press signout button
+
     }
+
 }
 

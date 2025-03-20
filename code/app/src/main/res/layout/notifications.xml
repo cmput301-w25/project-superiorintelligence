@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/notifications"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/backgroundGreen">
@@ -47,51 +48,40 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/notifications_toolbar"/>
 
-    <!-- Tab Layout Container (Fixes HorizontalScrollView Issue) -->
-    <LinearLayout
-        android:id="@+id/tab_container"
+    <!-- Tab Layout -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/notifications_tab_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:background="@color/backgroundGreen"
+        app:tabGravity="fill"
+        app:tabIndicatorColor="@color/secondaryGreen"
+        app:tabMode="fixed"
+        app:tabSelectedTextColor="@color/black"
+        app:tabTextColor="@color/black"
         app:layout_constraintTop_toBottomOf="@id/notifications_toolbar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Tab Layout -->
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/notifications_tab_layout"
-            android:layout_width="match_parent"
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/tab_incoming_requests"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/backgroundGreen"
-            app:tabGravity="fill"
-            app:tabIndicatorColor="@color/secondaryGreen"
-            app:tabMode="fixed"
-            app:tabSelectedTextColor="@color/black"
-            app:tabTextColor="@color/black">
+            android:text="Incoming_requests" />
 
-            <com.google.android.material.tabs.TabItem
-                android:id="@+id/tab_incoming_requests"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Incoming Requests" />
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/tab_pending_requests"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pending requests" />
+    </com.google.android.material.tabs.TabLayout>
 
-            <com.google.android.material.tabs.TabItem
-                android:id="@+id/tab_pending_requests"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Pending Requests" />
-
-        </com.google.android.material.tabs.TabLayout>
-
-    </LinearLayout>
-
-    <!-- ViewPager2 for Swapping Fragments -->
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/notifications_viewpager"
+    <!-- RecyclerView for Notifications -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/notifications_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/tab_container"
+        app:layout_constraintTop_toBottomOf="@id/notifications_tab_layout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>

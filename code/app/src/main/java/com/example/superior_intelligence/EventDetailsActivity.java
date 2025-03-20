@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -28,7 +29,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EventDetailsActivity extends AppCompatActivity {
+public class EventDetailsActivity extends AppCompatActivity implements DeleteMoodFragment.DeleteDialogListener{
 
     private TextView eventTitle, eventMood, selectedMood, eventReason, eventSituation, eventDate, eventUser;
     private TextView noCommentsText;
@@ -87,23 +88,13 @@ public class EventDetailsActivity extends AppCompatActivity {
 
 
             Button deleteButton = findViewById(R.id.delete_button);
-            deleteButton.setOnClickListener(view -> {
-                String currId = currentEvent.getID();
+            deleteButton.setOnClickListener(view -> {;
                 // delete currId from database
-                deleteCurEvent(currId);
-                // go back to home page
-                finish();
+                DeleteMoodFragment deleteDialogFragment = new DeleteMoodFragment();
+                deleteDialogFragment.show(getSupportFragmentManager(), "DeleteMoodDialog");
             });
-
         }
     }
-
-
-    private void deleteCurEvent(String currId){
-        Database db = new Database();
-        db.deleteEvent(currId);
-    }
-
 
 
     /**
@@ -228,5 +219,18 @@ public class EventDetailsActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    /**
+     * Delete mood from database when user click confirm delete
+     */
+    @Override
+    public void delete(boolean delete_status) {
+        if (delete_status){
+            Database db = new Database();
+            db.deleteEvent(currentEvent.getID());
+        }
+        finish();
+
     }
 }
