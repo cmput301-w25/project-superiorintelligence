@@ -9,17 +9,26 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Database {
+    private static Database instance;
     private final FirebaseFirestore db;
     private final CollectionReference myPostsRef;
-    private DocumentReference docRef;
+
 
     public Database() {
         db = FirebaseFirestore.getInstance();
         myPostsRef = db.collection("MyPosts");
+    }
+
+    public static Database getInstance() {
+        if (instance == null) {
+            instance = new Database();
+        }
+        return instance;
     }
 
     /**
@@ -139,6 +148,37 @@ public class Database {
                     }
                 });
     }
+
+    public void saveCommentToEvent(String postId, Comment comment) {
+        DocumentReference postRef = myPostsRef.document(postId);
+
+        postRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                Map<String, Object> data = documentSnapshot.getData();
+                Map<String, List<Map<String, String>>> commentsMap;
+
+                if (data != null && data.containsKey("comments")) {
+                    commentsMap = (Map<String, List<Map<String, String>>>) data.get("comments");
+                } else {
+                    commentsMap = new HashMap<>();
+                }
+
+                Map<String, String> commentData = new HashMap<>();
+                commentData.put("date", comment.getTime());
+                commentData.put("text", comment.getText());
+
+                if (!commentsMap.containsKey(comment.getUsername())) {
+                    commentsMap.put(comment.getUsername(), new ArrayList<>());
+                }
+                commentsMap.get(comment.getUsername()).add(commentData);
+
+                postRef.update("comments", commentsMap)
+                        .addOnSuccessListener(aVoid -> Log.d("Firestore", "Comment saved successfully"))
+                        .addOnFailureListener(e -> Log.e("Firestore", "Error saving comment", e));
+            }
+        });
+    }
+
 
     /**
      * Delete Event from Firestore

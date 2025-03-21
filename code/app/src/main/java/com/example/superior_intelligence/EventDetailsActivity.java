@@ -3,12 +3,14 @@ package com.example.superior_intelligence;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.Movie;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -16,18 +18,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 
 public class EventDetailsActivity extends AppCompatActivity implements DeleteMoodFragment.DeleteDialogListener{
 
@@ -44,7 +46,7 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
 
     private boolean isMyPost;
     private Event currentEvent;
-    private List<String> commentsList;
+    private List<Comment> commentsList = new ArrayList<>();
     private String currentUser;
 
     @Override
@@ -63,7 +65,6 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
         }
 
         isMyPost = currentUser != null && currentUser.equals(currentEvent.getUser());
-        commentsList = currentEvent.getComments() != null ? currentEvent.getComments() : new ArrayList<>();
 
         // Load appropriate layout
         setContentView(isMyPost ? R.layout.event_details : R.layout.others_event_details);
@@ -71,8 +72,9 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
         // Initialize UI elements
         initializeUI();
         setEventDetails();
-        setupCommentsSection();
         initEditLauncher(); // Set up editing capability
+
+        loadCommentsFromFirestore(currentEvent.getID());
 
         // Back button handler
         backButton.setOnClickListener(v -> finish());
@@ -203,11 +205,18 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
             commentInput = findViewById(R.id.comment_input);
             sendCommentButton = findViewById(R.id.send_comment_button);
             sendCommentButton.setOnClickListener(view -> {
-                String newComment = commentInput.getText().toString().trim();
-                if (!newComment.isEmpty()) {
+                String commentText = commentInput.getText().toString().trim();
+                if (!commentText.isEmpty()) {
+                    String username = User.getInstance().getUsername();
+                    String timestamp = new SimpleDateFormat("dd/MM/yy H:mm", Locale.getDefault()).format(new Date());
+                    Comment newComment = new Comment(username, commentText, timestamp);
                     commentsList.add(newComment);
-                    commentInput.setText("");
+
+                    // Refresh UI
                     setupCommentsSection();
+                    // Clear text input
+                    commentInput.setText("");
+                    Database.getInstance().saveCommentToEvent(currentEvent.getID(), newComment);
                 }
             });
 
@@ -221,6 +230,43 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
         }
     }
 
+    private void loadCommentsFromFirestore(String postId) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference postRef = db.collection("MyPosts").document(postId);
+
+        postRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists() && documentSnapshot.contains("comments")) {
+                // Safely fill commentsList (already != null)
+                commentsList.clear();
+                Map<String, List<Map<String, String>>> commentsMap =
+                        (Map<String, List<Map<String, String>>>) documentSnapshot.get("comments");
+
+                for (String user : commentsMap.keySet()) {
+                    List<Map<String, String>> userComments = commentsMap.get(user);
+                    for (Map<String, String> commentData : userComments) {
+                        commentsList.add(new Comment(
+                                user,
+                                commentData.get("text"),
+                                commentData.get("date")
+                        ));
+                    }
+                }
+            } else {
+                // If no "comments" field, or doc not found, your list remains empty
+                commentsList.clear();
+            }
+
+            // Now that commentsList is updated, show them
+            setupCommentsSection();
+        }).addOnFailureListener(e -> {
+            Log.e("Firestore", "Error loading comments", e);
+            // Optionally handle error (list remains empty)
+            setupCommentsSection();
+        });
+    }
+
+
+
     /**
      * Delete mood from database when user click confirm delete
      */
@@ -231,6 +277,5 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
             db.deleteEvent(currentEvent.getID());
         }
         finish();
-
     }
 }

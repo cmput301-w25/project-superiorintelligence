@@ -9,6 +9,7 @@
 
 package com.example.superior_intelligence;
 import com.example.superior_intelligence.Userbase;
+import com.google.firebase.auth.FirebaseAuth;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,6 +18,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
@@ -26,6 +29,8 @@ public class LoginPageActivity extends AppCompatActivity {
     EditText loginUsername;
     Button loginButton;
     Button signUpButton;
+    private Userbase userbase = Userbase.getInstance();
+    private ProgressBar loadingIndicator;
     //TextView signupRedirectText;
 
     @Override
@@ -37,6 +42,7 @@ public class LoginPageActivity extends AppCompatActivity {
         //signupRedirectText = findViewById(R.id.signupRedirectText);
         loginButton = findViewById(R.id.login_button);
         signUpButton = findViewById(R.id.signup_page_button);
+        loadingIndicator = findViewById(R.id.loading_indicator);
 
         // Find the back button
         ImageButton backButton = findViewById(R.id.back_button);
@@ -95,7 +101,9 @@ public class LoginPageActivity extends AppCompatActivity {
      */
     public void checkUser() {
         String userUsername = loginUsername.getText().toString().trim();
-        Userbase userbase = Userbase.getInstance();
+        loadingIndicator.setVisibility(View.VISIBLE);
+        loginButton.setEnabled(false);
+
         userbase.checkUserExists(userUsername, (exists, name, username) -> {
             if (exists) {
                 // Save user details in SharedPreferences
@@ -109,12 +117,56 @@ public class LoginPageActivity extends AppCompatActivity {
                 user.setName(name);
                 user.setUsername(username);
                 // Navigate to HomeActivity
-                Intent intent = new Intent(LoginPageActivity.this, HomeActivity.class);
-                startActivity(intent);
+
+                ensureFirebaseAuth(() -> ensureDatabaseIsReady(() -> {
+                    loadingIndicator.setVisibility(View.GONE);
+                    loginButton.setEnabled(true);
+
+                    startActivity(new Intent(LoginPageActivity.this, HomeActivity.class));
+                    finish();
+                }));
             } else {
                 loginUsername.setError("User does not exist");
                 loginUsername.requestFocus();
+                loadingIndicator.setVisibility(View.GONE);
+                loginButton.setEnabled(true);
             }
         });
+    }
+
+    /**
+     * Ensures Firestore has finished loading before switching activities.
+     */
+    private void ensureDatabaseIsReady(Runnable onReady) {
+        Database database = Database.getInstance();
+        database.loadEventsFromFirebase(User.getInstance(), (myPosts, explore, followed) -> {
+            if (myPosts != null && explore != null && followed != null) {
+                onReady.run();
+            } else {
+                Toast.makeText(this, "Failed to fetch data. Try again.", Toast.LENGTH_SHORT).show();
+                loadingIndicator.setVisibility(View.GONE);
+                loginButton.setEnabled(true);
+            }
+        });
+    }
+
+    /**
+     * Ensures FirebaseAuth has an active session using anonymous login.
+     */
+    private void ensureFirebaseAuth(Runnable onAuthenticated) {
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            onAuthenticated.run(); // Already signed in
+        } else {
+            FirebaseAuth.getInstance().signInAnonymously()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        onAuthenticated.run();
+                    } else {
+                        Toast.makeText(this, "Firebase authentication failed.", Toast.LENGTH_SHORT).show();
+                        loadingIndicator.setVisibility(View.GONE);
+                        loginButton.setEnabled(true);
+                    }
+                });
+        }
     }
 }

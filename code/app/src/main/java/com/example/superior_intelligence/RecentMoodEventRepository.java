@@ -62,7 +62,7 @@ public class RecentMoodEventRepository {
                         Double lng = doc.getDouble("lng");
                         if (lat != null)event.setLat(lat);
                         if(lng != null) event.setLng(lng);
-                        List<String> commentList = (List<String>) doc.get("comments");
+                        List<Comment> commentList = (List<Comment>) doc.get("comments");
                         if (commentList != null){event.setComments(commentList);}
                         events.add(event);}
                     onSuccess.accept(events);
