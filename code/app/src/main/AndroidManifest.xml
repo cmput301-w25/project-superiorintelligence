@@ -18,6 +18,9 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
 
+    <!-- for database related tests with firestore -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- Feature declarations -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 
@@ -78,6 +81,11 @@
         <activity android:name=".CreateAccountActivity"
             android:parentActivityName=".LoginPageActivity"
             android:exported="true"/>
+
+        <!-- Search For Users Activity -->
+        <activity android:name=".SearchUsersActivity"
+            android:exported="true"/>
+
 
         <!-- Mood Create and Edit Activity -->
         <activity android:name=".MoodCreateAndEditActivity"

@@ -10,7 +10,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatButton;
 
 public class ProfileActivity extends AppCompatActivity {
     @Override
@@ -40,6 +39,17 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
+        // Search User button
+        LinearLayout searchUserButton = findViewById(R.id.search_user_button);
+        searchUserButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ProfileActivity.this, SearchUsersActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
         // signout button
         LinearLayout signoutButton = findViewById(R.id.signout);
         signoutButton.setOnClickListener(new View.OnClickListener() {
@@ -50,5 +60,7 @@ public class ProfileActivity extends AppCompatActivity {
                 finish(); //user cannot return to this page if at login page
             }
         });
+
+
     }
 }
