@@ -192,7 +192,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/comments_recycler_view"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="340dp"
                 android:overScrollMode="always"
                 android:background="@android:color/white"
                 android:padding="8dp"

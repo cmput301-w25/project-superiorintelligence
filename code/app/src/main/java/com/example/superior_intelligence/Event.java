@@ -26,7 +26,7 @@ public class Event implements Serializable {
     private String user;
     private Double lng;
     private Double lat;
-    private List<String> comments;
+    private List<Comment> comments;
 
     /**
      * Empty constructor required for Firestore
@@ -48,7 +48,7 @@ public class Event implements Serializable {
      * @param isMyPost      Whether the event was created by the user.25
      * @param user          The username of the event creator.
      */
-    public Event(String id, String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String user, Double lat, Double lng, List<String> comments) {
+    public Event(String id, String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String user, Double lat, Double lng, List<Comment> comments) {
         this.id = id;
         this.title = title;
         this.date = date;
@@ -306,20 +306,19 @@ public class Event implements Serializable {
         return this.id;
     }
 
-    public List<String> getComments() {
+    public List<Comment> getComments() {
         return comments;
     }
 
-    public void setComments(List<String> comments) {
+    public void setComments(List<Comment> comments) {
         this.comments = comments;
     }
 
-    public void addComment(String comment) {
+    public void addComment(Comment comment) {
         if (this.comments == null) {
             this.comments = new ArrayList<>();
         }
         this.comments.add(comment);
     }
-
 }
 
