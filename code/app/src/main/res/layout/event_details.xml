@@ -190,14 +190,15 @@
                 android:padding="8dp"
                 android:visibility="gone" />
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/delete_button"
-                style="@style/Widget.Material3.Button.TextButton"
-                android:layout_width="match_parent"
+                android:layout_width="325dp"
                 android:layout_height="wrap_content"
-                android:background="@color/angerRed"
+                android:background="@drawable/rounded_background"
+                android:clickable="true"
+                android:text="DELETE"
                 android:textColor="@color/black"
-                android:text="DELETE" />
+                android:layout_marginStart="15dp"/>
 
         </LinearLayout>
     </ScrollView>
