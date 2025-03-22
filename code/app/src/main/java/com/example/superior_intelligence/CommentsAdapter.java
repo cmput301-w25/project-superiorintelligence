@@ -13,10 +13,21 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
 
     private final List<Comment> comments;
 
+    /**
+     * Constructs a specified list of comments.
+     * If the provided list is null, it initializes with an empty list.
+     * @param comments the list of comments to display
+     */
     public CommentsAdapter(List<Comment> comments) {
         this.comments = (comments != null) ? comments : new ArrayList<>();
     }
 
+    /**
+     * Creates the layout for a comment item and returns a new ViewHolder instance.
+     * @param parent   the parent ViewGroup
+     * @param viewType the view type of the new view
+     * @return a new CommentViewHolder that holds the comment item view
+     */
     @NonNull
     @Override
     public CommentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -24,6 +35,11 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
         return new CommentViewHolder(view);
     }
 
+    /**
+     * Binds the comment data to the views held by the ViewHolder.
+     * @param holder   the ViewHolder that should be updated
+     * @param position the position of the comment in the dataset
+     */
     @Override
     public void onBindViewHolder(@NonNull CommentViewHolder holder, int position) {
         Comment comment = comments.get(position);
@@ -32,11 +48,19 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
         holder.commentText.setText(comment.getText());
     }
 
+    /**
+     * Returns the total number of comments in the dataset.
+     * @return the number of comments
+     */
     @Override
     public int getItemCount() {
         return comments.size();
     }
 
+    /**
+     * ViewHolder class representing a single comment item within the RecyclerView.
+     * Holds references to the username, date, and text views.
+     */
     public static class CommentViewHolder extends RecyclerView.ViewHolder {
         TextView commentText, commentUser, commentDate;
 
