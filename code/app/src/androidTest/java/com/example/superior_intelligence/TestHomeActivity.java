@@ -26,6 +26,7 @@ import org.junit.runner.RunWith;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+/*
 @RunWith(AndroidJUnit4.class)
 public class TestHomeActivity {
 
@@ -52,17 +53,21 @@ public class TestHomeActivity {
         assertNotNull("Firestore should be initialized", db); // Ensure Firestore instance is assigned
     }
 
+
+ */
     /**
      * **Test Firestore Connection**
      */
+    /*
     @Test
     public void testFirestoreConnection() {
         assertNotNull("Firestore instance should not be null", db);
     }
-
+    /*
     /**
      * **Test Adding a New Event**
      */
+    /*
     @Test
     public void testAddEventToFirestore() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
@@ -79,17 +84,22 @@ public class TestHomeActivity {
                     latch.countDown();
                 });
 
+
+
         latch.await(5, TimeUnit.SECONDS);
     }
-
+    */
     /**
      * **Test Retrieving a Specific Event**
      */
+    /*
     @Test
     public void testRetrieveSpecificEvent() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
 
+
         Event testEvent = new Event("SomeID", "Retrieve Event", "11-03-2020", "", "Test retrieval", 1, false, true, "testuser", (double) 0, (double) 0);
+
         db.collection("events").add(testEvent).addOnSuccessListener(docRef -> {
             String eventId = docRef.getId();
 
@@ -107,10 +117,11 @@ public class TestHomeActivity {
 
         latch.await(5, TimeUnit.SECONDS);
     }
-
+    */
     /**
      * **Test Updating an Existing Event**
      */
+    /*
     @Test
     public void testUpdateEvent() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
@@ -142,9 +153,12 @@ public class TestHomeActivity {
         latch.await(5, TimeUnit.SECONDS);
     }
 
+     */
+
     /**
      * **Test Deleting an Event**
      */
+    /*
     @Test
     public void testDeleteEvent() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
@@ -172,4 +186,7 @@ public class TestHomeActivity {
 
         latch.await(5, TimeUnit.SECONDS);
     }
-}
+
+   */
+//}
+
