@@ -17,6 +17,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 public class HomeActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
@@ -29,6 +32,24 @@ public class HomeActivity extends AppCompatActivity {
     private List<Event> myPostsEvents = new ArrayList<>();
 
     private TextView tabExplore, tabFollowed, tabMyPosts, tabMap;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = auth.getCurrentUser();
+
+        if (currentUser == null) {
+            Log.e("AuthDebug", "No user session found! Redirecting to login.");
+            Intent loginIntent = new Intent(this, LoginPageActivity.class);
+            loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(loginIntent);
+            finish(); // Stop execution of HomeActivity if user is not logged in
+        } else {
+            Log.d("AuthDebug", "User logged in: " + currentUser.getEmail());
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,6 +135,12 @@ public class HomeActivity extends AppCompatActivity {
      */
     private void loadAllEvents() {
         User currentUser = User.getInstance();
+
+        if (currentUser == null) {
+            Log.e("UserDebug", "User instance is NULL! Skipping event loading.");
+            return; // Prevent crash
+        }
+
         database.loadEventsFromFirebase(currentUser, (myPosts, explore, followed) -> {
             if (myPosts != null && explore != null && followed != null) {
                 myPostsEvents.clear();

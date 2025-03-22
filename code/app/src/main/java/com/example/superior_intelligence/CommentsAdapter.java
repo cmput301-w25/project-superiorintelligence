@@ -11,9 +11,9 @@ import java.util.List;
 
 public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.CommentViewHolder> {
 
-    private final List<String> comments;
+    private final List<Comment> comments;
 
-    public CommentsAdapter(List<String> comments) {
+    public CommentsAdapter(List<Comment> comments) {
         this.comments = (comments != null) ? comments : new ArrayList<>();
     }
 
@@ -26,7 +26,10 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
 
     @Override
     public void onBindViewHolder(@NonNull CommentViewHolder holder, int position) {
-        holder.commentText.setText(comments.get(position));
+        Comment comment = comments.get(position);
+        holder.commentUser.setText(comment.getUsername());
+        holder.commentDate.setText(comment.getTime());
+        holder.commentText.setText(comment.getText());
     }
 
     @Override
@@ -35,10 +38,12 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
     }
 
     public static class CommentViewHolder extends RecyclerView.ViewHolder {
-        TextView commentText;
+        TextView commentText, commentUser, commentDate;
 
         public CommentViewHolder(@NonNull View itemView) {
             super(itemView);
+            commentUser = itemView.findViewById(R.id.comment_user);
+            commentDate = itemView.findViewById(R.id.comment_date);
             commentText = itemView.findViewById(R.id.comment_text);
         }
     }
