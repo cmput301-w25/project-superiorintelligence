@@ -129,7 +129,7 @@ public class Database {
                                 Userbase.getInstance().checkFollowStatus(loggedInUsername, event.getUser(), isFollowing -> {
                                     if (isFollowing) {
                                         followed.add(event);
-                                    } else {
+                                    } else if (event.isPublic_status()){
                                         explore.add(event);
                                     }
                                     processedCount[0]++;

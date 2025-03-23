@@ -45,11 +45,12 @@ public class Mapper {
             Boolean followedBool = document.getBoolean("isFollowed");
             boolean isFollowed = (followedBool != null) ? followedBool : false;
             Boolean myPostBool = document.getBoolean("isMyPost");
-            boolean isMyPost = (myPostBool != null) ? myPostBool : false;
+            boolean isMyPost = (myPostBool != null) ? myPostBool : true;
             String mood = document.getString("mood");
             String situation = document.getString("situation");
             String moodExplanation = document.getString("moodExplanation");
             String postUser = document.getString("postUser");
+            boolean publicStat = (document.getBoolean("public_status") != null);
 
             String dateString = "Unknown Date";
             if (rawDate instanceof String) {
@@ -76,7 +77,8 @@ public class Mapper {
                     situation,
                     postUser,
                     lat,
-                    lng
+                    lng,
+                    publicStat
             );
 
         } catch (Exception e) {
