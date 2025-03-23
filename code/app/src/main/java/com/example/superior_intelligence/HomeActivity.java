@@ -6,20 +6,24 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -93,6 +97,24 @@ public class HomeActivity extends AppCompatActivity {
                 // Hide the Spinner right after a selection
                 filterSpinner.setVisibility(View.GONE);
 
+                if (selectedFilter.equals("Filter by text")) {
+
+                    // Create a simple input dialog
+                    AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
+                    builder.setTitle("Enter search phrase");
+
+                    final EditText input = new EditText(HomeActivity.this);
+                    builder.setView(input);
+
+                    builder.setPositiveButton("Filter", (dialog, which) -> {
+                        String keyword = input.getText().toString().trim().toLowerCase();
+                        filterMyPostsByReason(keyword);
+                    });
+
+                    builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
+                    builder.show();
+                }
             }
 
             @Override
@@ -203,6 +225,40 @@ public class HomeActivity extends AppCompatActivity {
         // Set events to adapter and refresh RecyclerView (no need to reset adapter)
         adapter.setEvents(targetList);
     }
+
+    private void filterMyPostsByReason(String keyword) {
+        if (keyword.isEmpty()) {
+            switchTab(myPostsEvents, tabMyPosts); // Reset
+            return;
+        }
+
+        String lowerKeyword = keyword.toLowerCase();
+        List<Event> exactMatches = new ArrayList<>();
+        List<Event> partialMatches = new ArrayList<>();
+
+        for (Event e : myPostsEvents) {
+            String reason = e.getMoodExplanation() != null ? e.getMoodExplanation().toLowerCase() : "";
+
+            // Match exact word (surrounded by word boundaries)
+            if (reason.matches(".*\\b" + Pattern.quote(lowerKeyword) + "\\b.*")) {
+                exactMatches.add(e);
+            } else if (reason.contains(lowerKeyword)) {
+                partialMatches.add(e);
+            }
+        }
+
+        // Sort both lists by date descending
+        Comparator<Event> dateDescComparator = (e1, e2) -> e2.getDate().compareTo(e1.getDate());
+        exactMatches.sort(dateDescComparator);
+        partialMatches.sort(dateDescComparator);
+
+        // Combine results: exact matches first
+        List<Event> filteredList = new ArrayList<>(exactMatches);
+        filteredList.addAll(partialMatches);
+
+        adapter.setEvents(filteredList);
+    }
+
 
     /**
      * Saves a new event to Firestore under the "MyPosts" collection.
