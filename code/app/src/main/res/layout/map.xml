@@ -92,55 +92,64 @@
                 android:id="@+id/cb_last_12_hours"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Last 12 hours" />
+                android:text="Last 12 hours"
+                app:buttonTint="@color/checkbox_tint"/>
 
             <CheckBox
                 android:id="@+id/cb_confusion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Confusion" />
+                android:text="Confusion"
+                app:buttonTint="@color/checkbox_tint"/>
 
             <CheckBox
                 android:id="@+id/cb_anger"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Anger" />
+                android:text="Anger"
+                app:buttonTint="@color/checkbox_tint"/>
 
             <CheckBox
                 android:id="@+id/cb_fear"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Fear" />
+                android:text="Fear"
+                app:buttonTint="@color/checkbox_tint"/>
 
             <CheckBox
                 android:id="@+id/cb_disgust"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Disgust" />
+                android:text="Disgust"
+                app:buttonTint="@color/checkbox_tint"/>
 
             <CheckBox
                 android:id="@+id/cb_happy"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Happy" />
+                android:text="Happy"
+                app:buttonTint="@color/checkbox_tint"/>
 
             <CheckBox
                 android:id="@+id/cb_sad"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sad" />
+                android:text="Sad"
+                app:buttonTint="@color/checkbox_tint"/>
 
             <CheckBox
                 android:id="@+id/cb_shame"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Shame" />
+                android:text="Shame"
+                app:buttonTint="@color/checkbox_tint"/>
 
             <CheckBox
                 android:id="@+id/cb_surprise"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Surprise" />
+                android:text="Surprise"
+                app:buttonTint="@color/checkbox_tint"/>
 
         </GridLayout>
 
