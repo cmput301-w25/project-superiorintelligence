@@ -1,6 +1,7 @@
 package com.example.superior_intelligence;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
@@ -16,7 +17,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -26,6 +26,7 @@ import java.util.List;
 
 public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
 
+    private static final String TAG = "MoodMap";
     private GoogleMap googleMap;
     private FirebaseFirestore db;
 
@@ -74,8 +75,15 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
         // Move camera to Edmonton
         LatLng edmonton = new LatLng(53.5461, -113.4938);
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(edmonton, 11f));
+
+        // 1) Load markers immediately with no filters (assuming checkboxes are all unchecked).
+        //    This will show all valid-location documents from "MyPosts."
+        applyFilters();
     }
 
+    /**
+     * Called when user presses "Apply" OR when the map first loads (onMapReady).
+     */
     private void applyFilters() {
         if (googleMap == null) {
             // Map not yet ready
@@ -84,11 +92,13 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
         // Clear old markers
         googleMap.clear();
 
+        // 2) Build a Firestore query based on which checkboxes are checked.
         Query query = db.collection("MyPosts");
 
         // "Last 12 hours" filter
         if (cbLast12Hours.isChecked()) {
             long twelveHoursAgo = System.currentTimeMillis() - (12L * 60L * 60L * 1000L);
+            Log.d(TAG, "Applying last 12 hours filter. Time cutoff = " + twelveHoursAgo);
             query = query.whereGreaterThan("timestamp", twelveHoursAgo);
         }
 
@@ -104,30 +114,43 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
         if (cbSurprise.isChecked())  selectedMoods.add("Surprise");
 
         if (!selectedMoods.isEmpty()) {
+            Log.d(TAG, "Applying mood filter: " + selectedMoods);
             query = query.whereIn("mood", selectedMoods);
         }
 
+        // 3) Execute the query
         query.get()
                 .addOnSuccessListener(snap -> {
+                    Log.d(TAG, "Documents found: " + snap.size());
                     for (DocumentSnapshot doc : snap) {
                         Double lat = doc.getDouble("lat");
                         Double lng = doc.getDouble("lng");
-                        if (lat != null && lng != null) {
-                            String title = doc.getString("title");
-                            String mood  = doc.getString("mood");
+                        String title = doc.getString("title");
+                        String mood  = doc.getString("mood");
+                        Log.d(TAG, "Doc ID: " + doc.getId()
+                                + ", lat: " + lat + ", lng: " + lng
+                                + ", mood: " + mood);
 
-                            LatLng position = new LatLng(lat, lng);
-                            googleMap.addMarker(new MarkerOptions()
-                                    .position(position)
-                                    .title(title != null ? title : "No Title")
-                                    .snippet(mood != null ? mood : "No Mood"));
+                        // Skip if lat/lng is null or 0
+                        if (lat == null || lng == null || lat == 0.0 || lng == 0.0) {
+                            Log.d(TAG, "Skipping document " + doc.getId()
+                                    + " due to invalid lat/lng.");
+                            continue;
                         }
+
+                        // Add marker for valid coords
+                        LatLng position = new LatLng(lat, lng);
+                        googleMap.addMarker(new MarkerOptions()
+                                .position(position)
+                                .title(title != null ? title : "No Title")
+                                .snippet(mood != null ? mood : "No Mood"));
                     }
                 })
-                .addOnFailureListener(e ->
-                        Toast.makeText(MoodMap.this,
-                                "Error loading events: " + e.getMessage(),
-                                Toast.LENGTH_SHORT).show()
-                );
+                .addOnFailureListener(e -> {
+                    Toast.makeText(MoodMap.this,
+                            "Error loading events: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Query failed: ", e);
+                });
     }
 }

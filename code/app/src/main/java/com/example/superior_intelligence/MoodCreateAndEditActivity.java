@@ -79,8 +79,8 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
 
     // Location
     private FusedLocationProviderClient fusedLocationClient;
-    private Double lat = null;
-    private Double lng = null;
+    private Double lat = 0.0;
+    private Double lng = 0.0;
 
     // PhotoActivity launcher for receiving the uploaded imageDocID
     private final ActivityResultLauncher<Intent> photoActivityLauncher =
@@ -128,8 +128,8 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
             if (isChecked) {
                 handleLocationClick();
             } else {
-                lat = (double)0;
-                lng = (double)0;
+                lat = 0.0;
+                lng = 0.0;
             }
         });
 

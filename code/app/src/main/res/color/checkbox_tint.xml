@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- When the checkbox is checked -->
+    <item android:color="@android:color/black" android:state_checked="true" />
+    <!-- When unchecked -->
+    <item android:color="@android:color/black" />
+</selector>
