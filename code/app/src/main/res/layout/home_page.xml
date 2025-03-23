@@ -91,7 +91,19 @@
         app:layout_constraintTop_toTopOf="@id/home_toolbar"
         android:src="@drawable/filter_icon" />
 
+    <Spinner
+        android:id="@+id/filter_spinner"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@+id/header_title"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/menu_button"
+        app:layout_constraintTop_toBottomOf="@+id/menu_button" />
+
+
     <!-- Category Tabs -->
+
     <LinearLayout
         android:id="@+id/category_tabs"
         android:layout_width="match_parent"
