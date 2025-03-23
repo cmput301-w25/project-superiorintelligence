@@ -52,9 +52,9 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        Log.d("EventDetailsActivity", "onCreate triggered");
         currentUser = User.getInstance().getUsername();
-
+        Log.d("EventDetailsActivity", "Current logged-in user: " + currentUser);
         // Retrieve entire Event object
         currentEvent = (Event) getIntent().getSerializableExtra("event");
 
@@ -63,6 +63,9 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
             finish();
             return;
         }
+
+        Log.d("EventDetailsActivity", "Event loaded: " + currentEvent.getTitle());
+        Log.d("EventDetailsActivity", "Event posted by: " + currentEvent.getUser());
 
         isMyPost = currentUser != null && currentUser.equals(currentEvent.getUser());
 
@@ -146,6 +149,7 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
         eventDate.setText("Date: " + (currentEvent.getDate() != null ? currentEvent.getDate() : "Unknown Date"));
         eventUser.setText("Posted by: " + (currentEvent.getUser() != null ? currentEvent.getUser() : "Anonymous"));
 
+        Log.d("EventDetails", "Loading event by user: " + currentEvent.getUser());
         // Handle image loading
         String imageDocID = currentEvent.getImageUrl();
         if (imageDocID != null && !imageDocID.isEmpty()) {
@@ -221,10 +225,15 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
             });
 
             profileCard.setOnClickListener(view -> {
+                String eventUsername = currentEvent.getUser();
+                Log.d("EventDetailsActivity", "Attempting to open profile for user: " + eventUsername);
                 if (currentEvent.getUser() != null) {
                     Intent profileIntent = new Intent(EventDetailsActivity.this, OtherUserProfileActivity.class);
                     profileIntent.putExtra("username", currentEvent.getUser());
                     startActivity(profileIntent);
+                }
+                else {
+                    Log.e("EventDetailsActivity", "currentEvent.getUser() is null or empty");
                 }
             });
         }
