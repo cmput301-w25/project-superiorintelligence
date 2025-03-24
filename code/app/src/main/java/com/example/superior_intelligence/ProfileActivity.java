@@ -39,6 +39,17 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
+        // Mood Following button
+        LinearLayout moodFollowingButton = findViewById(R.id.mood_following);
+        moodFollowingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ProfileActivity.this, MoodFollowingActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
         // Search User button
         LinearLayout searchUserButton = findViewById(R.id.search_user_button);
         searchUserButton.setOnClickListener(new View.OnClickListener() {

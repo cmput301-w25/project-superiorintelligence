@@ -101,6 +101,12 @@
             android:exported="true">
         </activity>
 
+        <!-- Profile Activity -->
+        <activity
+            android:name=".MoodFollowingActivity"
+            android:exported="true">
+        </activity>
+
         <!-- Other User Details Activity -->
         <activity
             android:name=".OtherUserProfileActivity"
