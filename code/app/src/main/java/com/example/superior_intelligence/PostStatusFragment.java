@@ -41,11 +41,10 @@ public class PostStatusFragment extends DialogFragment {
                 .setView(view)
                 .setPositiveButton("POST", (dialogInterface, which) -> {
                     if (public_checkbox.isChecked()){
-                        public_stat[0] = true;
+                        listener.public_status(true);
                     } else {
-                        public_stat[0] = false;
+                        listener.public_status(false);
                     }
-                    listener.public_status(public_stat[0]);
                 })
                 .create();
         dialog.setOnShowListener(d -> {

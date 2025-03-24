@@ -51,7 +51,7 @@ public class Mapper {
             String situation = document.getString("situation");
             String moodExplanation = document.getString("moodExplanation");
             String postUser = document.getString("postUser");
-            boolean publicStat = (document.getBoolean("public_status") != null);
+            boolean publicStat = document.getBoolean("public_status");
             String dateString = "Unknown Date";
             if (rawDate instanceof String) {
                 dateString = (String) rawDate;

@@ -80,6 +80,7 @@ public class Event implements Serializable {
      * @param moodExplanation The explanation for the mood.
      * @param situation      The social situation during the event.
      * @param user           The username of the event creator.
+     * @param public_status  Post status, true if post is public, false otherwise
      */
     public Event(String id, String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String mood, String moodExplanation, String situation, String user, Double lat, Double lng, boolean public_status) {
         this.id = id;

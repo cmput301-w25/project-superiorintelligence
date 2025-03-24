@@ -66,12 +66,21 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
             holder.eventOverlay.setCardBackgroundColor(Color.parseColor("#99FFFFFF")); // Default fallback color
         }
 
+        // reset both views to ensure they don’t carry previous states
+        holder.privateIcon.setVisibility(View.GONE);
+        holder.publicIcon.setVisibility(View.GONE);
+
+        System.out.println("Event Status: " + event.isPublic_status());
+
         // Set public/private status
-        if (event.isPublic_status()){
-            holder.publicIcon.setVisibility(View.VISIBLE);
-        } else {
+        if (!event.isPublic_status()) {
             holder.privateIcon.setVisibility(View.VISIBLE);
+            System.out.println("Private icon should be visible");
+        } else {
+            holder.publicIcon.setVisibility(View.VISIBLE);
+            System.out.println("Public icon should be visible");
         }
+
 
         // Set emoji if present
         if (event.getEmojiResource() != 0) {
