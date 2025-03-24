@@ -134,9 +134,8 @@ public class Database {
                                         } else {
                                             explore.add(event);
                                         }
-                                        processedCount[0]++;
                                     }
-
+                                    processedCount[0]++;
                                     // Once all documents are processed, trigger callback
                                     if (processedCount[0] == totalDocuments) {
                                         Log.d("DatabaseDebug", "Final Event Counts -> MyPosts: " + myPosts.size() + ", Explore: " + explore.size() + ", Followed: " + followed.size());

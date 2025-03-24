@@ -81,7 +81,6 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
             System.out.println("Public icon should be visible");
         }
 
-
         // Set emoji if present
         if (event.getEmojiResource() != 0) {
             holder.eventEmoticon.setVisibility(View.VISIBLE);
