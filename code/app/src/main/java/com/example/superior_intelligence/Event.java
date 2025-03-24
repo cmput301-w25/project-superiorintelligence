@@ -320,5 +320,23 @@ public class Event implements Serializable {
         }
         this.comments.add(comment);
     }
+
+    /**
+     * Gets the raw date object for sorting purposes.
+     * @return The date as a Comparable object (Timestamp or parsed String).
+     */
+    public Comparable getRawDate() {
+        if (date instanceof Timestamp) {
+            return (Timestamp) date;
+        } else if (date instanceof String) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+                return new Timestamp(sdf.parse((String) date));
+            } catch (Exception e) {
+                return null; // Fallback for invalid dates
+            }
+        }
+        return null;
+    }
 }
 
