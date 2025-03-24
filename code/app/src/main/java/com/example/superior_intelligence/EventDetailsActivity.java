@@ -82,7 +82,7 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
         // Back button handler
         backButton.setOnClickListener(v -> finish());
 
-        // Edit button (only for own posts)
+        // Edit/Delete button (only for own posts)
         if (isMyPost) {
             ImageButton editButton = findViewById(R.id.editButton);
             editButton.setOnClickListener(view -> {
