@@ -327,5 +327,7 @@ public class Event implements Serializable {
     public boolean isPublic_status() {
         return public_status;
     }
+
+
 }
 

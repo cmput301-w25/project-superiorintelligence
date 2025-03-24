@@ -458,7 +458,6 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
         String finalImageUrl = (imageUrl != null) ? imageUrl : "";
         String overlayColor = getOverlayColorForMood(mood);
         User user = User.getInstance();
-
         // Make sure your Event constructor includes lat & lng if you want to store them
         return new Event(
                 eventID, eventTitle, eventDate, overlayColor, finalImageUrl,

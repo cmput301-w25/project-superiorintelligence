@@ -30,6 +30,7 @@ public class Mapper {
         eventData.put("postUser", event.getUser());
         eventData.put("lat", event.getLat());
         eventData.put("lng", event.getLng());
+        eventData.put("public_status", event.isPublic_status());
         return eventData;
     }
 
@@ -51,7 +52,6 @@ public class Mapper {
             String moodExplanation = document.getString("moodExplanation");
             String postUser = document.getString("postUser");
             boolean publicStat = (document.getBoolean("public_status") != null);
-
             String dateString = "Unknown Date";
             if (rawDate instanceof String) {
                 dateString = (String) rawDate;
