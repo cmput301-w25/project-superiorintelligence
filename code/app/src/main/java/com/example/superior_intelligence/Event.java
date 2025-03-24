@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Date;
 import com.google.firebase.Timestamp;
 
 /**
@@ -159,6 +160,13 @@ public class Event implements Serializable {
         return isMyPost;
     }
 
+    /**
+     * gets the timestamp of the mood event from what is stored in firebase.
+     * returns the time stamp as a long int.
+     */
+    private long timestamp;
+    public long getTimestamp() { return timestamp;}
+    public void setTimestamp(long timestamp) {this.timestamp = timestamp;}
 
     public Double getLat() {
         return lat;

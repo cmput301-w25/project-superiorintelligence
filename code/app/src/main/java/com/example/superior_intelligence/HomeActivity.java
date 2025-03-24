@@ -275,7 +275,7 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         // Sort both lists by date descending
-        Comparator<Event> dateDescComparator = (e1, e2) -> e2.getDate().compareTo(e1.getDate());
+        Comparator<Event> dateDescComparator = (e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp());
         exactMatches.sort(dateDescComparator);
         partialMatches.sort(dateDescComparator);
 
