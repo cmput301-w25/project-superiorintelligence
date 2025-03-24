@@ -19,6 +19,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Make all components scrollable when textExplanation gets long -->
     <!-- Editable Title at Center of Toolbar -->
     <EditText
         android:id="@+id/mood_event_title"

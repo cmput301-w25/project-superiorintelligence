@@ -73,6 +73,21 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
             holder.eventOverlay.setCardBackgroundColor(Color.parseColor("#99FFFFFF")); // Default fallback color
         }
 
+        // reset both views to ensure they don’t carry previous states
+        holder.privateIcon.setVisibility(View.GONE);
+        holder.publicIcon.setVisibility(View.GONE);
+
+        System.out.println("Event Status: " + event.isPublic_status());
+
+        // Set public/private status
+        if (!event.isPublic_status()) {
+            holder.privateIcon.setVisibility(View.VISIBLE);
+            System.out.println("Private icon should be visible");
+        } else {
+            holder.publicIcon.setVisibility(View.VISIBLE);
+            System.out.println("Public icon should be visible");
+        }
+
         // Set emoji if present
         if (event.getEmojiResource() != 0) {
             holder.eventEmoticon.setVisibility(View.VISIBLE);
@@ -98,7 +113,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         // Declare all required views here
         TextView eventTitle, eventDate;
         CardView eventOverlay;
-        ImageView eventEmoticon, eventImage, commentIcon;
+        ImageView eventEmoticon, eventImage, commentIcon, publicIcon, privateIcon;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -109,6 +124,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
             eventEmoticon = itemView.findViewById(R.id.event_emoticon);
             eventImage = itemView.findViewById(R.id.event_image);
             commentIcon = itemView.findViewById(R.id.comment_icon);
+            publicIcon = itemView.findViewById(R.id.public_status);
+            privateIcon = itemView.findViewById(R.id.private_status);
         }
     }
 
