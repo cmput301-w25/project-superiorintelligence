@@ -14,6 +14,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.window.OnBackInvokedDispatcher;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
@@ -78,7 +80,7 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
         backButton.setOnClickListener(v -> {
             Intent returnIntent = new Intent();
             returnIntent.putExtra("selectedTab", "myposts");
-            // Do NOT send "newEvent" unless it was edited
+            returnIntent.putExtra("textFilter", getIntent().getStringExtra("textFilter")); // Preserve filter
             setResult(RESULT_OK, returnIntent);
             finish();
         });
@@ -102,6 +104,32 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
         }
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                    () -> {
+                        Intent returnIntent = new Intent();
+                        returnIntent.putExtra("selectedTab", "myposts");
+                        returnIntent.putExtra("textFilter", getIntent().getStringExtra("textFilter")); // Preserve filter
+                        setResult(RESULT_OK, returnIntent);
+                        finish();
+                    }
+            );
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent returnIntent = new Intent();
+        returnIntent.putExtra("selectedTab", "myposts");
+        returnIntent.putExtra("textFilter", getIntent().getStringExtra("textFilter")); // Preserve filter
+        setResult(RESULT_OK, returnIntent);
+        super.onBackPressed(); // Finish the activity normally
+    }
 
     /**
      * Initializes the launcher to handle edit results.

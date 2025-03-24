@@ -41,16 +41,29 @@ public class HomeActivity extends AppCompatActivity {
     private TextView tabExplore, tabFollowed, tabMyPosts, tabMap;
 
     private String currentTextFilter = null;
+    private String currentTab = null;
 
     private final ActivityResultLauncher<Intent> viewDetailsLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                     Intent data = result.getData();
-                    setIntent(data); // Save the intent so handleIncomingEvent reads it
-                    loadAllEvents(this::handleIncomingEvent); // Reapply filter/tab AFTER data loads
+
+                    String incomingFilter = data.getStringExtra("textFilter");
+                    if (incomingFilter != null) {
+                        currentTextFilter = incomingFilter;
+                    }
+
+                    String selectedTab = data.getStringExtra("selectedTab");
+                    if (selectedTab != null) {
+                        data.putExtra("selectedTab", selectedTab); // persist
+                    }
+
+                    setIntent(data); // Save into activity
+                    loadAllEvents(() -> {
+                        handleIncomingEvent(); // Apply after loading finishes
+                    });
                 }
             });
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +77,7 @@ public class HomeActivity extends AppCompatActivity {
         adapter = new EventAdapter(this, event -> {
             Intent intent = new Intent(HomeActivity.this, EventDetailsActivity.class);
             intent.putExtra("event", event);
+            intent.putExtra("textFilter", currentTextFilter);
             viewDetailsLauncher.launch(intent);
         });
 
@@ -115,7 +129,7 @@ public class HomeActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedFilter = parent.getItemAtPosition(position).toString();
 
-                // Skip the dummy first item (hint)
+                // Skip the dummy "Select filter"
                 if (position == 0) return;
 
                 // Always reset selection back to 0 so this triggers next time
@@ -206,18 +220,17 @@ public class HomeActivity extends AppCompatActivity {
 
         String selectedTab = intent.getStringExtra("selectedTab");
         if ("myposts".equals(selectedTab)) {
-            if (currentTextFilter != null && !currentTextFilter.isEmpty()) {
-                filterMyPostsByReason(currentTextFilter);
-            } else {
-                switchTab(myPostsEvents, tabMyPosts);
+            String preservedFilter = intent.getStringExtra("textFilter");
+            if (preservedFilter != null) {
+                currentTextFilter = preservedFilter;
             }
+            switchTab(myPostsEvents, tabMyPosts);
         } else if ("followed".equals(selectedTab)) {
             switchTab(followedEvents, tabFollowed);
         } else {
-            switchTab(exploreEvents, tabExplore); // fallback if intent is null or something else
+            // DEFAULT TO EXPLORE TAB IF NOTHING SELECTED
+            switchTab(exploreEvents, tabExplore);
         }
-
-        setIntent(new Intent()); // Clear intent after use
     }
 
     /**
@@ -249,7 +262,10 @@ public class HomeActivity extends AppCompatActivity {
     /**
      * Switch tabs and update UI.
      */
-    private void switchTab(List<Event> targetList, TextView selectedTab) {
+    private void switchTab(List<Event> targetList, TextView selectedTabView) {
+        // Update current tab tracking
+        currentTab = selectedTabView.getText().toString().toLowerCase();
+
         // Reset styles for all tabs
         tabExplore.setTypeface(null, android.graphics.Typeface.NORMAL);
         tabFollowed.setTypeface(null, android.graphics.Typeface.NORMAL);
@@ -257,11 +273,16 @@ public class HomeActivity extends AppCompatActivity {
         tabMap.setTypeface(null, android.graphics.Typeface.NORMAL);
 
         // Highlight selected tab
-        selectedTab.setTypeface(null, android.graphics.Typeface.BOLD);
+        selectedTabView.setTypeface(null, android.graphics.Typeface.BOLD);
 
-        // Set events to adapter and refresh RecyclerView (no need to reset adapter)
-        adapter.setEvents(targetList);
+        // Respect filter only if we are on myposts tab
+        if ("myposts".equals(currentTab) && currentTextFilter != null && !currentTextFilter.isEmpty()) {
+            filterMyPostsByReason(currentTextFilter); // Filtered view
+        } else {
+            adapter.setEvents(targetList); // Unfiltered view
+        }
     }
+
 
     private void filterMyPostsByReason(String keyword) {
         if (keyword.isEmpty()) {
