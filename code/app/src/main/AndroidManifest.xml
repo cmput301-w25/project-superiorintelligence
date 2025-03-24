@@ -112,8 +112,12 @@
             android:name=".EventDetailsActivity"
             android:exported="true">
         </activity>
-<!--Mood Map-->
+
+        <!--Mood Map-->
         <activity android:name=".MoodMap" />
+
+        <!-- Offline Activity -->
+        <activity android:name=".OfflineActivity"/>
 
         <!-- FileProvider for Camera Image Storage -->
         <provider

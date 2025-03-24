@@ -127,13 +127,15 @@ public class Database {
                                 }
                             } else {
                                 Userbase.getInstance().checkFollowStatus(loggedInUsername, event.getUser(), isFollowing -> {
-                                    if (isFollowing) {
-                                        followed.add(event);
-                                    } else {
-                                        explore.add(event);
+                                    // if event is private, don't add to any tab
+                                    if (event.isPublic_status()) {
+                                        if (isFollowing) {
+                                            followed.add(event);
+                                        } else {
+                                            explore.add(event);
+                                        }
                                     }
                                     processedCount[0]++;
-
                                     // Once all documents are processed, trigger callback
                                     if (processedCount[0] == totalDocuments) {
                                         Log.d("DatabaseDebug", "Final Event Counts -> MyPosts: " + myPosts.size() + ", Explore: " + explore.size() + ", Followed: " + followed.size());

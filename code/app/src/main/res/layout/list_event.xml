@@ -36,15 +36,40 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Emoticon (Optional, Top Right) -->
+        <!-- Emoticon (Optional, Top left next to comment icon) -->
         <ImageView
             android:id="@+id/event_emoticon"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginStart="12dp"
             android:layout_marginTop="8dp"
-            android:visibility="gone"
             android:scaleType="centerInside"
+            android:visibility="gone"
+            app:layout_constraintStart_toEndOf="@id/comment_icon"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Public/Private Status (Top Right) -->
+        <ImageView
+            android:id="@+id/public_status"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/public_icon"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/private_status"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/private_icon"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
