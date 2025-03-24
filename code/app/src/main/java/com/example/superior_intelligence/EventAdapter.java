@@ -29,8 +29,15 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     private List<Event> currentList = new ArrayList<>();
     private Context context;
 
-    public EventAdapter(@NonNull Context context) {
+    public interface ViewDetailsListener {
+        void onViewDetails(Event event);
+    }
+
+    private ViewDetailsListener viewDetailsListener;
+
+    public EventAdapter(@NonNull Context context, ViewDetailsListener listener) {
         this.context = context;
+        this.viewDetailsListener = listener;
     }
 
     public EventAdapter(ArrayList<Event> eventList) {
@@ -76,9 +83,9 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
 
         // Handle click to open details
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, EventDetailsActivity.class);
-            intent.putExtra("event", event); // Pass entire event object
-            context.startActivity(intent);
+            if (viewDetailsListener != null) {
+                viewDetailsListener.onViewDetails(event);
+            }
         });
     }
 

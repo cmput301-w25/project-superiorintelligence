@@ -75,7 +75,13 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
         initEditLauncher(); // Set up editing capability
 
         // Back button handler
-        backButton.setOnClickListener(v -> finish());
+        backButton.setOnClickListener(v -> {
+            Intent returnIntent = new Intent();
+            returnIntent.putExtra("selectedTab", "myposts");
+            // Do NOT send "newEvent" unless it was edited
+            setResult(RESULT_OK, returnIntent);
+            finish();
+        });
 
         // Edit button (only for own posts)
         if (isMyPost) {

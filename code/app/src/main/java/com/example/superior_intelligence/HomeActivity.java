@@ -12,6 +12,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
@@ -38,6 +40,18 @@ public class HomeActivity extends AppCompatActivity {
 
     private TextView tabExplore, tabFollowed, tabMyPosts, tabMap;
 
+    private String currentTextFilter = null;
+
+    private final ActivityResultLauncher<Intent> viewDetailsLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Intent data = result.getData();
+                    setIntent(data); // Save the intent so handleIncomingEvent reads it
+                    loadAllEvents(this::handleIncomingEvent); // Reapply filter/tab AFTER data loads
+                }
+            });
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +61,12 @@ public class HomeActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new EventAdapter(this);
+        adapter = new EventAdapter(this, event -> {
+            Intent intent = new Intent(HomeActivity.this, EventDetailsActivity.class);
+            intent.putExtra("event", event);
+            viewDetailsLauncher.launch(intent);
+        });
+
         recyclerView.setAdapter(adapter);
 
         // Tab UI elements
@@ -77,10 +96,12 @@ public class HomeActivity extends AppCompatActivity {
 
         filterButton.setOnClickListener(v -> {
             if (filterSpinner.getVisibility() == View.GONE) {
+                // Reset to 0 before making visible to ensure selection triggers again
+                filterSpinner.setSelection(0, false);
                 filterSpinner.setVisibility(View.VISIBLE);
-                filterSpinner.performClick(); // Optional: opens the dropdown automatically
+                filterSpinner.performClick(); // Open dropdown
             } else {
-                filterSpinner.setVisibility(View.GONE); // hide if already visible
+                filterSpinner.setVisibility(View.GONE);
             }
         });
 
@@ -94,10 +115,17 @@ public class HomeActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedFilter = parent.getItemAtPosition(position).toString();
 
+                // Skip the dummy first item (hint)
+                if (position == 0) return;
+
+                // Always reset selection back to 0 so this triggers next time
+                filterSpinner.setSelection(0, false);
+
                 // Hide the Spinner right after a selection
                 filterSpinner.setVisibility(View.GONE);
 
                 if (selectedFilter.equals("Filter by text")) {
+                    filterSpinner.setSelection(0, false);
 
                     // Create a simple input dialog
                     AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
@@ -144,50 +172,58 @@ public class HomeActivity extends AppCompatActivity {
         notificationButton.setOnClickListener(view -> startActivity(new Intent(HomeActivity.this, NotificationActivity.class)));
 
         // Load events and handle any incoming event
-        loadAllEvents();
-        handleIncomingEvent();
+        loadAllEvents(this::handleIncomingEvent);
+        //handleIncomingEvent();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        loadAllEvents();
+        //loadAllEvents();
+        loadAllEvents(this::handleIncomingEvent);
     }
 
     /**
      * Handle incoming event to add or update.
      */
     private void handleIncomingEvent() {
-        Event newEvent = (Event) getIntent().getSerializableExtra("newEvent");
+        Intent intent = getIntent();
+
+        Event newEvent = (Event) intent.getSerializableExtra("newEvent");
         if (newEvent != null && newEvent.isMyPost()) {
             boolean found = false;
             for (int i = 0; i < myPostsEvents.size(); i++) {
                 if (myPostsEvents.get(i).getID().equals(newEvent.getID())) {
-                    myPostsEvents.set(i, newEvent); // Update existing
+                    myPostsEvents.set(i, newEvent);
                     found = true;
                     break;
                 }
             }
             if (!found) {
-                myPostsEvents.add(newEvent); // Add if new
+                myPostsEvents.add(newEvent);
             }
         }
 
-        // Select correct tab after handling event
-        String selectedTab = getIntent().getStringExtra("selectedTab");
+        String selectedTab = intent.getStringExtra("selectedTab");
         if ("myposts".equals(selectedTab)) {
-            switchTab(myPostsEvents, tabMyPosts);
+            if (currentTextFilter != null && !currentTextFilter.isEmpty()) {
+                filterMyPostsByReason(currentTextFilter);
+            } else {
+                switchTab(myPostsEvents, tabMyPosts);
+            }
         } else if ("followed".equals(selectedTab)) {
             switchTab(followedEvents, tabFollowed);
         } else {
-            switchTab(exploreEvents, tabExplore);
+            switchTab(exploreEvents, tabExplore); // fallback if intent is null or something else
         }
+
+        setIntent(new Intent()); // Clear intent after use
     }
 
     /**
      * Load events from Firestore and update UI.
      */
-    private void loadAllEvents() {
+    private void loadAllEvents(Runnable afterLoad) {
         User currentUser = User.getInstance();
         database.loadEventsFromFirebase(currentUser, (myPosts, explore, followed) -> {
             if (myPosts != null && explore != null && followed != null) {
@@ -199,10 +235,11 @@ public class HomeActivity extends AppCompatActivity {
                 exploreEvents.addAll(explore);
                 followedEvents.addAll(followed);
 
-                // Default to showing MyPosts tab if user is returning
-                switchTab(myPostsEvents, tabMyPosts);
-
                 adapter.notifyDataSetChanged();
+
+                if (afterLoad != null) {
+                    afterLoad.run(); // Run your logic after everything is loaded
+                }
             } else {
                 Log.w("HomeActivity", "Failed to load events from Firestore");
             }
