@@ -12,6 +12,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
@@ -41,6 +43,31 @@ public class HomeActivity extends AppCompatActivity {
 
     private TextView tabExplore, tabFollowed, tabMyPosts, tabMap;
 
+    private String currentTextFilter = null;
+    private String currentTab = null;
+
+    private final ActivityResultLauncher<Intent> viewDetailsLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Intent data = result.getData();
+
+                    String incomingFilter = data.getStringExtra("textFilter");
+                    if (incomingFilter != null) {
+                        currentTextFilter = incomingFilter;
+                    }
+
+                    String selectedTab = data.getStringExtra("selectedTab");
+                    if (selectedTab != null) {
+                        data.putExtra("selectedTab", selectedTab); // persist
+                    }
+
+                    setIntent(data); // Save into activity
+                    loadAllEvents(() -> {
+                        handleIncomingEvent(); // Apply after loading finishes
+                    });
+                }
+            });
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -68,7 +95,13 @@ public class HomeActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new EventAdapter(this);
+        adapter = new EventAdapter(this, event -> {
+            Intent intent = new Intent(HomeActivity.this, EventDetailsActivity.class);
+            intent.putExtra("event", event);
+            intent.putExtra("textFilter", currentTextFilter);
+            viewDetailsLauncher.launch(intent);
+        });
+
         recyclerView.setAdapter(adapter);
 
         // Tab UI elements
@@ -98,10 +131,12 @@ public class HomeActivity extends AppCompatActivity {
 
         filterButton.setOnClickListener(v -> {
             if (filterSpinner.getVisibility() == View.GONE) {
+                // Reset to 0 before making visible to ensure selection triggers again
+                filterSpinner.setSelection(0, false);
                 filterSpinner.setVisibility(View.VISIBLE);
-                filterSpinner.performClick(); // Optional: opens the dropdown automatically
+                filterSpinner.performClick(); // Open dropdown
             } else {
-                filterSpinner.setVisibility(View.GONE); // hide if already visible
+                filterSpinner.setVisibility(View.GONE);
             }
         });
 
@@ -115,10 +150,17 @@ public class HomeActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedFilter = parent.getItemAtPosition(position).toString();
 
+                // Skip the dummy "Select filter"
+                if (position == 0) return;
+
+                // Always reset selection back to 0 so this triggers next time
+                filterSpinner.setSelection(0, false);
+
                 // Hide the Spinner right after a selection
                 filterSpinner.setVisibility(View.GONE);
 
                 if (selectedFilter.equals("Filter by text")) {
+                    filterSpinner.setSelection(0, false);
 
                     // Create a simple input dialog
                     AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
@@ -165,42 +207,49 @@ public class HomeActivity extends AppCompatActivity {
         notificationButton.setOnClickListener(view -> startActivity(new Intent(HomeActivity.this, NotificationActivity.class)));
 
         // Load events and handle any incoming event
-        loadAllEvents();
-        handleIncomingEvent();
+        loadAllEvents(this::handleIncomingEvent);
+        //handleIncomingEvent();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        loadAllEvents();
+        //loadAllEvents();
+        loadAllEvents(this::handleIncomingEvent);
     }
 
     /**
      * Handle incoming event to add or update.
      */
     private void handleIncomingEvent() {
-        Event newEvent = (Event) getIntent().getSerializableExtra("newEvent");
+        Intent intent = getIntent();
+
+        Event newEvent = (Event) intent.getSerializableExtra("newEvent");
         if (newEvent != null && newEvent.isMyPost()) {
             boolean found = false;
             for (int i = 0; i < myPostsEvents.size(); i++) {
                 if (myPostsEvents.get(i).getID().equals(newEvent.getID())) {
-                    myPostsEvents.set(i, newEvent); // Update existing
+                    myPostsEvents.set(i, newEvent);
                     found = true;
                     break;
                 }
             }
             if (!found) {
-                myPostsEvents.add(newEvent); // Add if new
+                myPostsEvents.add(newEvent);
             }
         }
 
-        // Select correct tab after handling event
-        String selectedTab = getIntent().getStringExtra("selectedTab");
+        String selectedTab = intent.getStringExtra("selectedTab");
         if ("myposts".equals(selectedTab)) {
+            String preservedFilter = intent.getStringExtra("textFilter");
+            if (preservedFilter != null) {
+                currentTextFilter = preservedFilter;
+            }
             switchTab(myPostsEvents, tabMyPosts);
         } else if ("followed".equals(selectedTab)) {
             switchTab(followedEvents, tabFollowed);
         } else {
+            // DEFAULT TO EXPLORE TAB IF NOTHING SELECTED
             switchTab(exploreEvents, tabExplore);
         }
     }
@@ -208,7 +257,7 @@ public class HomeActivity extends AppCompatActivity {
     /**
      * Load events from Firestore and update UI.
      */
-    private void loadAllEvents() {
+    private void loadAllEvents(Runnable afterLoad) {
         User currentUser = User.getInstance();
 
         if (currentUser == null) {
@@ -226,10 +275,11 @@ public class HomeActivity extends AppCompatActivity {
                 exploreEvents.addAll(explore);
                 followedEvents.addAll(followed);
 
-                // Default to showing MyPosts tab if user is returning
-                switchTab(myPostsEvents, tabMyPosts);
-
                 adapter.notifyDataSetChanged();
+
+                if (afterLoad != null) {
+                    afterLoad.run(); // Run your logic after everything is loaded
+                }
             } else {
                 Log.w("HomeActivity", "Failed to load events from Firestore");
             }
@@ -239,7 +289,10 @@ public class HomeActivity extends AppCompatActivity {
     /**
      * Switch tabs and update UI.
      */
-    private void switchTab(List<Event> targetList, TextView selectedTab) {
+    private void switchTab(List<Event> targetList, TextView selectedTabView) {
+        // Update current tab tracking
+        currentTab = selectedTabView.getText().toString().toLowerCase();
+
         // Reset styles for all tabs
         tabExplore.setTypeface(null, android.graphics.Typeface.NORMAL);
         tabFollowed.setTypeface(null, android.graphics.Typeface.NORMAL);
@@ -247,11 +300,16 @@ public class HomeActivity extends AppCompatActivity {
         tabMap.setTypeface(null, android.graphics.Typeface.NORMAL);
 
         // Highlight selected tab
-        selectedTab.setTypeface(null, android.graphics.Typeface.BOLD);
+        selectedTabView.setTypeface(null, android.graphics.Typeface.BOLD);
 
-        // Set events to adapter and refresh RecyclerView (no need to reset adapter)
-        adapter.setEvents(targetList);
+        // Respect filter only if we are on myposts tab
+        if ("myposts".equals(currentTab) && currentTextFilter != null && !currentTextFilter.isEmpty()) {
+            filterMyPostsByReason(currentTextFilter); // Filtered view
+        } else {
+            adapter.setEvents(targetList); // Unfiltered view
+        }
     }
+
 
     private void filterMyPostsByReason(String keyword) {
         if (keyword.isEmpty()) {
