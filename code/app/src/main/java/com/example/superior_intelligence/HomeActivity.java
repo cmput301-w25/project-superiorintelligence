@@ -129,33 +129,38 @@ public class HomeActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedFilter = parent.getItemAtPosition(position).toString();
 
-                // Skip the dummy "Select filter"
-                if (position == 0) return;
-
-                // Always reset selection back to 0 so this triggers next time
+                if (position == 0) return; // Skip dummy item
                 filterSpinner.setSelection(0, false);
-
-                // Hide the Spinner right after a selection
                 filterSpinner.setVisibility(View.GONE);
 
-                if (selectedFilter.equals("Filter by text")) {
-                    filterSpinner.setSelection(0, false);
+                switch (selectedFilter) {
+                    case "Filter by text":
+                        AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
+                        builder.setTitle("Enter search phrase");
 
-                    // Create a simple input dialog
-                    AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
-                    builder.setTitle("Enter search phrase");
+                        final EditText input = new EditText(HomeActivity.this);
+                        builder.setView(input);
 
-                    final EditText input = new EditText(HomeActivity.this);
-                    builder.setView(input);
+                        builder.setPositiveButton("Filter", (dialog, which) -> {
+                            String keyword = input.getText().toString().trim().toLowerCase();
+                            currentTextFilter = keyword;
+                            filterEventsByReason(keyword);
+                        });
 
-                    builder.setPositiveButton("Filter", (dialog, which) -> {
-                        String keyword = input.getText().toString().trim().toLowerCase();
-                        filterMyPostsByReason(keyword);
-                    });
+                        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+                        builder.show();
+                        break;
 
-                    builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-
-                    builder.show();
+                    case "Clear filter":
+                        currentTextFilter = null;
+                        if ("myposts".equals(currentTab)) {
+                            adapter.setEvents(myPostsEvents);
+                        } else if ("followed".equals(currentTab)) {
+                            adapter.setEvents(followedEvents);
+                        } else if ("explore".equals(currentTab)) {
+                            adapter.setEvents(exploreEvents);
+                        }
+                        break;
                 }
             }
 
@@ -276,28 +281,42 @@ public class HomeActivity extends AppCompatActivity {
         selectedTabView.setTypeface(null, android.graphics.Typeface.BOLD);
 
         // Respect filter only if we are on myposts tab
-        if ("myposts".equals(currentTab) && currentTextFilter != null && !currentTextFilter.isEmpty()) {
-            filterMyPostsByReason(currentTextFilter); // Filtered view
+        if (("myposts".equals(currentTab) || "followed".equals(currentTab))
+                && currentTextFilter != null && !currentTextFilter.isEmpty()) {
+            filterEventsByReason(currentTextFilter);
         } else {
-            adapter.setEvents(targetList); // Unfiltered view
+            adapter.setEvents(targetList);
         }
+
     }
 
 
-    private void filterMyPostsByReason(String keyword) {
+    private void filterEventsByReason(String keyword) {
         if (keyword.isEmpty()) {
-            switchTab(myPostsEvents, tabMyPosts); // Reset
+            if ("myposts".equals(currentTab)) {
+                switchTab(myPostsEvents, tabMyPosts);
+            } else if ("followed".equals(currentTab)) {
+                switchTab(followedEvents, tabFollowed);
+            }
             return;
         }
+
+        List<Event> sourceList = null;
+        if ("myposts".equals(currentTab)) {
+            sourceList = myPostsEvents;
+        } else if ("followed".equals(currentTab)) {
+            sourceList = followedEvents;
+        }
+
+        if (sourceList == null) return;
 
         String lowerKeyword = keyword.toLowerCase();
         List<Event> exactMatches = new ArrayList<>();
         List<Event> partialMatches = new ArrayList<>();
 
-        for (Event e : myPostsEvents) {
+        for (Event e : sourceList) {
             String reason = e.getMoodExplanation() != null ? e.getMoodExplanation().toLowerCase() : "";
 
-            // Match exact word (surrounded by word boundaries)
             if (reason.matches(".*\\b" + Pattern.quote(lowerKeyword) + "\\b.*")) {
                 exactMatches.add(e);
             } else if (reason.contains(lowerKeyword)) {
@@ -305,18 +324,15 @@ public class HomeActivity extends AppCompatActivity {
             }
         }
 
-        // Sort both lists by date descending
         Comparator<Event> dateDescComparator = (e1, e2) -> e2.getDate().compareTo(e1.getDate());
         exactMatches.sort(dateDescComparator);
         partialMatches.sort(dateDescComparator);
 
-        // Combine results: exact matches first
         List<Event> filteredList = new ArrayList<>(exactMatches);
         filteredList.addAll(partialMatches);
 
         adapter.setEvents(filteredList);
     }
-
 
     /**
      * Saves a new event to Firestore under the "MyPosts" collection.
