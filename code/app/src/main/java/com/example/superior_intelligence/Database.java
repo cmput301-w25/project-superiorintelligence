@@ -149,13 +149,15 @@ public class Database {
                                 }
                             } else {
                                 Userbase.getInstance().checkFollowStatus(loggedInUsername, event.getUser(), isFollowing -> {
-                                    if (isFollowing) {
-                                        followed.add(event);
-                                    } else {
-                                        explore.add(event);
+                                    // if event is private, don't add to any tab
+                                    if (event.isPublic_status()) {
+                                        if (isFollowing) {
+                                            followed.add(event);
+                                        } else {
+                                            explore.add(event);
+                                        }
                                     }
                                     processedCount[0]++;
-
                                     // Once all documents are processed, trigger callback
                                     if (processedCount[0] == totalDocuments) {
                                         myPosts.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));

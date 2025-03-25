@@ -30,6 +30,7 @@ public class Mapper {
         eventData.put("postUser", event.getUser());
         eventData.put("lat", event.getLat());
         eventData.put("lng", event.getLng());
+        eventData.put("public_status", event.isPublic_status());
         return eventData;
     }
 
@@ -45,12 +46,12 @@ public class Mapper {
             Boolean followedBool = document.getBoolean("isFollowed");
             boolean isFollowed = (followedBool != null) ? followedBool : false;
             Boolean myPostBool = document.getBoolean("isMyPost");
-            boolean isMyPost = (myPostBool != null) ? myPostBool : false;
+            boolean isMyPost = (myPostBool != null) ? myPostBool : true;
             String mood = document.getString("mood");
             String situation = document.getString("situation");
             String moodExplanation = document.getString("moodExplanation");
             String postUser = document.getString("postUser");
-
+            boolean publicStat = document.getBoolean("public_status");
             String dateString = "Unknown Date";
             if (rawDate instanceof String) {
                 dateString = (String) rawDate;
@@ -76,7 +77,8 @@ public class Mapper {
                     situation,
                     postUser,
                     lat,
-                    lng
+                    lng,
+                    publicStat
             );
 
         } catch (Exception e) {

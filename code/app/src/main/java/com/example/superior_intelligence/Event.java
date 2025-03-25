@@ -28,7 +28,7 @@ public class Event implements Serializable {
     private Double lng;
     private Double lat;
     private List<Comment> comments;
-
+    private boolean public_status;
     /**
      * Empty constructor required for Firestore
      */
@@ -48,8 +48,9 @@ public class Event implements Serializable {
      * @param isFollowed    Whether the event is followed by the user.
      * @param isMyPost      Whether the event was created by the user.25
      * @param user          The username of the event creator.
+     * @param public_status True if the post is public, otherwise private.
      */
-    public Event(String id, String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String user, Double lat, Double lng, List<Comment> comments) {
+    public Event(String id, String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String user, Double lat, Double lng, List<Comment> comments, boolean public_status) {
         this.id = id;
         this.title = title;
         this.date = date;
@@ -62,6 +63,7 @@ public class Event implements Serializable {
         this.lat = lat;
         this.lng = lng;
         this.comments = (comments != null) ? comments : new ArrayList<>();
+        this.public_status = public_status;
     }
   
     /**
@@ -79,8 +81,9 @@ public class Event implements Serializable {
      * @param moodExplanation The explanation for the mood.
      * @param situation      The social situation during the event.
      * @param user           The username of the event creator.
+     * @param public_status  Post status, true if post is public, false otherwise
      */
-    public Event(String id, String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String mood, String moodExplanation, String situation, String user, Double lat, Double lng) {
+    public Event(String id, String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String mood, String moodExplanation, String situation, String user, Double lat, Double lng, boolean public_status) {
         this.id = id;
         this.title = title;
         this.date = date;
@@ -95,6 +98,7 @@ public class Event implements Serializable {
         this.user = user;
         this.lat = lat;
         this.lng = lng;
+        this.public_status = public_status;
     }
 
     /**
@@ -328,5 +332,11 @@ public class Event implements Serializable {
         }
         this.comments.add(comment);
     }
+
+    public boolean isPublic_status() {
+        return public_status;
+    }
+
+
 }
 
