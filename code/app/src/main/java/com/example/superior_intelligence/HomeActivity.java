@@ -517,7 +517,11 @@ public class HomeActivity extends AppCompatActivity {
                     chosenMoods.add(moodOptions[i]);
                 }
             }
-            filterMyPostsByMood(chosenMoods);
+            if ("myposts".equals(currentTab)) {
+                filterPostsByMood(chosenMoods, myPostsEvents);
+            } else if ("followed".equals(currentTab)){
+                filterPostsByMood(chosenMoods, followedEvents);
+            }
         });
 
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
@@ -525,17 +529,22 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     /**
-     * Filters the MYPOSTS list based on the selected emotional states.
+     * Filters the posts list based on the selected emotional states.
      * @param chosenMoods List of selected moods.
+     * @param allPosts list of all posts in the current tab
      */
-    private void filterMyPostsByMood(List<String> chosenMoods) {
+    private void filterPostsByMood(List<String> chosenMoods, List<Event> allPosts) {
         if (chosenMoods.isEmpty()) {
-            switchTab(myPostsEvents, tabMyPosts);
+            if (allPosts == myPostsEvents) {
+                switchTab(myPostsEvents, tabMyPosts);
+            } else if (allPosts == followedEvents){
+                switchTab(followedEvents, tabFollowed);
+            }
             return;
         }
 
         List<Event> filteredList = new ArrayList<>();
-        for (Event event : myPostsEvents) {
+        for (Event event : allPosts) {
             // Ensure the event's mood matches one of the chosen moods
             if (chosenMoods.contains(event.getMood())) {
                 filteredList.add(event);
@@ -546,6 +555,11 @@ public class HomeActivity extends AppCompatActivity {
         filteredList.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
 
         adapter.setEvents(filteredList);
-        switchTab(filteredList, tabMyPosts);
+        if (allPosts == myPostsEvents){
+            switchTab(filteredList, tabMyPosts);
+        } else if (allPosts == followedEvents) {
+            switchTab(filteredList, tabFollowed);
+        }
     }
+
 }

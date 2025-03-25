@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/filter_recent" android:title="Show posts from last 7 days"/>
+    <item android:id="@+id/filter_emotion" android:title="Filter by emotional state"/>
+    <item android:id="@+id/filter_text" android:title="Filter by text"/>
+    <item android:id="@+id/filter_clear" android:title="Clear filter"/>
+</menu>
