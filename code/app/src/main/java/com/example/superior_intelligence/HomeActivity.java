@@ -207,6 +207,7 @@ public class HomeActivity extends AppCompatActivity {
 
     /**
      * Load events from Firestore and update UI.
+     * And edited to force sort
      */
     private void loadAllEvents() {
         User currentUser = User.getInstance();
@@ -222,6 +223,12 @@ public class HomeActivity extends AppCompatActivity {
                 exploreEvents.clear();
                 followedEvents.clear();
 
+                // 2. Sort each list by timestamp descending
+                myPosts.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
+                explore.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
+                followed.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
+
+                // 3. Add them to your local lists
                 myPostsEvents.addAll(myPosts);
                 exploreEvents.addAll(explore);
                 followedEvents.addAll(followed);
