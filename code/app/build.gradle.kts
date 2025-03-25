@@ -41,6 +41,7 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
+    implementation(libs.espresso.idling.resource)
     testImplementation(libs.junit)
     testImplementation(libs.espresso.core)
     testImplementation(libs.ext.junit)

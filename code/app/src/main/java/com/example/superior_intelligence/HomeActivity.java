@@ -1,24 +1,44 @@
 package com.example.superior_intelligence;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.health.connect.LocalTimeRangeFilter;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.type.DateTime;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -32,6 +52,32 @@ public class HomeActivity extends AppCompatActivity {
     private List<Event> myPostsEvents = new ArrayList<>();
 
     private TextView tabExplore, tabFollowed, tabMyPosts, tabMap;
+
+    private String currentTextFilter = null;
+    private String currentTab = null;
+    private ImageButton filterButton;
+
+    private final ActivityResultLauncher<Intent> viewDetailsLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Intent data = result.getData();
+
+                    String incomingFilter = data.getStringExtra("textFilter");
+                    if (incomingFilter != null) {
+                        currentTextFilter = incomingFilter;
+                    }
+
+                    String selectedTab = data.getStringExtra("selectedTab");
+                    if (selectedTab != null) {
+                        data.putExtra("selectedTab", selectedTab); // persist
+                    }
+
+                    setIntent(data); // Save into activity
+                    loadAllEvents(() -> {
+                        handleIncomingEvent(); // Apply after loading finishes
+                    });
+                }
+            });
 
     @Override
     protected void onStart() {
@@ -60,7 +106,13 @@ public class HomeActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new EventAdapter(this);
+        adapter = new EventAdapter(this, event -> {
+            Intent intent = new Intent(HomeActivity.this, EventDetailsActivity.class);
+            intent.putExtra("event", event);
+            intent.putExtra("textFilter", currentTextFilter);
+            viewDetailsLauncher.launch(intent);
+        });
+
         recyclerView.setAdapter(adapter);
 
         // Tab UI elements
@@ -68,6 +120,107 @@ public class HomeActivity extends AppCompatActivity {
         tabFollowed = findViewById(R.id.tab_followed);
         tabMyPosts = findViewById(R.id.tab_myposts);
         tabMap = findViewById(R.id.tab_map);
+        filterButton = findViewById(R.id.menu_button);
+        Spinner filterSpinner = findViewById(R.id.filter_spinner);
+
+        /**
+         * Initializes the Spinner with filter options and sets up the filter button to toggle its visibility.
+         * This portion configures a Spinner. The Spinner is initially hidden and becomes visible when the user taps
+         * the filter button. Tapping the button again hides the Spinner.
+         * Creates an ArrayAdapter using the filter_options array.
+         * Applies a standard dropdown layout to the Spinner items.
+         * Sets the adapter on the Spinner to populate its options.
+         * Defines the OnClickListener for the filter button to toggle the Spinner.
+         */
+        ArrayAdapter<CharSequence> filterAdapter = ArrayAdapter.createFromResource(
+                this,
+                R.array.filter_options,
+                android.R.layout.simple_spinner_item
+        );
+        filterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        filterSpinner.setAdapter(filterAdapter);
+
+        filterButton.setOnClickListener(v -> {
+            if (filterSpinner.getVisibility() == View.GONE) {
+                // Reset to 0 before making visible to ensure selection triggers again
+                filterSpinner.setSelection(0, false);
+                filterSpinner.setVisibility(View.VISIBLE);
+                filterSpinner.performClick(); // Open dropdown
+            } else {
+                filterSpinner.setVisibility(View.GONE);
+            }
+        });
+
+        /**
+         * Sets a listener on the Spinner to handle filter selection and hide the Spinner after selection.
+         * This section listens for user interaction with the Spinner. When an item is selected, the Spinner
+         * is immediately hidden to prevent the selected text from being displayed permanently in the layout.
+         */
+        filterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selectedFilter = parent.getItemAtPosition(position).toString();
+
+                if (position == 0) return; // Skip dummy item
+                filterSpinner.setSelection(0, false);
+                filterSpinner.setVisibility(View.GONE);
+
+                switch (selectedFilter) {
+                    case "Filter by text":
+                        AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this, R.style.DialogTheme);
+                        builder.setTitle("Enter search phrase");
+
+                        final EditText input = new EditText(HomeActivity.this);
+                        builder.setView(input);
+
+                        builder.setPositiveButton("Filter", (dialog, which) -> {
+                            String keyword = input.getText().toString().trim().toLowerCase();
+                            currentTextFilter = keyword;
+                            filterEventsByReason(keyword);
+                        });
+                        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
+                        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.BLACK);
+                        break;
+
+                    case "Show posts from last 7 days":
+                        if ("myposts".equals(currentTab)) {
+                            try {
+                                recentWeek(myPostsEvents);
+                            } catch (ParseException e) {
+                                throw new RuntimeException(e);
+                            }
+                        } else if ("followed".equals(currentTab)) {
+                            try {
+                                recentWeek(followedEvents);
+                            } catch (ParseException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        break;
+
+                    case "Clear filter":
+                        currentTextFilter = null;
+                        if ("myposts".equals(currentTab)) {
+                            adapter.setEvents(myPostsEvents);
+                        } else if ("followed".equals(currentTab)) {
+                            adapter.setEvents(followedEvents);
+                        } else if ("explore".equals(currentTab)) {
+                            adapter.setEvents(exploreEvents);
+                        }
+                        break;
+                }
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Do nothing
+            }
+        });
 
         // Set tab listeners (do this ONCE, not inside switchTab!)
         tabExplore.setOnClickListener(v -> switchTab(exploreEvents, tabExplore));
@@ -87,53 +240,78 @@ public class HomeActivity extends AppCompatActivity {
         profileImage.setOnClickListener(v -> startActivity(new Intent(HomeActivity.this, ProfileActivity.class)));
 
         ImageButton notificationButton = findViewById(R.id.notification_button);
-        notificationButton.setOnClickListener(view -> startActivity(new Intent(HomeActivity.this, NotificationActivity.class)));
+        ActivityResultLauncher<Intent> notificationLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        Intent data = result.getData();
+                        setIntent(data); // Retain selectedTab and textFilter for handleIncomingEvent()
+                        handleIncomingEvent(); // Reapply tab and filter
+                    }
+                }
+        );
+
+        notificationButton.setOnClickListener(view -> {
+            Intent intent = new Intent(HomeActivity.this, NotificationActivity.class);
+            intent.putExtra("selectedTab", currentTab);
+            intent.putExtra("textFilter", currentTextFilter);
+            notificationLauncher.launch(intent);
+        });
+
 
         // Load events and handle any incoming event
-        loadAllEvents();
-        handleIncomingEvent();
+        loadAllEvents(this::handleIncomingEvent);
+        //handleIncomingEvent();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        loadAllEvents();
+        //loadAllEvents();
+        loadAllEvents(this::handleIncomingEvent);
     }
 
     /**
      * Handle incoming event to add or update.
      */
     private void handleIncomingEvent() {
-        Event newEvent = (Event) getIntent().getSerializableExtra("newEvent");
+        Intent intent = getIntent();
+
+        Event newEvent = (Event) intent.getSerializableExtra("newEvent");
         if (newEvent != null && newEvent.isMyPost()) {
             boolean found = false;
             for (int i = 0; i < myPostsEvents.size(); i++) {
                 if (myPostsEvents.get(i).getID().equals(newEvent.getID())) {
-                    myPostsEvents.set(i, newEvent); // Update existing
+                    myPostsEvents.set(i, newEvent);
                     found = true;
                     break;
                 }
             }
             if (!found) {
-                myPostsEvents.add(newEvent); // Add if new
+                myPostsEvents.add(newEvent);
             }
         }
 
-        // Select correct tab after handling event
-        String selectedTab = getIntent().getStringExtra("selectedTab");
+        String selectedTab = intent.getStringExtra("selectedTab");
         if ("myposts".equals(selectedTab)) {
+            String preservedFilter = intent.getStringExtra("textFilter");
+            if (preservedFilter != null) {
+                currentTextFilter = preservedFilter;
+            }
             switchTab(myPostsEvents, tabMyPosts);
         } else if ("followed".equals(selectedTab)) {
             switchTab(followedEvents, tabFollowed);
         } else {
+            // DEFAULT TO EXPLORE TAB IF NOTHING SELECTED
             switchTab(exploreEvents, tabExplore);
         }
     }
 
     /**
      * Load events from Firestore and update UI.
+     * And edited to force sort
      */
-    private void loadAllEvents() {
+    private void loadAllEvents(Runnable afterLoad) {
         User currentUser = User.getInstance();
 
         if (currentUser == null) {
@@ -147,14 +325,21 @@ public class HomeActivity extends AppCompatActivity {
                 exploreEvents.clear();
                 followedEvents.clear();
 
+                // 2. Sort each list by timestamp descending
+                myPosts.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
+                explore.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
+                followed.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
+
+                // 3. Add them to your local lists
                 myPostsEvents.addAll(myPosts);
                 exploreEvents.addAll(explore);
                 followedEvents.addAll(followed);
 
-                // Default to showing MyPosts tab if user is returning
-                switchTab(myPostsEvents, tabMyPosts);
-
                 adapter.notifyDataSetChanged();
+
+                if (afterLoad != null) {
+                    afterLoad.run(); // Run your logic after everything is loaded
+                }
             } else {
                 Log.w("HomeActivity", "Failed to load events from Firestore");
             }
@@ -164,7 +349,9 @@ public class HomeActivity extends AppCompatActivity {
     /**
      * Switch tabs and update UI.
      */
-    private void switchTab(List<Event> targetList, TextView selectedTab) {
+    private void switchTab(List<Event> targetList, TextView selectedTabView) {
+        currentTab = selectedTabView.getText().toString().toLowerCase();
+
         // Reset styles for all tabs
         tabExplore.setTypeface(null, android.graphics.Typeface.NORMAL);
         tabFollowed.setTypeface(null, android.graphics.Typeface.NORMAL);
@@ -172,10 +359,72 @@ public class HomeActivity extends AppCompatActivity {
         tabMap.setTypeface(null, android.graphics.Typeface.NORMAL);
 
         // Highlight selected tab
-        selectedTab.setTypeface(null, android.graphics.Typeface.BOLD);
+        selectedTabView.setTypeface(null, android.graphics.Typeface.BOLD);
 
-        // Set events to adapter and refresh RecyclerView (no need to reset adapter)
-        adapter.setEvents(targetList);
+        // Enable/disable filter button
+        if ("explore".equals(currentTab)) {
+            filterButton.setEnabled(false);
+            filterButton.setAlpha(0.3f); // Visually indicate it's disabled
+        } else {
+            filterButton.setEnabled(true);
+            filterButton.setAlpha(1f); // Full opacity
+        }
+
+        // Apply filter if applicable
+        if (("myposts".equals(currentTab) || "followed".equals(currentTab)) &&
+                currentTextFilter != null && !currentTextFilter.isEmpty()) {
+            filterEventsByReason(currentTextFilter);
+        } else {
+            adapter.setEvents(targetList);
+        }
+    }
+
+
+
+    private void filterEventsByReason(String keyword) {
+        if (keyword.isEmpty()) {
+            if ("myposts".equals(currentTab)) {
+                switchTab(myPostsEvents, tabMyPosts);
+            } else if ("followed".equals(currentTab)) {
+                switchTab(followedEvents, tabFollowed);
+            }
+            return;
+        }
+
+        List<Event> sourceList = null;
+        if ("myposts".equals(currentTab)) {
+            sourceList = myPostsEvents;
+        } else if ("followed".equals(currentTab)) {
+            sourceList = followedEvents;
+        }
+
+        if (sourceList == null) return;
+
+        String lowerKeyword = keyword.toLowerCase();
+        List<Event> exactMatches = new ArrayList<>();
+        List<Event> partialMatches = new ArrayList<>();
+
+        for (Event e : sourceList) {
+            String reason = e.getMoodExplanation() != null ? e.getMoodExplanation().toLowerCase() : "";
+
+            if (reason.matches(".*\\b" + Pattern.quote(lowerKeyword) + "\\b.*")) {
+                exactMatches.add(e);
+            } else if (reason.contains(lowerKeyword)) {
+                partialMatches.add(e);
+            }
+        }
+
+
+        // Sort both lists by date descending
+        Comparator<Event> dateDescComparator = (e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp());
+
+        exactMatches.sort(dateDescComparator);
+        partialMatches.sort(dateDescComparator);
+
+        List<Event> filteredList = new ArrayList<>(exactMatches);
+        filteredList.addAll(partialMatches);
+
+        adapter.setEvents(filteredList);
     }
 
     /**
@@ -204,5 +453,44 @@ public class HomeActivity extends AppCompatActivity {
                 Toast.makeText(this, "Failed to update event!", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    /**
+     * Get recent week of mood for either my mood events or the people that the user followed's posts
+     * @param posts  list of posts (myPosts/followedPosts) to find recent week posts
+     */
+    private void recentWeek(List<Event> posts) throws ParseException {
+        /*Stackoverflow:
+        https://stackoverflow.com/questions/16982056/how-to-get-the-date-7-days-earlier-date-from-current-date-in-java
+         */
+
+        List<Event> recentWeekEvents = new ArrayList<>();
+
+        // get Calendar instance
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        Date currentDate = cal.getTime();
+        // substract 7 days
+        // If we give 7 there it will give 8 days back
+        cal.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH)-6);
+        // convert to date
+        Date recentWeekDate = cal.getTime();
+
+        for (Event e: posts) {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMM yyyy, HH:mm");
+            Date eventDate = simpleDateFormat.parse(e.getDate());
+
+            // if event date is not before the recent week and after current date
+            if (!eventDate.before(recentWeekDate) && !eventDate.after(currentDate)) {
+                recentWeekEvents.add(e);
+            }
+        }
+
+        // Sort both lists by date descending
+        Comparator<Event> dateDescComparator = (e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp());
+        recentWeekEvents.sort(dateDescComparator);
+
+        adapter.setEvents(recentWeekEvents);
+
     }
 }

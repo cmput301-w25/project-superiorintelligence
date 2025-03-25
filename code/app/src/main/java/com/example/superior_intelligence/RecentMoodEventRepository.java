@@ -39,9 +39,11 @@ public class RecentMoodEventRepository {
                         Event event = new Event();
                         event.setID(doc.getId());
                         Timestamp ts = doc.getTimestamp("dateTime");
-                        if (ts != null){String formattedDate=new SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-                                    .format(ts.toDate());
-                            event.setDate(formattedDate);}
+                        if (ts != null) {
+                            event.setTimestamp(ts.toDate().getTime());
+                            String formattedDate = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(ts.toDate());
+                            event.setDate(formattedDate);
+                        }
                         event.setMood(doc.getString("mood")) ;
                         event.setTitle(doc.getString("title"));
                         event.setOverlayColor(doc.getString("overlayColor" ));
