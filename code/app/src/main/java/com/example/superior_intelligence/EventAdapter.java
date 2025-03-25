@@ -1,16 +1,9 @@
 package com.example.superior_intelligence;
-import com.example.superior_intelligence.Photobase;
-import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.os.Handler;
 import android.content.Context;
-import android.os.Looper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -124,8 +117,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
             eventEmoticon = itemView.findViewById(R.id.event_emoticon);
             eventImage = itemView.findViewById(R.id.event_image);
             commentIcon = itemView.findViewById(R.id.comment_icon);
-            publicIcon = itemView.findViewById(R.id.public_status);
-            privateIcon = itemView.findViewById(R.id.private_status);
+            publicIcon = itemView.findViewById(R.id.public_status_detail);
+            privateIcon = itemView.findViewById(R.id.private_status_detail);
         }
     }
 

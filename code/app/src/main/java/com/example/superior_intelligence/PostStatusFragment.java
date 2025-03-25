@@ -19,7 +19,11 @@ public class PostStatusFragment extends DialogFragment {
         public void public_status(boolean post_status);
     }
     private PostStatusDialogListener listener;
+    private Event existingEvent;
 
+    public PostStatusFragment(Event existingEvent){
+        this.existingEvent = existingEvent;
+    }
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
@@ -36,17 +40,32 @@ public class PostStatusFragment extends DialogFragment {
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         View view = getLayoutInflater().inflate(R.layout.post_status_fragment, null);
         CheckBox public_checkbox = view.findViewById(R.id.public_checkbox);
-        final boolean[] public_stat = new boolean[1];
-        AlertDialog dialog = new AlertDialog.Builder(requireContext(), R.style.DialogTheme)
-                .setView(view)
-                .setPositiveButton("POST", (dialogInterface, which) -> {
-                    if (public_checkbox.isChecked()){
-                        listener.public_status(true);
-                    } else {
-                        listener.public_status(false);
-                    }
-                })
-                .create();
+        AlertDialog dialog;
+        if (existingEvent != null && existingEvent.isPublic_status()){
+            public_checkbox.setChecked(true);
+            dialog = new AlertDialog.Builder(requireContext(), R.style.DialogTheme)
+                    .setView(view)
+                    .setPositiveButton("CONFIRM", (dialogInterface, which) -> {
+                        if (public_checkbox.isChecked()){
+                            listener.public_status(true);
+                        } else {
+                            listener.public_status(false);
+                        }
+                    })
+                    .create();
+        } else {
+            dialog = new AlertDialog.Builder(requireContext(), R.style.DialogTheme)
+                    .setView(view)
+                    .setPositiveButton("POST", (dialogInterface, which) -> {
+                        if (public_checkbox.isChecked()) {
+                            listener.public_status(true);
+                        } else {
+                            listener.public_status(false);
+                        }
+                    })
+                    .create();
+        }
+
         dialog.setOnShowListener(d -> {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
         });

@@ -355,7 +355,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
 
         if (eventID == null || eventID.isEmpty()) {
             // get public/private post status
-            PostStatusFragment postStatusDialogFragment = new PostStatusFragment();
+            PostStatusFragment postStatusDialogFragment = new PostStatusFragment(null);
             postStatusDialogFragment.show(getSupportFragmentManager(), "PostStatusDialog");
 
         } else {
