@@ -98,6 +98,7 @@ public class us0507 {
         testEvent.setUser("otherUser");
         testEvent.setLat(0.0);
         testEvent.setLng(0.0);
+        testEvent.setPublic_status(true);
 
         Database.getInstance().saveEventToFirebase(testEvent, success -> latch.countDown());
         latch.await();
@@ -134,6 +135,8 @@ public class us0507 {
 
         onView(withId(R.id.comments_recycler_view))
                 .check(matches(hasDescendant(withText(testComment))));
+
+        SystemClock.sleep(1000);
     }
 
 
