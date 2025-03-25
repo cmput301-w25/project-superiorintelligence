@@ -333,6 +333,10 @@ public class Event implements Serializable {
         this.comments.add(comment);
     }
 
+    public void setPublic_status(boolean public_status) {
+        this.public_status = public_status;
+    }
+
     public boolean isPublic_status() {
         return public_status;
     }
