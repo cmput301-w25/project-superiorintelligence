@@ -45,6 +45,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private String currentTextFilter = null;
     private String currentTab = null;
+    private ImageButton filterButton;
 
     private final ActivityResultLauncher<Intent> viewDetailsLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -109,7 +110,7 @@ public class HomeActivity extends AppCompatActivity {
         tabFollowed = findViewById(R.id.tab_followed);
         tabMyPosts = findViewById(R.id.tab_myposts);
         tabMap = findViewById(R.id.tab_map);
-        ImageButton filterButton = findViewById(R.id.menu_button);
+        filterButton = findViewById(R.id.menu_button);
         Spinner filterSpinner = findViewById(R.id.filter_spinner);
 
         /**
@@ -209,7 +210,24 @@ public class HomeActivity extends AppCompatActivity {
         profileImage.setOnClickListener(v -> startActivity(new Intent(HomeActivity.this, ProfileActivity.class)));
 
         ImageButton notificationButton = findViewById(R.id.notification_button);
-        notificationButton.setOnClickListener(view -> startActivity(new Intent(HomeActivity.this, NotificationActivity.class)));
+        ActivityResultLauncher<Intent> notificationLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        Intent data = result.getData();
+                        setIntent(data); // Retain selectedTab and textFilter for handleIncomingEvent()
+                        handleIncomingEvent(); // Reapply tab and filter
+                    }
+                }
+        );
+
+        notificationButton.setOnClickListener(view -> {
+            Intent intent = new Intent(HomeActivity.this, NotificationActivity.class);
+            intent.putExtra("selectedTab", currentTab);
+            intent.putExtra("textFilter", currentTextFilter);
+            notificationLauncher.launch(intent);
+        });
+
 
         // Load events and handle any incoming event
         loadAllEvents(this::handleIncomingEvent);
@@ -302,7 +320,6 @@ public class HomeActivity extends AppCompatActivity {
      * Switch tabs and update UI.
      */
     private void switchTab(List<Event> targetList, TextView selectedTabView) {
-        // Update current tab tracking
         currentTab = selectedTabView.getText().toString().toLowerCase();
 
         // Reset styles for all tabs
@@ -314,15 +331,24 @@ public class HomeActivity extends AppCompatActivity {
         // Highlight selected tab
         selectedTabView.setTypeface(null, android.graphics.Typeface.BOLD);
 
-        // Respect filter only if we are on myposts tab
-        if (("myposts".equals(currentTab) || "followed".equals(currentTab))
-                && currentTextFilter != null && !currentTextFilter.isEmpty()) {
+        // Enable/disable filter button
+        if ("explore".equals(currentTab)) {
+            filterButton.setEnabled(false);
+            filterButton.setAlpha(0.3f); // Visually indicate it's disabled
+        } else {
+            filterButton.setEnabled(true);
+            filterButton.setAlpha(1f); // Full opacity
+        }
+
+        // Apply filter if applicable
+        if (("myposts".equals(currentTab) || "followed".equals(currentTab)) &&
+                currentTextFilter != null && !currentTextFilter.isEmpty()) {
             filterEventsByReason(currentTextFilter);
         } else {
             adapter.setEvents(targetList);
         }
-
     }
+
 
 
     private void filterEventsByReason(String keyword) {
