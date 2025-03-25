@@ -89,6 +89,10 @@ public class us010101_us010201_us020401 {
         // Submit post
         onView(withId(R.id.confirm_mood_create_button)).perform(click());
 
+        SystemClock.sleep(1000);
+        onView(withId(R.id.public_checkbox)).perform(click());
+
+        onView(withText("POST")).perform(click()); // or "CONFIRM" for editing
         SystemClock.sleep(3000);
 
         // Go to MyPosts to verify
