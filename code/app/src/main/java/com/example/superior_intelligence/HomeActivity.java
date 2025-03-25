@@ -186,6 +186,10 @@ public class HomeActivity extends AppCompatActivity {
                         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.BLACK);
                         break;
 
+                    case "Filter by emotional state":
+                        showEmotionFilterDialog();
+                        break;
+
                     case "Show posts from last 7 days":
                         if ("myposts".equals(currentTab)) {
                             try {
@@ -261,13 +265,11 @@ public class HomeActivity extends AppCompatActivity {
 
         // Load events and handle any incoming event
         loadAllEvents(this::handleIncomingEvent);
-        //handleIncomingEvent();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        //loadAllEvents();
         loadAllEvents(this::handleIncomingEvent);
     }
 
@@ -379,8 +381,6 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-
-
     private void filterEventsByReason(String keyword) {
         if (keyword.isEmpty()) {
             if ("myposts".equals(currentTab)) {
@@ -491,6 +491,61 @@ public class HomeActivity extends AppCompatActivity {
         recentWeekEvents.sort(dateDescComparator);
 
         adapter.setEvents(recentWeekEvents);
+    }
 
+    // --- New Methods for Emotional State Filtering ---
+
+    /**
+     * Displays a multi-choice dialog for filtering posts by emotional state.
+     */
+    private void showEmotionFilterDialog() {
+        // Retrieve the emotional state options from strings.xml
+        final String[] moodOptions = getResources().getStringArray(R.array.emotional_state_list);
+        final boolean[] selectedMoods = new boolean[moodOptions.length];
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(R.string.select_emotion_prompt)); // uses "Select Emotion Prompt" from strings.xml
+
+        builder.setMultiChoiceItems(moodOptions, selectedMoods, (dialog, which, isChecked) -> {
+            selectedMoods[which] = isChecked;
+        });
+
+        builder.setPositiveButton("Filter", (dialog, which) -> {
+            List<String> chosenMoods = new ArrayList<>();
+            for (int i = 0; i < moodOptions.length; i++) {
+                if (selectedMoods[i]) {
+                    chosenMoods.add(moodOptions[i]);
+                }
+            }
+            filterMyPostsByMood(chosenMoods);
+        });
+
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+        builder.create().show();
+    }
+
+    /**
+     * Filters the MYPOSTS list based on the selected emotional states.
+     * @param chosenMoods List of selected moods.
+     */
+    private void filterMyPostsByMood(List<String> chosenMoods) {
+        if (chosenMoods.isEmpty()) {
+            switchTab(myPostsEvents, tabMyPosts);
+            return;
+        }
+
+        List<Event> filteredList = new ArrayList<>();
+        for (Event event : myPostsEvents) {
+            // Ensure the event's mood matches one of the chosen moods
+            if (chosenMoods.contains(event.getMood())) {
+                filteredList.add(event);
+            }
+        }
+
+        // Sort filtered events by timestamp descending
+        filteredList.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
+
+        adapter.setEvents(filteredList);
+        switchTab(filteredList, tabMyPosts);
     }
 }
