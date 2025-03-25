@@ -1,6 +1,8 @@
 package com.example.superior_intelligence;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -87,6 +89,29 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
             holder.eventEmoticon.setImageResource(event.getEmojiResource());
         } else {
             holder.eventEmoticon.setVisibility(View.GONE); // Hide emoji if none
+        }
+
+        String imageDocId = event.getImageUrl();
+        if (imageDocId != null && !imageDocId.isEmpty()) {
+            Photobase photobase = new Photobase(context);
+            photobase.loadImage(imageDocId, new Photobase.ImageLoadCallback() {
+                @Override
+                public void onImageLoaded(Bitmap bitmap) {
+                    holder.eventImage.setVisibility(View.VISIBLE);
+                    holder.eventImage.setImageBitmap(bitmap);
+                }
+
+                @Override
+                public void onImageLoadFailed(String error) {
+                    Log.e("EventAdapter", "Failed to load image: " + error);
+                    holder.eventImage.setVisibility(View.VISIBLE);
+                    holder.eventImage.setImageResource(R.color.secondaryGreen);
+
+                }
+            });
+        } else {
+            holder.eventImage.setVisibility(View.VISIBLE);
+            holder.eventImage.setImageResource(R.color.secondaryGreen);
         }
 
         // Handle click to open details
