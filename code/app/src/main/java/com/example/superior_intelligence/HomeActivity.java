@@ -1,6 +1,7 @@
 package com.example.superior_intelligence;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.health.connect.LocalTimeRangeFilter;
 import android.os.Bundle;
 import android.util.Log;
@@ -165,7 +166,7 @@ public class HomeActivity extends AppCompatActivity {
 
                 switch (selectedFilter) {
                     case "Filter by text":
-                        AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this, R.style.DialogTheme);
                         builder.setTitle("Enter search phrase");
 
                         final EditText input = new EditText(HomeActivity.this);
@@ -176,10 +177,20 @@ public class HomeActivity extends AppCompatActivity {
                             currentTextFilter = keyword;
                             filterEventsByReason(keyword);
                         });
-
                         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-                        builder.show();
+
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
+                        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.BLACK);
                         break;
+
+                    case "Show posts from last 7 days":
+                        try {
+                            recentWeek(myPostsEvents);
+                        } catch (ParseException e) {
+                            throw new RuntimeException(e);
+                        }
 
                     case "Clear filter":
                         currentTextFilter = null;
@@ -193,15 +204,6 @@ public class HomeActivity extends AppCompatActivity {
                         break;
                 }
 
-                if (selectedFilter.equals("Show posts from last 7 days")) {
-                    if (currentTab.equals("MYPOSTS")){
-                        try {
-                            adapter.setEvents(recentWeek(myPostsEvents));
-                        } catch (ParseException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                }
             }
 
             @Override
@@ -422,7 +424,7 @@ public class HomeActivity extends AppCompatActivity {
      * Get recent week of mood for either my mood events or the people that the user followed's posts
      * @param posts  list of posts (myPosts/followedPosts) to find recent week posts
      */
-    private List<Event> recentWeek(List<Event> posts) throws ParseException {
+    private void recentWeek(List<Event> posts) throws ParseException {
         /*Stackoverflow:
         https://stackoverflow.com/questions/16982056/how-to-get-the-date-7-days-earlier-date-from-current-date-in-java
          */
@@ -449,6 +451,11 @@ public class HomeActivity extends AppCompatActivity {
             }
         }
 
-        return recentWeekEvents;
+        // Sort both lists by date descending
+        Comparator<Event> dateDescComparator = (e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp());
+        recentWeekEvents.sort(dateDescComparator);
+
+        adapter.setEvents(recentWeekEvents);
+
     }
 }
