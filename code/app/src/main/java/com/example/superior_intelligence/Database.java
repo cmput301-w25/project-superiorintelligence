@@ -114,6 +114,24 @@ public class Database {
                                 continue;
                             }
 
+                            String dtString = document.getString("date");
+                            if (dtString != null) {
+                                try {
+                                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd MMM yyyy, HH:mm", java.util.Locale.getDefault());
+                                    java.util.Date parsedDate = sdf.parse(dtString);
+                                    if (parsedDate != null) {
+                                        event.setTimestamp(parsedDate.getTime());
+                                    } else {
+                                        event.setTimestamp(0);
+                                    }
+                                } catch (java.text.ParseException e) {
+                                    e.printStackTrace();
+                                    event.setTimestamp(0);
+                                }
+                            } else {
+                                event.setTimestamp(0);
+                            }
+
                             Log.d("DatabaseDebug", "loggedInUsername: " + loggedInUsername);
                             Log.d("DatabaseDebug", "event.getUser(): " + event.getUser());
                             Log.d("DatabaseDebug", "Event Title: " + event.getTitle() + " | User: " + event.getUser());
@@ -122,6 +140,10 @@ public class Database {
                                 myPosts.add(event);
                                 processedCount[0]++;
                                 if (processedCount[0] == totalDocuments) {
+                                    // Sort all lists by numeric timestamp descending
+                                    myPosts.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
+                                    explore.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
+                                    followed.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
                                     Log.d("DatabaseDebug", "Final Event Counts -> MyPosts: " + myPosts.size() + ", Explore: " + explore.size() + ", Followed: " + followed.size());
                                     callback.onEventsLoaded(myPosts, explore, followed);
                                 }
@@ -138,6 +160,9 @@ public class Database {
                                     processedCount[0]++;
                                     // Once all documents are processed, trigger callback
                                     if (processedCount[0] == totalDocuments) {
+                                        myPosts.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
+                                        explore.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
+                                        followed.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
                                         Log.d("DatabaseDebug", "Final Event Counts -> MyPosts: " + myPosts.size() + ", Explore: " + explore.size() + ", Followed: " + followed.size());
                                         callback.onEventsLoaded(myPosts, explore, followed);
                                     }
