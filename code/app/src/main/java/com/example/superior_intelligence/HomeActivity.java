@@ -1,6 +1,7 @@
 package com.example.superior_intelligence;
 
 import android.content.Intent;
+import android.health.connect.LocalTimeRangeFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -20,15 +21,23 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.type.DateTime;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -177,6 +186,16 @@ public class HomeActivity extends AppCompatActivity {
                     builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
                     builder.show();
+                }
+
+                if (selectedFilter.equals("Show posts from last 7 days")) {
+                    if (currentTab.equals("MYPOSTS")){
+                        try {
+                            adapter.setEvents(recentWeek(myPostsEvents));
+                        } catch (ParseException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
                 }
             }
 
@@ -371,5 +390,39 @@ public class HomeActivity extends AppCompatActivity {
                 Toast.makeText(this, "Failed to update event!", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    /**
+     * Get recent week of mood for either my mood events or the people that the user followed's posts
+     * @param posts  list of posts (myPosts/followedPosts) to find recent week posts
+     */
+    private List<Event> recentWeek(List<Event> posts) throws ParseException {
+        /*Stackoverflow:
+        https://stackoverflow.com/questions/16982056/how-to-get-the-date-7-days-earlier-date-from-current-date-in-java
+         */
+
+        List<Event> recentWeekEvents = new ArrayList<>();
+
+        // get Calendar instance
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        Date currentDate = cal.getTime();
+        // substract 7 days
+        // If we give 7 there it will give 8 days back
+        cal.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH)-6);
+        // convert to date
+        Date recentWeekDate = cal.getTime();
+
+        for (Event e: posts) {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMM yyyy, HH:mm");
+            Date eventDate = simpleDateFormat.parse(e.getDate());
+
+            // if event date is not before the recent week and after current date
+            if (!eventDate.before(recentWeekDate) && !eventDate.after(currentDate)) {
+                recentWeekEvents.add(e);
+            }
+        }
+
+        return recentWeekEvents;
     }
 }
