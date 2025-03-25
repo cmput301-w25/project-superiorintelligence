@@ -209,7 +209,24 @@ public class HomeActivity extends AppCompatActivity {
         profileImage.setOnClickListener(v -> startActivity(new Intent(HomeActivity.this, ProfileActivity.class)));
 
         ImageButton notificationButton = findViewById(R.id.notification_button);
-        notificationButton.setOnClickListener(view -> startActivity(new Intent(HomeActivity.this, NotificationActivity.class)));
+        ActivityResultLauncher<Intent> notificationLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        Intent data = result.getData();
+                        setIntent(data); // Retain selectedTab and textFilter for handleIncomingEvent()
+                        handleIncomingEvent(); // Reapply tab and filter
+                    }
+                }
+        );
+
+        notificationButton.setOnClickListener(view -> {
+            Intent intent = new Intent(HomeActivity.this, NotificationActivity.class);
+            intent.putExtra("selectedTab", currentTab);
+            intent.putExtra("textFilter", currentTextFilter);
+            notificationLauncher.launch(intent);
+        });
+
 
         // Load events and handle any incoming event
         loadAllEvents(this::handleIncomingEvent);

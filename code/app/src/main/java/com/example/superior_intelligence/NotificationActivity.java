@@ -1,5 +1,6 @@
 package com.example.superior_intelligence;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageButton;
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,7 +29,13 @@ public class NotificationActivity extends AppCompatActivity {
         fetchIncomingRequests();
 
         ImageButton backButton = findViewById(R.id.notifications_back_button);
-        backButton.setOnClickListener(view -> finish());
+        backButton.setOnClickListener(view -> {
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("selectedTab", getIntent().getStringExtra("selectedTab"));
+            resultIntent.putExtra("textFilter", getIntent().getStringExtra("textFilter"));
+            setResult(RESULT_OK, resultIntent);
+            finish();
+        });
 
         // Handle Tab Switching
         TabLayout tabLayout = findViewById(R.id.notifications_tab_layout);
