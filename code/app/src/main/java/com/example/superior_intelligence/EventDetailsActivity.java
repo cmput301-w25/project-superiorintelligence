@@ -86,7 +86,11 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
         // Back button handler
         backButton.setOnClickListener(v -> {
             Intent returnIntent = new Intent();
-            returnIntent.putExtra("selectedTab", "myposts");
+            if (isMyPost) {
+                returnIntent.putExtra("selectedTab", "myposts");
+            } else {
+                returnIntent.putExtra("selectedTab", "explore");
+            }
             returnIntent.putExtra("textFilter", getIntent().getStringExtra("textFilter")); // Preserve filter
             setResult(RESULT_OK, returnIntent);
             finish();
