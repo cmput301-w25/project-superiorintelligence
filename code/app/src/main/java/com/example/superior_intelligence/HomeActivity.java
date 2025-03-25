@@ -192,6 +192,7 @@ public class HomeActivity extends AppCompatActivity {
                         } catch (ParseException e) {
                             throw new RuntimeException(e);
                         }
+                        break;
 
                     case "Clear filter":
                         currentTextFilter = null;
