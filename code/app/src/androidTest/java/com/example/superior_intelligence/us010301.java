@@ -95,6 +95,10 @@ public class us010301 {
 
             // Confirm and submit
             onView(withId(R.id.confirm_mood_create_button)).perform(click());
+            SystemClock.sleep(1000);
+            onView(withId(R.id.public_checkbox)).perform(click());
+
+            onView(withText("POST")).perform(click());
             SystemClock.sleep(1500);
         }
 

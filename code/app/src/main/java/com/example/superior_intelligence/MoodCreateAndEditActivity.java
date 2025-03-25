@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location; // Must import this
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,7 +69,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
     // Situation
     private ImageView situationArrow;
     private Spinner situationSpinner;
-    TextView selectedSituation;
+    TextView selectedSituation, explanationCounter;
 
     // Emoji
     private ImageButton emojiButton;
@@ -110,8 +112,10 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
         emotionArrow = findViewById(R.id.emotion_arrow);
         emotionSpinner = findViewById(R.id.emotion_spinner);
         selectedMood = findViewById(R.id.selected_mood);
-
+        explanationCounter = findViewById(R.id.explanation_counter);
         triggerExplanation = findViewById(R.id.trigger_response);
+
+        setupTriggerExplanationWatcher();
 
         situationArrow = findViewById(R.id.situation_arrow);
         situationSpinner = findViewById(R.id.situation_spinner);
@@ -379,6 +383,48 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
         }
     }
 
+    /**
+     * Sets up a character count tracker and visual limit feedback for the explanation input.
+     * - Updates the live count (e.g., "120/200")
+     * - Turns the counter red when the limit is hit
+     * - Prevents typing beyond 200 characters
+     */
+    private void setupTriggerExplanationWatcher() {
+        triggerExplanation.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                int length = s.length();
+
+                explanationCounter.setText(Math.min(length, 200) + "/200");
+
+                if (length >= 200) {
+                    explanationCounter.setTextColor(
+                            ContextCompat.getColor(MoodCreateAndEditActivity.this, android.R.color.holo_red_dark));
+                } else {
+                    explanationCounter.setTextColor(
+                            ContextCompat.getColor(MoodCreateAndEditActivity.this, android.R.color.darker_gray));
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() > 200) {
+                    String trimmed = s.subSequence(0, 200).toString();
+                    triggerExplanation.setText(trimmed);
+                    triggerExplanation.setSelection(trimmed.length());
+                }
+            }
+        });
+    }
+
+    /**
+     * Creates a new mood event and saves it to Firestore.
+     * On success, navigates back to HomeActivity with the new event bundled.
+     * @param database The database instance to handle event saving.
+     */
     private void confirmCreateEvent(Database database) {
 
         // CREATE new Event scenario
@@ -497,6 +543,12 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
         return emojiResId;
     }
 
+    /**
+     * Picks a background color based on the user's selected mood.
+     * Each emotion is tied to a unique hex color for visual feedback.
+     * @param mood The emotion selected by the user (e.g., "anger", "happiness").
+     * @return A hex color string that matches the mood (e.g., "#FF6347" for anger).
+     */
     private String getOverlayColorForMood(String mood) {
         switch (mood.toLowerCase()) {
             case "anger":
@@ -520,6 +572,11 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
         }
     }
 
+    /**
+     * Called after the user chooses whether their mood post should be public or private.
+     * Once the choice is made, this triggers the creation and saving of the mood event.
+     * @param post_status true if the post is public, false if it's private.
+     */
     @Override
     public void public_status(boolean post_status) {
         postPublicStatus = post_status;
