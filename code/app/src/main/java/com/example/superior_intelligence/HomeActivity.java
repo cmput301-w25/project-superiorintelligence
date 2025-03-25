@@ -429,6 +429,7 @@ public class HomeActivity extends AppCompatActivity {
 
     /**
      * Saves a new event to Firestore under the "MyPosts" collection.
+     * @param event event to be saved to the firebase
      */
     private void saveEventToFirebase(Event event) {
         database.saveEventToFirebase(event, success -> {
@@ -442,6 +443,7 @@ public class HomeActivity extends AppCompatActivity {
 
     /**
      * Update event in Firestore using Database.java
+     * @param event event to be updated on the firebase
      */
     private void updateEventInFirebase(Event event) {
         database.updateEvent(event, success -> {
@@ -503,7 +505,8 @@ public class HomeActivity extends AppCompatActivity {
         final String[] moodOptions = getResources().getStringArray(R.array.emotional_state_list);
         final boolean[] selectedMoods = new boolean[moodOptions.length];
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.DialogTheme);
         builder.setTitle(getString(R.string.select_emotion_prompt)); // uses "Select Emotion Prompt" from strings.xml
 
         builder.setMultiChoiceItems(moodOptions, selectedMoods, (dialog, which, isChecked) -> {
@@ -525,7 +528,11 @@ public class HomeActivity extends AppCompatActivity {
         });
 
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-        builder.create().show();
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
+        dialog.getButton(android.app.AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.BLACK);
+
     }
 
     /**
