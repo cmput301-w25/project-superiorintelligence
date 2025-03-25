@@ -88,6 +88,8 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
             Intent returnIntent = new Intent();
             if (isMyPost) {
                 returnIntent.putExtra("selectedTab", "myposts");
+            } else if (currentEvent.isFollowed()) {
+                returnIntent.putExtra("selectedTab", "followed");
             } else {
                 returnIntent.putExtra("selectedTab", "explore");
             }
