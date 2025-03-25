@@ -69,7 +69,6 @@ public class PostStatusFragment extends DialogFragment {
         dialog.setOnShowListener(d -> {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
         });
-
         return dialog;
 
     }
