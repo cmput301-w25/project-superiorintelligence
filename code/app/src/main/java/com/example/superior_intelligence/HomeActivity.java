@@ -193,6 +193,12 @@ public class HomeActivity extends AppCompatActivity {
                             } catch (ParseException e) {
                                 throw new RuntimeException(e);
                             }
+                        } else if ("followed".equals(currentTab)) {
+                            try {
+                                recentWeek(followedEvents);
+                            } catch (ParseException e) {
+                                throw new RuntimeException(e);
+                            }
                         }
                         break;
 
