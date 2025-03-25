@@ -8,6 +8,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -15,8 +16,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -24,6 +25,14 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Activity that displays a Google Map showing mood event markers retrieved from Firestore.
+ * When a marker is tapped, an AlertDialog is shown with all the details of the event.
+ * <p>
+ * Markers are loaded based on Firestore documents in the "MyPosts" collection, and users
+ * can filter the markers using various CheckBoxes (e.g., "Last 12 hours", "Confusion", etc.).
+ * </p>
+ */
 public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final String TAG = "MoodMap";
@@ -34,6 +43,12 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
     private CheckBox cbLast12Hours, cbConfusion, cbAnger, cbFear,
             cbDisgust, cbHappy, cbSad, cbShame, cbSurprise;
 
+    /**
+     * Called when the activity is first created. Sets up the UI, finds filter checkboxes,
+     * sets up the Apply Filters and Back buttons, and initializes the Google Map fragment.
+     *
+     * @param savedInstanceState The saved instance state.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,21 +83,40 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
         }
     }
 
+    /**
+     * Called when the Google Map is ready to be used.
+     * Moves the camera to Edmonton, loads all markers without filters, and sets up
+     * a marker click listener to show event details.
+     *
+     * @param map The GoogleMap instance.
+     */
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
         googleMap = map;
 
         // Move camera to Edmonton
         LatLng edmonton = new LatLng(53.5461, -113.4938);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(edmonton, 11f));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(edmonton, 11.5f));
 
-        // 1) Load markers immediately with no filters (assuming checkboxes are all unchecked).
-        //    This will show all valid-location documents from "MyPosts."
+        // Load markers immediately with no filters (all valid events).
         applyFilters();
+
+        // Set a marker click listener to show a dialog with event details.
+        googleMap.setOnMarkerClickListener(marker -> {
+            Object tag = marker.getTag();
+            if (tag instanceof DocumentSnapshot) {
+                DocumentSnapshot docSnap = (DocumentSnapshot) tag;
+                showEventDialog(docSnap);
+            }
+            // Return true to consume the event and prevent the default info window from showing.
+            return true;
+        });
     }
 
     /**
-     * Called when user presses "Apply" OR when the map first loads (onMapReady).
+     * Retrieves mood events from Firestore based on the selected filter checkboxes,
+     * clears existing markers, and adds a new marker for each event with valid location data.
+     * Each marker is tagged with its corresponding Firestore DocumentSnapshot.
      */
     private void applyFilters() {
         if (googleMap == null) {
@@ -92,7 +126,7 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
         // Clear old markers
         googleMap.clear();
 
-        // 2) Build a Firestore query based on which checkboxes are checked.
+        // Build a Firestore query based on which checkboxes are checked.
         Query query = db.collection("MyPosts");
 
         // "Last 12 hours" filter
@@ -118,7 +152,7 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
             query = query.whereIn("mood", selectedMoods);
         }
 
-        // 3) Execute the query
+        // Execute the query
         query.get()
                 .addOnSuccessListener(snap -> {
                     Log.d(TAG, "Documents found: " + snap.size());
@@ -138,12 +172,13 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
                             continue;
                         }
 
-                        // Add marker for valid coords
+                        // Add marker for valid coordinates and store the document in the marker's tag.
                         LatLng position = new LatLng(lat, lng);
-                        googleMap.addMarker(new MarkerOptions()
+                        Marker marker = googleMap.addMarker(new MarkerOptions()
                                 .position(position)
                                 .title(title != null ? title : "No Title")
                                 .snippet(mood != null ? mood : "No Mood"));
+                        marker.setTag(doc);
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -152,5 +187,36 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
                             Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "Query failed: ", e);
                 });
+    }
+
+    /**
+     * Displays an AlertDialog showing the details of a mood event.
+     * The event details are extracted from the given Firestore DocumentSnapshot.
+     *
+     * @param docSnap The DocumentSnapshot containing the event data.
+     */
+    private void showEventDialog(DocumentSnapshot docSnap) {
+        // Extract fields from the document.
+        String title = docSnap.getString("title");
+        String mood = docSnap.getString("mood");
+        String explanation = docSnap.getString("moodExplanation");
+        String situation = docSnap.getString("situation");
+        String date = docSnap.getString("date");
+        String user = docSnap.getString("postUser");
+
+        // Build the message string.
+        StringBuilder messageBuilder = new StringBuilder();
+        messageBuilder.append("Mood: ").append(mood != null ? mood : "N/A").append("\n")
+                .append("User: ").append(user != null ? user : "N/A").append("\n")
+                .append("Reason: ").append(explanation != null ? explanation : "N/A").append("\n")
+                .append("Situation: ").append(situation != null ? situation : "N/A").append("\n")
+                .append("Date: ").append(date != null ? date : "N/A").append("\n");
+
+        // Create and show the dialog.
+        new AlertDialog.Builder(this)
+                .setTitle(title != null ? title : "Mood Event")
+                .setMessage(messageBuilder.toString())
+                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                .show();
     }
 }
