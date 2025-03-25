@@ -186,10 +186,12 @@ public class HomeActivity extends AppCompatActivity {
                         break;
 
                     case "Show posts from last 7 days":
-                        try {
-                            recentWeek(myPostsEvents);
-                        } catch (ParseException e) {
-                            throw new RuntimeException(e);
+                        if ("myposts".equals(currentTab)) {
+                            try {
+                                recentWeek(myPostsEvents);
+                            } catch (ParseException e) {
+                                throw new RuntimeException(e);
+                            }
                         }
                         break;
 
