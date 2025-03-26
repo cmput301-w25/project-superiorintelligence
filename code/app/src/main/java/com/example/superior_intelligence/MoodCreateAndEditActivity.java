@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location; // Must import this
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,7 +42,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
-public class MoodCreateAndEditActivity extends AppCompatActivity {
+public class MoodCreateAndEditActivity extends AppCompatActivity implements PostStatusFragment.PostStatusDialogListener{
 
     // Unique ID for Mood Event
     private String eventID;
@@ -49,9 +51,11 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
     // Passing an event
     private Event currentEvent;
 
-
     // Title
     EditText headerTitle;
+
+    // Post status
+    boolean postPublicStatus;
 
     // Emotion
     private ImageView emotionArrow;
@@ -65,7 +69,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
     // Situation
     private ImageView situationArrow;
     private Spinner situationSpinner;
-    TextView selectedSituation;
+    TextView selectedSituation, explanationCounter;
 
     // Emoji
     private ImageButton emojiButton;
@@ -79,8 +83,8 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
 
     // Location
     private FusedLocationProviderClient fusedLocationClient;
-    private Double lat = null;
-    private Double lng = null;
+    private Double lat = 0.0;
+    private Double lng = 0.0;
 
     // PhotoActivity launcher for receiving the uploaded imageDocID
     private final ActivityResultLauncher<Intent> photoActivityLauncher =
@@ -108,8 +112,10 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         emotionArrow = findViewById(R.id.emotion_arrow);
         emotionSpinner = findViewById(R.id.emotion_spinner);
         selectedMood = findViewById(R.id.selected_mood);
-
+        explanationCounter = findViewById(R.id.explanation_counter);
         triggerExplanation = findViewById(R.id.trigger_response);
+
+        setupTriggerExplanationWatcher();
 
         situationArrow = findViewById(R.id.situation_arrow);
         situationSpinner = findViewById(R.id.situation_spinner);
@@ -128,8 +134,8 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
             if (isChecked) {
                 handleLocationClick();
             } else {
-                lat = (double)0;
-                lng = (double)0;
+                lat = 0.0;
+                lng = 0.0;
             }
         });
 
@@ -352,24 +358,9 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         Database database = new Database(); // Instance to handle Firestore
 
         if (eventID == null || eventID.isEmpty()) {
-            // CREATE new Event scenario
-            Event newEvent = createNewEvent();
-            Log.d("MoodCreateAndEditActivity", "Navigating to HomeActivity with newEvent: " + newEvent.getTitle());
-
-            // Save to Firestore first, then navigate back
-            database.saveEventToFirebase(newEvent, success -> {
-                if (success) {
-                    Log.d("MoodCreateAndEditActivity", "Event successfully saved to Firestore.");
-                    Intent intent = new Intent(MoodCreateAndEditActivity.this, HomeActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra("selectedTab", "myposts");
-                    intent.putExtra("newEvent", newEvent);
-                    startActivity(intent);
-                    finish();
-                } else {
-                    Toast.makeText(MoodCreateAndEditActivity.this, "Failed to save event.", Toast.LENGTH_SHORT).show();
-                }
-            });
+            // get public/private post status
+            PostStatusFragment postStatusDialogFragment = new PostStatusFragment(null);
+            postStatusDialogFragment.show(getSupportFragmentManager(), "PostStatusDialog");
 
         } else {
             // UPDATE existing Event scenario using `currentEvent.getDate()`
@@ -393,6 +384,69 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
     }
 
     /**
+     * Sets up a character count tracker and visual limit feedback for the explanation input.
+     * - Updates the live count (e.g., "120/200")
+     * - Turns the counter red when the limit is hit
+     * - Prevents typing beyond 200 characters
+     */
+    private void setupTriggerExplanationWatcher() {
+        triggerExplanation.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                int length = s.length();
+
+                explanationCounter.setText(Math.min(length, 200) + "/200");
+
+                if (length >= 200) {
+                    explanationCounter.setTextColor(
+                            ContextCompat.getColor(MoodCreateAndEditActivity.this, android.R.color.holo_red_dark));
+                } else {
+                    explanationCounter.setTextColor(
+                            ContextCompat.getColor(MoodCreateAndEditActivity.this, android.R.color.darker_gray));
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() > 200) {
+                    String trimmed = s.subSequence(0, 200).toString();
+                    triggerExplanation.setText(trimmed);
+                    triggerExplanation.setSelection(trimmed.length());
+                }
+            }
+        });
+    }
+
+    /**
+     * Creates a new mood event and saves it to Firestore.
+     * On success, navigates back to HomeActivity with the new event bundled.
+     * @param database The database instance to handle event saving.
+     */
+    private void confirmCreateEvent(Database database) {
+
+        // CREATE new Event scenario
+        Event newEvent = createNewEvent();
+        Log.d("MoodCreateAndEditActivity", "Navigating to HomeActivity with newEvent: " + newEvent.getTitle());
+
+        // Save to Firestore first, then navigate back
+        database.saveEventToFirebase(newEvent, success -> {
+            if (success) {
+                Log.d("MoodCreateAndEditActivity", "Event successfully saved to Firestore.");
+                Intent intent = new Intent(MoodCreateAndEditActivity.this, HomeActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("selectedTab", "myposts");
+                intent.putExtra("newEvent", newEvent);
+                startActivity(intent);
+                finish();
+            } else {
+                Toast.makeText(MoodCreateAndEditActivity.this, "Failed to save event.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    /**
      * Create the Event object when editing an existing event.
      */
     Event createUpdatedEvent(String existingId, String eventDate) { // Accept date from caller
@@ -410,12 +464,11 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         String finalImageUrl = (imageUrl != null) ? imageUrl : "";
         String overlayColor = getOverlayColorForMood(mood);
         User user = User.getInstance();
-
         return new Event(
                 existingId, eventTitle, eventDate, overlayColor, finalImageUrl,
                 emojiResource, isFollowed, isMyPost,
                 mood, moodExplanation, situation, user.getUsername(),
-                lat, lng
+                lat, lng, currentEvent.isPublic_status()
         );
     }
 
@@ -451,13 +504,12 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         String finalImageUrl = (imageUrl != null) ? imageUrl : "";
         String overlayColor = getOverlayColorForMood(mood);
         User user = User.getInstance();
-
         // Make sure your Event constructor includes lat & lng if you want to store them
         return new Event(
                 eventID, eventTitle, eventDate, overlayColor, finalImageUrl,
                 emojiResource, isFollowed, isMyPost,
                 mood, moodExplanation, situation, user.getUsername(),
-                lat, lng
+                lat, lng, postPublicStatus
         );
     }
 
@@ -491,6 +543,12 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         return emojiResId;
     }
 
+    /**
+     * Picks a background color based on the user's selected mood.
+     * Each emotion is tied to a unique hex color for visual feedback.
+     * @param mood The emotion selected by the user (e.g., "anger", "happiness").
+     * @return A hex color string that matches the mood (e.g., "#FF6347" for anger).
+     */
     private String getOverlayColorForMood(String mood) {
         switch (mood.toLowerCase()) {
             case "anger":
@@ -514,4 +572,16 @@ public class MoodCreateAndEditActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Called after the user chooses whether their mood post should be public or private.
+     * Once the choice is made, this triggers the creation and saving of the mood event.
+     * @param post_status true if the post is public, false if it's private.
+     */
+    @Override
+    public void public_status(boolean post_status) {
+        postPublicStatus = post_status;
+
+        Database database = new Database();
+        confirmCreateEvent(database);
+    }
 }

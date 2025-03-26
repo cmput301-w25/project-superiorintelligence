@@ -112,8 +112,12 @@
             android:name=".EventDetailsActivity"
             android:exported="true">
         </activity>
-<!--Mood Map-->
+
+        <!--Mood Map-->
         <activity android:name=".MoodMap" />
+
+        <!-- Offline Activity -->
+        <activity android:name=".OfflineActivity"/>
 
         <!-- FileProvider for Camera Image Storage -->
         <provider
@@ -128,7 +132,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyAvFt1Phsc4D1j3_a-qcMS4PeFl2AWKPqc"/>
+            android:value="AIzaSyDX9U8sMPFOUdFfmT1GesyRN3v5FVc7peM"/>
 
 
     </application>

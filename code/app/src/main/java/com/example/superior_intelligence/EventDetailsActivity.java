@@ -16,6 +16,9 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.window.OnBackInvokedDispatcher;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,6 +26,7 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -31,13 +35,13 @@ import java.util.List;
 import java.util.Map;
 
 
-public class EventDetailsActivity extends AppCompatActivity implements DeleteMoodFragment.DeleteDialogListener{
+public class EventDetailsActivity extends AppCompatActivity implements DeleteMoodFragment.DeleteDialogListener, PostStatusFragment.PostStatusDialogListener{
 
     private TextView eventTitle, eventMood, selectedMood, eventReason, eventSituation, eventDate, eventUser;
     private TextView noCommentsText;
     private EditText commentInput;
     private RecyclerView commentsRecyclerView;
-    private ImageView eventImage;
+    private ImageView eventImage, publicEmo, privateEmo;
     private ImageButton sendCommentButton, backButton;
     private CardView profileCard;
 
@@ -52,9 +56,9 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        Log.d("EventDetailsActivity", "onCreate triggered");
         currentUser = User.getInstance().getUsername();
-
+        Log.d("EventDetailsActivity", "Current logged-in user: " + currentUser);
         // Retrieve entire Event object
         currentEvent = (Event) getIntent().getSerializableExtra("event");
 
@@ -63,6 +67,9 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
             finish();
             return;
         }
+
+        Log.d("EventDetailsActivity", "Event loaded: " + currentEvent.getTitle());
+        Log.d("EventDetailsActivity", "Event posted by: " + currentEvent.getUser());
 
         isMyPost = currentUser != null && currentUser.equals(currentEvent.getUser());
 
@@ -77,11 +84,23 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
         loadCommentsFromFirestore(currentEvent.getID());
 
         // Back button handler
-        backButton.setOnClickListener(v -> finish());
+        backButton.setOnClickListener(v -> {
+            Intent returnIntent = new Intent();
+            if (isMyPost) {
+                returnIntent.putExtra("selectedTab", "myposts");
+            } else if (currentEvent.isFollowed()) {
+                returnIntent.putExtra("selectedTab", "followed");
+            } else {
+                returnIntent.putExtra("selectedTab", "explore");
+            }
+            returnIntent.putExtra("textFilter", getIntent().getStringExtra("textFilter")); // Preserve filter
+            setResult(RESULT_OK, returnIntent);
+            finish();
+        });
 
-        // Edit button (only for own posts)
+        // Edit/Delete button (only for own posts)
         if (isMyPost) {
-            ImageButton editButton = findViewById(R.id.editButton);
+            Button editButton = findViewById(R.id.edit_button);
             editButton.setOnClickListener(view -> {
                 Intent editIntent = new Intent(EventDetailsActivity.this, MoodCreateAndEditActivity.class);
                 editIntent.putExtra("event", currentEvent); // Pass whole Event object
@@ -95,9 +114,50 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
                 DeleteMoodFragment deleteDialogFragment = new DeleteMoodFragment();
                 deleteDialogFragment.show(getSupportFragmentManager(), "DeleteMoodDialog");
             });
+
+
+            ImageView editStatButton;
+            if (publicEmo.getVisibility() == View.VISIBLE){
+                editStatButton = publicEmo;
+            } else {
+                editStatButton = privateEmo;
+            }
+            editStatButton.setOnClickListener(view -> {
+                // public status fragment
+                PostStatusFragment publicDialogFragment = new PostStatusFragment(currentEvent);
+                publicDialogFragment.show(getSupportFragmentManager(), "PostStatusDialog");
+            });
+
+
         }
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                    () -> {
+                        Intent returnIntent = new Intent();
+                        returnIntent.putExtra("selectedTab", "myposts");
+                        returnIntent.putExtra("textFilter", getIntent().getStringExtra("textFilter")); // Preserve filter
+                        setResult(RESULT_OK, returnIntent);
+                        finish();
+                    }
+            );
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent returnIntent = new Intent();
+        returnIntent.putExtra("selectedTab", "myposts");
+        returnIntent.putExtra("textFilter", getIntent().getStringExtra("textFilter")); // Preserve filter
+        setResult(RESULT_OK, returnIntent);
+        super.onBackPressed(); // Finish the activity normally
+    }
 
     /**
      * Initializes the launcher to handle edit results.
@@ -146,6 +206,16 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
         eventDate.setText("Date: " + (currentEvent.getDate() != null ? currentEvent.getDate() : "Unknown Date"));
         eventUser.setText("Posted by: " + (currentEvent.getUser() != null ? currentEvent.getUser() : "Anonymous"));
 
+        if (isMyPost) {
+            // Set public status emoticon
+            if (currentEvent.isPublic_status()) {
+                publicEmo.setVisibility(View.VISIBLE);
+            } else {
+                privateEmo.setVisibility(View.VISIBLE);
+            }
+        }
+
+        Log.d("EventDetails", "Loading event by user: " + currentEvent.getUser());
         // Handle image loading
         String imageDocID = currentEvent.getImageUrl();
         if (imageDocID != null && !imageDocID.isEmpty()) {
@@ -221,12 +291,20 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
             });
 
             profileCard.setOnClickListener(view -> {
+                String eventUsername = currentEvent.getUser();
+                Log.d("EventDetailsActivity", "Attempting to open profile for user: " + eventUsername);
                 if (currentEvent.getUser() != null) {
                     Intent profileIntent = new Intent(EventDetailsActivity.this, OtherUserProfileActivity.class);
                     profileIntent.putExtra("username", currentEvent.getUser());
                     startActivity(profileIntent);
                 }
+                else {
+                    Log.e("EventDetailsActivity", "currentEvent.getUser() is null or empty");
+                }
             });
+        } else {
+            publicEmo = findViewById(R.id.public_status_detail);
+            privateEmo = findViewById(R.id.private_status_detail);
         }
     }
 
@@ -272,10 +350,48 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
      */
     @Override
     public void delete(boolean delete_status) {
-        if (delete_status){
-            Database db = new Database();
-            db.deleteEvent(currentEvent.getID());
+        if (delete_status) {
+            Log.d("EventDetailsActivity", "User confirmed deletion for event: " + currentEvent.getID());
+            Database.getInstance().deleteEvent(currentEvent.getID(), success -> {
+                if (success) {
+                    Log.d("EventDetailsActivity", "Event deleted successfully");
+
+                    Intent returnIntent = new Intent();
+                    returnIntent.putExtra("eventDeleted", true);
+                    returnIntent.putExtra("deletedEventId", currentEvent.getID());
+                    returnIntent.putExtra("selectedTab", "myposts");
+                    setResult(RESULT_OK, returnIntent);
+                    finish();
+                } else {
+                    Log.e("EventDetailsActivity", "Failed to delete event");
+                    Toast.makeText(EventDetailsActivity.this, "Failed to delete event", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Log.d("EventDetailsActivity", "User canceled delete dialog.");
         }
-        finish();
+    }
+
+    @Override
+    public void public_status(boolean post_status) {
+        if (currentEvent.isPublic_status() != post_status){
+            currentEvent.setPublic_status(post_status);
+
+            Database database = new Database();
+            // Update in Firestore
+            database.updateEvent(currentEvent, success -> {
+                if (success) {
+                    Toast.makeText(EventDetailsActivity.this, "Event updated successfully!", Toast.LENGTH_SHORT).show();
+                    Intent returnIntent = new Intent();
+                    returnIntent.putExtra("newEvent", currentEvent);
+                    returnIntent.putExtra("selectedTab", "myposts");
+                    setResult(RESULT_OK, returnIntent);
+                    finish(); // Close and return
+                } else {
+                    Toast.makeText(EventDetailsActivity.this, "Failed to update event.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
     }
 }

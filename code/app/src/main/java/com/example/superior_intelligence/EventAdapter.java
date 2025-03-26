@@ -1,16 +1,11 @@
 package com.example.superior_intelligence;
-import com.example.superior_intelligence.Photobase;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.os.Handler;
 import android.content.Context;
-import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -29,8 +24,15 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     private List<Event> currentList = new ArrayList<>();
     private Context context;
 
-    public EventAdapter(@NonNull Context context) {
+    public interface ViewDetailsListener {
+        void onViewDetails(Event event);
+    }
+
+    private ViewDetailsListener viewDetailsListener;
+
+    public EventAdapter(@NonNull Context context, ViewDetailsListener listener) {
         this.context = context;
+        this.viewDetailsListener = listener;
     }
 
     public EventAdapter(ArrayList<Event> eventList) {
@@ -66,6 +68,21 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
             holder.eventOverlay.setCardBackgroundColor(Color.parseColor("#99FFFFFF")); // Default fallback color
         }
 
+        // reset both views to ensure they don’t carry previous states
+        holder.privateIcon.setVisibility(View.GONE);
+        holder.publicIcon.setVisibility(View.GONE);
+
+        System.out.println("Event Status: " + event.isPublic_status());
+
+        // Set public/private status
+        if (!event.isPublic_status()) {
+            holder.privateIcon.setVisibility(View.VISIBLE);
+            System.out.println("Private icon should be visible");
+        } else {
+            holder.publicIcon.setVisibility(View.VISIBLE);
+            System.out.println("Public icon should be visible");
+        }
+
         // Set emoji if present
         if (event.getEmojiResource() != 0) {
             holder.eventEmoticon.setVisibility(View.VISIBLE);
@@ -74,11 +91,34 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
             holder.eventEmoticon.setVisibility(View.GONE); // Hide emoji if none
         }
 
+        String imageDocId = event.getImageUrl();
+        if (imageDocId != null && !imageDocId.isEmpty()) {
+            Photobase photobase = new Photobase(context);
+            photobase.loadImage(imageDocId, new Photobase.ImageLoadCallback() {
+                @Override
+                public void onImageLoaded(Bitmap bitmap) {
+                    holder.eventImage.setVisibility(View.VISIBLE);
+                    holder.eventImage.setImageBitmap(bitmap);
+                }
+
+                @Override
+                public void onImageLoadFailed(String error) {
+                    Log.e("EventAdapter", "Failed to load image: " + error);
+                    holder.eventImage.setVisibility(View.VISIBLE);
+                    holder.eventImage.setImageResource(R.color.secondaryGreen);
+
+                }
+            });
+        } else {
+            holder.eventImage.setVisibility(View.VISIBLE);
+            holder.eventImage.setImageResource(R.color.secondaryGreen);
+        }
+
         // Handle click to open details
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, EventDetailsActivity.class);
-            intent.putExtra("event", event); // Pass entire event object
-            context.startActivity(intent);
+            if (viewDetailsListener != null) {
+                viewDetailsListener.onViewDetails(event);
+            }
         });
     }
 
@@ -91,7 +131,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         // Declare all required views here
         TextView eventTitle, eventDate;
         CardView eventOverlay;
-        ImageView eventEmoticon, eventImage, commentIcon;
+        ImageView eventEmoticon, eventImage, commentIcon, publicIcon, privateIcon;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -102,6 +142,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
             eventEmoticon = itemView.findViewById(R.id.event_emoticon);
             eventImage = itemView.findViewById(R.id.event_image);
             commentIcon = itemView.findViewById(R.id.comment_icon);
+            publicIcon = itemView.findViewById(R.id.public_status_detail);
+            privateIcon = itemView.findViewById(R.id.private_status_detail);
         }
     }
 

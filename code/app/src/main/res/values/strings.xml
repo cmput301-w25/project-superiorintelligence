@@ -51,6 +51,15 @@
         <item>With a crowd</item>
     </string-array>
 
+    <string-array name="filter_options">
+        <item>Select filter…</item>
+        <item>Show posts from last 7 days</item>
+        <item>Filter by emotional state</item>
+        <item>Filter by text</item>
+        <item>Clear filter</item>
+
+    </string-array>
+
     <!-- Content Descriptions -->
     <string name="content_desc_tool_icon">Tool Icon</string>
     <string name="content_desc_search_icon">Search Icon</string>

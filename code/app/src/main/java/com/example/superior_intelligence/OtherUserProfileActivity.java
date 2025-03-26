@@ -74,11 +74,15 @@ public class OtherUserProfileActivity extends AppCompatActivity {
                 profileName.setText(name);
             } else {
                 Log.e("OtherUserProfileActivity", "User not found.");
+                Log.e("OtherUserProfileActivity", "User not found: " + username);
             }
         });
     }
 
     private void checkFollowStatus() {
+        if (username == null || currentUser == null) {
+            Log.e("OtherUserProfileActivity", "Username or current user is null");
+        }
         userbase.getUserFollowing(currentUser, followingList -> {
             if (followingList.contains(username)) {
                 followStatus = FollowStatus.FOLLOWING;
