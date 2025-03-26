@@ -63,6 +63,9 @@ public class us020301 {
 
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+    /**
+     * Sets up Firebase emulator and ensures test user exists before each test.
+     */
     @Before
     public void setup() throws InterruptedException {
         FirebaseAuth.getInstance().signOut();
@@ -71,6 +74,10 @@ public class us020301 {
         Intents.init();
     }
 
+    /**
+     * Simulates when a user tries to upload a photo larger than 64KB.
+     * Verifies that the "Image size exceed limit" dialog is shown with the correct message.
+     */
     @Test
     public void testUploadTooLargeImage_ShowsSizeLimitDialog() throws InterruptedException {
         loginAs("testUser");
@@ -141,6 +148,9 @@ public class us020301 {
         );
     }
 
+    /**
+     * Logs in using the given username.
+     */
     private void loginAs(String username) throws InterruptedException {
         Intent intent = new Intent();
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -151,6 +161,9 @@ public class us020301 {
         SystemClock.sleep(3000);
     }
 
+    /**
+     * Creates a test user in the Firestore emulator if not already present.
+     */
     private void ensureUserExists(String username, String name) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         Map<String, Object> user = new HashMap<>();
@@ -163,6 +176,9 @@ public class us020301 {
         latch.await();
     }
 
+    /**
+     * Clears all documents from Firestore after tests.
+     */
     @After
     public void tearDown() {
         String projectId = "moodgram";

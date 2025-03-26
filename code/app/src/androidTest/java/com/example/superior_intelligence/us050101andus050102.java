@@ -48,6 +48,10 @@ public class us050101andus050102 {
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final String projectId = "moodgram";
 
+    /**
+     * Sets up emulator, test users, and a sample public event before each test.
+     * Also confirms that required data was written to the emulator.
+     */
     @Before
     public void setup() throws InterruptedException {
         // Sign out any old user
@@ -69,6 +73,10 @@ public class us050101andus050102 {
         confirmEventExists("userA_event");
     }
 
+    /**
+     * Tests that userB can request to follow userA, sees a pending notification,
+     * and userA receives the request and sees it in their notification center.
+     */
     @Test
     public void testFollowRequestAndAcceptFlow() throws InterruptedException {
         // *** Now we manually launch the Activity after data is ready ***

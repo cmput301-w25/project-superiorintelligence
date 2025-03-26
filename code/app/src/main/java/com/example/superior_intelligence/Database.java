@@ -210,9 +210,16 @@ public class Database {
     /**
      * Delete Event from Firestore
      */
-    public void deleteEvent(String eventID){
-        myPostsRef.document(eventID).delete();
-
+    public void deleteEvent(String eventID, OnEventDeletedCallback callback) {
+        myPostsRef.document(eventID).delete()
+            .addOnSuccessListener(aVoid -> {
+            Log.d("Database", "Event deleted successfully: " + eventID);
+            callback.onEventDeleted(true);
+        })
+                .addOnFailureListener(e -> {
+                    Log.e("Database", "Failed to delete event: " + eventID, e);
+                    callback.onEventDeleted(false);
+                });
     }
 
     /**
@@ -238,5 +245,9 @@ public class Database {
 
     public CollectionReference getMyPostsRef() {
         return myPostsRef;
+    }
+
+    public interface OnEventDeletedCallback {
+        void onEventDeleted(boolean success);
     }
 }
