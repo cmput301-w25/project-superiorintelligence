@@ -134,7 +134,7 @@
                 android:id="@+id/cb_sad"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sad"
+                android:text="Sadness"
                 app:buttonTint="@color/checkbox_tint"/>
 
             <CheckBox
