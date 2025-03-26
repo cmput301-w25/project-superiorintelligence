@@ -7,6 +7,11 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class FirestoreIdlingResource implements IdlingResource {
     private ResourceCallback resourceCallback;
     private boolean isIdle = false;
+    private final String collection;
+
+    public FirestoreIdlingResource(String collection) {
+        this.collection = collection;
+    }
 
     @Override
     public String getName() { return FirestoreIdlingResource.class.getName(); }
@@ -18,11 +23,15 @@ public class FirestoreIdlingResource implements IdlingResource {
     public void registerIdleTransitionCallback(ResourceCallback callback) { resourceCallback = callback; }
 
     public void waitForFirestoreUpdate() {
-        FirebaseFirestore.getInstance().collection("myposts")
+        isIdle = false;
+
+        FirebaseFirestore.getInstance().collection(collection)
                 .get()
                 .addOnCompleteListener(task -> {
                     isIdle = true;
                     if (resourceCallback != null) resourceCallback.onTransitionToIdle();
                 });
     }
+
+
 }
