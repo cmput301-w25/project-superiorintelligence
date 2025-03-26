@@ -9,6 +9,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Movie;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -17,6 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 public class DeleteMoodFragment extends DialogFragment {
+
     interface DeleteDialogListener{
         void delete(boolean delete_status);
     }
@@ -49,8 +51,6 @@ public class DeleteMoodFragment extends DialogFragment {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
             dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.BLACK);
         });
-
         return dialog;
-
     }
 }

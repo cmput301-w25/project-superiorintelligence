@@ -11,12 +11,14 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 import android.content.Intent;
+import android.icu.text.SimpleDateFormat;
 import android.os.SystemClock;
 import android.util.Log;
 
 import androidx.test.rule.ActivityTestRule;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.junit.After;
@@ -29,112 +31,126 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
 public class us050101andus050102 {
 
+    // 1) TELL JUnit NOT to auto-start the Activity: launchActivity=false
     @Rule
     public ActivityTestRule<LoginPageActivity> loginRule =
-            new ActivityTestRule<>(LoginPageActivity.class, true, false);
+            new ActivityTestRule<>(LoginPageActivity.class, /*initialTouchMode=*/true, /*launchActivity=*/false);
 
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final String projectId = "moodgram";
 
     /**
-     * Setup method executed before each test. Signs out existing users,
-     * connects to the Firestore emulator, and creates mock users and a mood event.
+     * Sets up emulator, test users, and a sample public event before each test.
+     * Also confirms that required data was written to the emulator.
      */
     @Before
     public void setup() throws InterruptedException {
+        // Sign out any old user
         FirebaseAuth.getInstance().signOut();
+        // Ensure we're using the local emulator, not production
         db.useEmulator("10.0.2.2", 8080);
 
-        // Create users and an event for userA
+        // (Optional) Wipe everything if you want a fresh slate each time
+        wipeEmulator();
+
+        // Now create all the test data
         ensureUserExists("userA", "Alice A");
         ensureUserExists("userB", "Bob B");
-        ensureEventByUserAExists(); // Preload into MyPosts
+        ensureEventByUserAExists();
+
+        // Confirm the docs actually exist before we let the test proceed
+        confirmUserExists("userA");
+        confirmUserExists("userB");
+        confirmEventExists("userA_event");
     }
 
     /**
-     * End-to-end test covering the flow of userB requesting to follow userA,
-     * and userA seeing the follow request in their notifications.
+     * Tests that userB can request to follow userA, sees a pending notification,
+     * and userA receives the request and sees it in their notification center.
      */
     @Test
     public void testFollowRequestAndAcceptFlow() throws InterruptedException {
-        loginAs("userB");
+        // *** Now we manually launch the Activity after data is ready ***
+        Intent intent = new Intent();
+        // Clears any old tasks so we start fresh
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        loginRule.launchActivity(intent);  // Finally start LoginPageActivity
 
+        // Then do the usual login steps
+        onView(withId(R.id.login_username)).perform(typeText("userB"));
+        closeSoftKeyboard();
+        onView(withId(R.id.login_button)).perform(click());
+        SystemClock.sleep(3000);
+
+        // The rest is the same
         onView(withId(R.id.tab_explore)).check(matches(isDisplayed()));
-
-        // Click on explore tab if not selected already
         onView(withId(R.id.tab_explore)).perform(click());
         SystemClock.sleep(2000);
 
         onView(withText("Title by userA")).perform(click());
 
-        // Click on profile icon to go to userA's profile
+        // Go to userA's profile
         onView(withId(R.id.profile_image)).perform(click());
         SystemClock.sleep(2000);
-        onView(withId(R.id.follow_request_button))
-                .check(matches(isDisplayed()));
+        onView(withId(R.id.follow_request_button)).check(matches(isDisplayed()));
 
         SystemClock.sleep(1000);
-
         onView(withId(R.id.follow_request_button)).perform(click());
-
         SystemClock.sleep(1000);
 
         pressBack();
         pressBack();
 
-
+        // Check we can see "Pending requests"
         onView(withId(R.id.notification_button)).perform(click());
-
-
         onView(withText("Pending requests")).perform(click());
         SystemClock.sleep(1000);
 
-        // Check if pending request is displayed
-        onView(withText("You requested to follow userA. Pending approval.")).check(matches(isDisplayed()));
+        onView(withText("You requested to follow userA. Pending approval."))
+                .check(matches(isDisplayed()));
 
-        // Return to Home, go to profile, log out
+        // Sign out
         pressBack();
         onView(withId(R.id.profile_image)).perform(click());
         SystemClock.sleep(2000);
-
         onView(withId(R.id.signout)).perform(click());
 
         SystemClock.sleep(1000);
 
+        // Log back in as userA
         loginAs("userA");
-
-        // Open notifications and check for incoming
         onView(withId(R.id.notification_button)).perform(click());
-        onView(withText("userB wants to follow you.")).check(matches(isDisplayed()));
+        onView(withText("userB wants to follow you."))
+                .check(matches(isDisplayed()));
 
         SystemClock.sleep(2000);
     }
 
     /**
-     * Logs in to the app as the specified user.
-     * @param username the username to log in with
+     * A shorter "loginAs(...)" method that re-launches the activity.
      */
     private void loginAs(String username) throws InterruptedException {
         Intent intent = new Intent();
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // 💥 clears back stack
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         loginRule.launchActivity(intent);
 
         onView(withId(R.id.login_username)).perform(typeText(username));
         closeSoftKeyboard();
         onView(withId(R.id.login_button)).perform(click());
-        SystemClock.sleep(3000); // Wait for HomeActivity to load
+        SystemClock.sleep(3000);
     }
 
     /**
-     * Creates a user document in Firestore.
-     * @param username the user's username
-     * @param name     the display name of the user
+     * Ensure user doc is created
      */
     private void ensureUserExists(String username, String name) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
@@ -151,12 +167,12 @@ public class us050101andus050102 {
     }
 
     /**
-     * Creates a mock event posted by userA for display in the Explore feed.
+     * Ensure event doc is created
      */
     private void ensureEventByUserAExists() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         String eventId = "userA_event";
-
+        String formattedNow = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault()).format(new Date());
         Map<String, Object> event = new HashMap<>();
         event.put("title", "Title by userA");
         event.put("postUser", "userA");
@@ -167,10 +183,9 @@ public class us050101andus050102 {
         event.put("situation", "Alone");
         event.put("moodExplanation", "Just vibing");
         event.put("emojiResource", R.drawable.happy_icon);
-        event.put("dateTime", com.google.firebase.Timestamp.now());
+        event.put("date", formattedNow);
+        event.put("public_status", true);
         event.put("comments", new HashMap<>());
-
-        // Add the ID field explicitly so it's available in EventDetailsActivity
         event.put("id", eventId);
 
         db.collection("MyPosts").document(eventId).set(event)
@@ -180,10 +195,49 @@ public class us050101andus050102 {
     }
 
     /**
-     * Clears the emulated database.
+     * Confirm user doc is present
+     */
+    private void confirmUserExists(String username) throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        db.collection("users").document(username).get()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful() || task.getResult() == null || !task.getResult().exists()) {
+                        throw new AssertionError("User doc " + username + " not found in emulator!");
+                    }
+                    Log.d("ConfirmUserExists", "User " + username + " found!");
+                    latch.countDown();
+                });
+        latch.await();
+    }
+
+    /**
+     * Confirm event doc is present
+     */
+    private void confirmEventExists(String eventId) throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        db.collection("MyPosts").document(eventId).get()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful() || task.getResult() == null || !task.getResult().exists()) {
+                        throw new AssertionError("Event doc " + eventId + " not found in emulator!");
+                    }
+                    Log.d("ConfirmEventExists", "Event " + eventId + " found!");
+                    latch.countDown();
+                });
+        latch.await();
+    }
+
+    /**
+     * Wipes the emulator after each test
      */
     @After
     public void tearDown() {
+        wipeEmulator();
+    }
+
+    /**
+     * Helper method to remove all docs from the local emulator
+     */
+    private void wipeEmulator() {
         String projectId = "moodgram";
         URL url = null;
         try {
@@ -206,4 +260,3 @@ public class us050101andus050102 {
         }
     }
 }
-

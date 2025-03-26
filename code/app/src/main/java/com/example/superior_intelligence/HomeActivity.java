@@ -307,6 +307,11 @@ public class HomeActivity extends AppCompatActivity {
             // DEFAULT TO EXPLORE TAB IF NOTHING SELECTED
             switchTab(exploreEvents, tabExplore);
         }
+
+        String deletedEventId = intent.getStringExtra("deletedEventId");
+        if (deletedEventId != null) {
+            myPostsEvents.removeIf(event -> event.getID().equals(deletedEventId));
+        }
     }
 
     /**

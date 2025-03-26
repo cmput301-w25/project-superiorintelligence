@@ -350,11 +350,26 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
      */
     @Override
     public void delete(boolean delete_status) {
-        if (delete_status){
-            Database db = new Database();
-            db.deleteEvent(currentEvent.getID());
+        if (delete_status) {
+            Log.d("EventDetailsActivity", "User confirmed deletion for event: " + currentEvent.getID());
+            Database.getInstance().deleteEvent(currentEvent.getID(), success -> {
+                if (success) {
+                    Log.d("EventDetailsActivity", "Event deleted successfully");
+
+                    Intent returnIntent = new Intent();
+                    returnIntent.putExtra("eventDeleted", true);
+                    returnIntent.putExtra("deletedEventId", currentEvent.getID());
+                    returnIntent.putExtra("selectedTab", "myposts");
+                    setResult(RESULT_OK, returnIntent);
+                    finish();
+                } else {
+                    Log.e("EventDetailsActivity", "Failed to delete event");
+                    Toast.makeText(EventDetailsActivity.this, "Failed to delete event", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Log.d("EventDetailsActivity", "User canceled delete dialog.");
         }
-        finish();
     }
 
     @Override

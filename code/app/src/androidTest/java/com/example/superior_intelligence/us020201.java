@@ -46,6 +46,9 @@ import static androidx.test.espresso.intent.matcher.IntentMatchers.*;
 import static androidx.test.espresso.matcher.ViewMatchers.*;
 import static org.hamcrest.Matchers.*;
 
+/**
+ * UI test for US 02.02.01 - As a participant, I want to add a photo to my mood event.
+ */
 @RunWith(AndroidJUnit4.class)
 public class us020201 {
 
@@ -59,6 +62,9 @@ public class us020201 {
 
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+    /**
+     * Sets up Firebase emulator and ensures test user exists before each test.
+     */
     @Before
     public void setup() throws InterruptedException {
         FirebaseAuth.getInstance().signOut();
@@ -67,6 +73,10 @@ public class us020201 {
         Intents.init();
     }
 
+    /**
+     * Full flow test to create a mood event and add a photo to it.
+     * Verifies image selection and post visibility.
+     */
     @Test
     public void testAddPhotoFlow() throws InterruptedException {
         loginAs("testUser");
@@ -119,6 +129,9 @@ public class us020201 {
         onView(withText("Photo Mood")).check(matches(isDisplayed()));
     }
 
+    /**
+     * Logs in using the given username.
+     */
     private void loginAs(String username) throws InterruptedException {
         Intent intent = new Intent();
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -129,6 +142,9 @@ public class us020201 {
         SystemClock.sleep(3000);
     }
 
+    /**
+     * Creates a test user in the Firestore emulator if not already present.
+     */
     private void ensureUserExists(String username, String name) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         Map<String, Object> user = new HashMap<>();
@@ -141,6 +157,9 @@ public class us020201 {
         latch.await();
     }
 
+    /**
+     * Clears all documents from Firestore after tests.
+     */
     @After
     public void tearDown() {
         String projectId = "moodgram";
@@ -165,6 +184,11 @@ public class us020201 {
         }
     }
 
+    /**
+     * Creates and returns a mock URI for a solid color image used for testing image upload.
+     * @param context Application context
+     * @return URI pointing to the mock image file
+     */
     private Uri createSolidColorImage(Context context) {
         Bitmap bmp = Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888);
         bmp.eraseColor(Color.BLUE);
