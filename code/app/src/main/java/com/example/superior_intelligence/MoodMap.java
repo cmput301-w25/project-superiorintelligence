@@ -49,7 +49,7 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
 
     // Filter CheckBoxes
     private CheckBox cbLast12Hours, cbConfusion, cbAnger, cbFear,
-            cbDisgust, cbHappy, cbSad, cbShame, cbSurprise;
+            cbDisgust, cbHappy, cbSadness, cbShame, cbSurprise;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +65,7 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
         cbFear        = findViewById(R.id.cb_fear);
         cbDisgust     = findViewById(R.id.cb_disgust);
         cbHappy       = findViewById(R.id.cb_happy);
-        cbSad         = findViewById(R.id.cb_sad);
+        cbSadness         = findViewById(R.id.cb_sadness);
         cbShame       = findViewById(R.id.cb_shame);
         cbSurprise    = findViewById(R.id.cb_surprise);
 
@@ -145,7 +145,7 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
         if (cbFear.isChecked())      selectedMoods.add("Fear");
         if (cbDisgust.isChecked())   selectedMoods.add("Disgust");
         if (cbHappy.isChecked())     selectedMoods.add("Happy");
-        if (cbSad.isChecked())       selectedMoods.add("Sad");
+        if (cbSadness.isChecked())       selectedMoods.add("Sadness");
         if (cbShame.isChecked())     selectedMoods.add("Shame");
         if (cbSurprise.isChecked())  selectedMoods.add("Surprise");
 
