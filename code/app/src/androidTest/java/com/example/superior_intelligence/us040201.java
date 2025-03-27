@@ -7,6 +7,7 @@ import static androidx.test.espresso.action.ViewActions.typeText;
 import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
@@ -16,8 +17,10 @@ import static java.util.regex.Pattern.matches;
 
 import android.graphics.Movie;
 import android.util.Log;
+import android.widget.DatePicker;
 
 import androidx.test.espresso.Espresso;
+import androidx.test.espresso.ViewAssertion;
 import androidx.test.espresso.assertion.ViewAssertions;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
@@ -26,6 +29,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
+import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -38,6 +42,9 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -72,7 +79,7 @@ public class us040201 {
         onView(withText("Show posts from last 7 days")).perform(click());
 
         //test that created last year should not appear
-        onView(withText("Test during week")).check(doesNotExist());
+        onView(withText("Test during week")).check((ViewAssertion) isDisplayed());
 
     }
     /**
@@ -101,6 +108,7 @@ public class us040201 {
         logIn();
 
         createEvents();
+        createLastYearEvent();
 
         // log in
         /*
@@ -151,8 +159,18 @@ public class us040201 {
         Thread.sleep(5000);
     }
 
-    public void createLastYearEvent(){
+    public void createLastYearEvent() throws InterruptedException {
+        Thread.sleep(5000);
         onView(withId(R.id.addButton)).perform(click());
+        onView(withId(R.id.mood_event_title)).perform(typeText("Test last year")).perform(closeSoftKeyboard());
+
+
+        onView(withId(R.id.emotion_arrow)).perform(click());
+        onView(withText("Fear")).perform(click());
+        onView(withId(R.id.confirm_mood_create_button)).perform(click());
+        onView(withText("POST")).perform(click());
+        Thread.sleep(5000);
+
     }
     /**
      * Remove any of the data that were added in the beginning of the test
