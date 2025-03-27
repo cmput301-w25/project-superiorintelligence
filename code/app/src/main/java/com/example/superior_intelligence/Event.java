@@ -24,7 +24,7 @@ public class Event implements Serializable {
     private String mood;
     private String situation;
     private String moodExplanation;
-    private String user;
+    private String postUser;
     private Double lng;
     private Double lat;
     private List<Comment> comments;
@@ -59,7 +59,7 @@ public class Event implements Serializable {
         this.emojiResource = emojiResource;
         this.isFollowed = isFollowed;
         this.isMyPost = isMyPost;
-        this.user = user;
+        this.postUser = user;
         this.lat = lat;
         this.lng = lng;
         this.comments = (comments != null) ? comments : new ArrayList<>();
@@ -95,7 +95,7 @@ public class Event implements Serializable {
         this.situation = situation;
         this.mood = mood;
         this.moodExplanation = moodExplanation;
-        this.user = user;
+        this.postUser = user;
         this.lat = lat;
         this.lng = lng;
         this.public_status = public_status;
@@ -291,7 +291,7 @@ public class Event implements Serializable {
      * @return The username.
      */
     public String getUser() {
-        return user;
+        return this.postUser;
     }
 
     /**
@@ -299,7 +299,7 @@ public class Event implements Serializable {
      * @param user The username to set.
      */
     public void setUser(String user) {
-        this.user = user;
+        this.postUser = user;
     }
 
     public void setLat(Double lat) {
