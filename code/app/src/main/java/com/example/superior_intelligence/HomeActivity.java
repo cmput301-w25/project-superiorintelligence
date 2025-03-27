@@ -8,8 +8,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.PopupMenu;
+import android.widget.PopupWindow;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -121,109 +125,73 @@ public class HomeActivity extends AppCompatActivity {
         tabMyPosts = findViewById(R.id.tab_myposts);
         tabMap = findViewById(R.id.tab_map);
         filterButton = findViewById(R.id.menu_button);
-        Spinner filterSpinner = findViewById(R.id.filter_spinner);
+        //Spinner filterSpinner = findViewById(R.id.filter_spinner);
 
-        /**
-         * Initializes the Spinner with filter options and sets up the filter button to toggle its visibility.
-         * This portion configures a Spinner. The Spinner is initially hidden and becomes visible when the user taps
-         * the filter button. Tapping the button again hides the Spinner.
-         * Creates an ArrayAdapter using the filter_options array.
-         * Applies a standard dropdown layout to the Spinner items.
-         * Sets the adapter on the Spinner to populate its options.
-         * Defines the OnClickListener for the filter button to toggle the Spinner.
-         */
-        ArrayAdapter<CharSequence> filterAdapter = ArrayAdapter.createFromResource(
-                this,
-                R.array.filter_options,
-                android.R.layout.simple_spinner_item
-        );
-        filterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        filterSpinner.setAdapter(filterAdapter);
 
+        // set up popupMenu for both followed and myposts tab
         filterButton.setOnClickListener(v -> {
-            if (filterSpinner.getVisibility() == View.GONE) {
-                // Reset to 0 before making visible to ensure selection triggers again
-                filterSpinner.setSelection(0, false);
-                filterSpinner.setVisibility(View.VISIBLE);
-                filterSpinner.performClick(); // Open dropdown
+            View popupView = getLayoutInflater().inflate(R.layout.filter_popup_menu, null);
+            PopupWindow popupWindow = new PopupWindow(popupView,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT, true);
+
+            popupWindow.showAsDropDown(filterButton);
+
+            Button recentWeekButton = popupView.findViewById(R.id.recent_week_option);
+            Button emotionalStateButton = popupView.findViewById(R.id.emotional_state_option);
+            Button filterTextButton = popupView.findViewById(R.id.text_filter_option);
+            Button clearFilter = popupView.findViewById(R.id.clear_filter_option);
+            Button threeRecentPost = popupView.findViewById(R.id.three_recent_option);
+
+            if ("myposts".equals(currentTab)) {
+                // Show multiple options
+                threeRecentPost.setVisibility(View.GONE);
             } else {
-                filterSpinner.setVisibility(View.GONE);
+                threeRecentPost.setOnClickListener(view -> {
+                    filterRecentThree();
+                });
             }
-        });
 
-        /**
-         * Sets a listener on the Spinner to handle filter selection and hide the Spinner after selection.
-         * This section listens for user interaction with the Spinner. When an item is selected, the Spinner
-         * is immediately hidden to prevent the selected text from being displayed permanently in the layout.
-         */
-        filterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selectedFilter = parent.getItemAtPosition(position).toString();
-
-                if (position == 0) return; // Skip dummy item
-                filterSpinner.setSelection(0, false);
-                filterSpinner.setVisibility(View.GONE);
-
-                switch (selectedFilter) {
-                    case "Filter by text":
-                        AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this, R.style.DialogTheme);
-                        builder.setTitle("Enter search phrase");
-
-                        final EditText input = new EditText(HomeActivity.this);
-                        builder.setView(input);
-
-                        builder.setPositiveButton("Filter", (dialog, which) -> {
-                            String keyword = input.getText().toString().trim().toLowerCase();
-                            currentTextFilter = keyword;
-                            filterEventsByReason(keyword);
-                        });
-                        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-
-                        AlertDialog dialog = builder.create();
-                        dialog.show();
-                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
-                        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.BLACK);
-                        break;
-
-                    case "Filter by emotional state":
-                        showEmotionFilterDialog();
-                        break;
-
-                    case "Show posts from last 7 days":
-                        if ("myposts".equals(currentTab)) {
-                            try {
-                                recentWeek(myPostsEvents);
-                            } catch (ParseException e) {
-                                throw new RuntimeException(e);
-                            }
-                        } else if ("followed".equals(currentTab)) {
-                            try {
-                                recentWeek(followedEvents);
-                            } catch (ParseException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-                        break;
-
-                    case "Clear filter":
-                        currentTextFilter = null;
-                        if ("myposts".equals(currentTab)) {
-                            adapter.setEvents(myPostsEvents);
-                        } else if ("followed".equals(currentTab)) {
-                            adapter.setEvents(followedEvents);
-                        } else if ("explore".equals(currentTab)) {
-                            adapter.setEvents(exploreEvents);
-                        }
-                        break;
+            recentWeekButton.setOnClickListener(view -> {
+                if ("followed".equals(currentTab)){
+                    try {
+                        recentWeek(followedEvents);
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    try {
+                        recentWeek(myPostsEvents);
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
+                popupWindow.dismiss();
+            });
 
-            }
+            emotionalStateButton.setOnClickListener(view -> {
+                showEmotionFilterDialog();
+                popupWindow.dismiss();
+            });
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // Do nothing
-            }
+            filterTextButton.setOnClickListener(view -> {
+                showFilterTextDialog();
+                popupWindow.dismiss();
+            });
+
+            clearFilter.setOnClickListener(view -> {
+                currentTextFilter = null;
+                if ("myposts".equals(currentTab)) {
+                    adapter.setEvents(myPostsEvents);
+                } else if ("followed".equals(currentTab)) {
+                    adapter.setEvents(followedEvents);
+                } else if ("explore".equals(currentTab)) {
+                    adapter.setEvents(exploreEvents);
+                }
+                popupWindow.dismiss();
+            });
+
+
         });
 
         // Set tab listeners (do this ONCE, not inside switchTab!)
@@ -272,6 +240,7 @@ public class HomeActivity extends AppCompatActivity {
         super.onResume();
         loadAllEvents(this::handleIncomingEvent);
     }
+
 
     /**
      * Handle incoming event to add or update.
@@ -386,6 +355,26 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    private void showFilterTextDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this, R.style.DialogTheme);
+        builder.setTitle("Enter search phrase");
+
+        final EditText input = new EditText(HomeActivity.this);
+        builder.setView(input);
+
+        builder.setPositiveButton("Filter", (dialog, which) -> {
+            String keyword = input.getText().toString().trim().toLowerCase();
+            currentTextFilter = keyword;
+            filterEventsByReason(keyword);
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.BLACK);
+
+    }
     private void filterEventsByReason(String keyword) {
         if (keyword.isEmpty()) {
             if ("myposts".equals(currentTab)) {
@@ -464,7 +453,9 @@ public class HomeActivity extends AppCompatActivity {
 
     /**
      * Get recent week of mood for either my mood events or the people that the user followed's posts
+     * set the adapter to the new recent week mood list
      * @param posts  list of posts (myPosts/followedPosts) to find recent week posts
+     * @return recentWeekEvents list of posts from last 7 days sorted desc
      */
     private void recentWeek(List<Event> posts) throws ParseException {
         /*Stackoverflow:
@@ -573,5 +564,18 @@ public class HomeActivity extends AppCompatActivity {
             switchTab(filteredList, tabFollowed);
         }
     }
+
+    /**
+     * filter the followedEvents to recent 3 and update adapter
+     */
+    private void filterRecentThree(){
+        List<Event> followedPosts = followedEvents;
+        List<Event> recentThree = new ArrayList<Event>();
+        for (int i = 0; i < 3; i++){
+            recentThree.add(followedPosts.get(i));
+        }
+        adapter.setEvents(recentThree);
+    }
+
 
 }
