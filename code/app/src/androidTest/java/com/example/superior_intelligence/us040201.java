@@ -1,6 +1,6 @@
 package com.example.superior_intelligence;
 /**
- * Test filtering recent week for my posts
+ * Test filtering recent week for my posts:
  */
 
 import static androidx.test.espresso.Espresso.onView;
