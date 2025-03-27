@@ -99,6 +99,7 @@ public class us040201 {
         latch.await(); // Wait for Firestore operation to complete before proceeding
         */
         logIn();
+
         createEvents();
 
         // log in
@@ -148,6 +149,10 @@ public class us040201 {
         onView(withId(R.id.confirm_mood_create_button)).perform(click());
         onView(withText("POST")).perform(click());
         Thread.sleep(5000);
+    }
+
+    public void createLastYearEvent(){
+        onView(withId(R.id.addButton)).perform(click());
     }
     /**
      * Remove any of the data that were added in the beginning of the test
