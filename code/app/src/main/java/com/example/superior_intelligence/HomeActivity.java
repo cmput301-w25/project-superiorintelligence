@@ -128,6 +128,7 @@ public class HomeActivity extends AppCompatActivity {
         //Spinner filterSpinner = findViewById(R.id.filter_spinner);
 
 
+        // set up popupMenu for both followed and myposts tab
         filterButton.setOnClickListener(v -> {
             View popupView = getLayoutInflater().inflate(R.layout.filter_popup_menu, null);
             PopupWindow popupWindow = new PopupWindow(popupView,
@@ -192,115 +193,6 @@ public class HomeActivity extends AppCompatActivity {
 
 
         });
-
-        /*
-         * Initializes the Spinner with filter options and sets up the filter button to toggle its visibility.
-         * This portion configures a Spinner. The Spinner is initially hidden and becomes visible when the user taps
-         * the filter button. Tapping the button again hides the Spinner.
-         * Creates an ArrayAdapter using the filter_options array.
-         * Applies a standard dropdown layout to the Spinner items.
-         * Sets the adapter on the Spinner to populate its options.
-         * Defines the OnClickListener for the filter button to toggle the Spinner.
-         */
-       /* ArrayAdapter<CharSequence> filterAdapter = ArrayAdapter.createFromResource(
-                this,
-                R.array.filter_options,
-                android.R.layout.simple_spinner_item
-        );
-        filterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        filterSpinner.setAdapter(filterAdapter);
-
-        filterButton.setOnClickListener(v -> {
-            if (filterSpinner.getVisibility() == View.GONE) {
-                // Reset to 0 before making visible to ensure selection triggers again
-                filterSpinner.setSelection(0, false);
-                filterSpinner.setVisibility(View.VISIBLE);
-                filterSpinner.performClick(); // Open dropdown
-            } else {
-                filterSpinner.setVisibility(View.GONE);
-                filterSpinner.setSelection(0, false);
-            }
-
-        });
-        */
-
-        /*
-         * Sets a listener on the Spinner to handle filter selection and hide the Spinner after selection.
-         * This section listens for user interaction with the Spinner. When an item is selected, the Spinner
-         * is immediately hidden to prevent the selected text from being displayed permanently in the layout.
-         */
-        /*
-        filterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selectedFilter = parent.getItemAtPosition(position).toString();
-
-                if (position == 0) return; // Skip dummy item
-                filterSpinner.setSelection(0, false);
-                filterSpinner.setVisibility(View.GONE);
-
-                switch (selectedFilter) {
-                    case "Filter by text":
-                        AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this, R.style.DialogTheme);
-                        builder.setTitle("Enter search phrase");
-
-                        final EditText input = new EditText(HomeActivity.this);
-                        builder.setView(input);
-
-                        builder.setPositiveButton("Filter", (dialog, which) -> {
-                            String keyword = input.getText().toString().trim().toLowerCase();
-                            currentTextFilter = keyword;
-                            filterEventsByReason(keyword);
-                        });
-                        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-
-                        AlertDialog dialog = builder.create();
-                        dialog.show();
-                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
-                        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.BLACK);
-                        break;
-
-                    case "Filter by emotional state":
-                        showEmotionFilterDialog();
-                        break;
-
-                    case "Show posts from last 7 days":
-                        if ("myposts".equals(currentTab)) {
-                            try {
-                                recentWeek(myPostsEvents);
-                            } catch (ParseException e) {
-                                throw new RuntimeException(e);
-                            }
-                        } else if ("followed".equals(currentTab)) {
-                            try {
-                                recentWeek(followedEvents);
-                            } catch (ParseException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-                        break;
-
-                    case "Clear filter":
-                        currentTextFilter = null;
-                        if ("myposts".equals(currentTab)) {
-                            adapter.setEvents(myPostsEvents);
-                        } else if ("followed".equals(currentTab)) {
-                            adapter.setEvents(followedEvents);
-                        } else if ("explore".equals(currentTab)) {
-                            adapter.setEvents(exploreEvents);
-                        }
-                        break;
-                }
-
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // Do nothing
-            }
-        });
-
-         */
 
         // Set tab listeners (do this ONCE, not inside switchTab!)
         tabExplore.setOnClickListener(v -> switchTab(exploreEvents, tabExplore));
