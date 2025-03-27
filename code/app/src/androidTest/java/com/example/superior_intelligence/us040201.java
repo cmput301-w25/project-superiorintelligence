@@ -1,4 +1,7 @@
 package com.example.superior_intelligence;
+/**
+ * Test filtering recent week for my posts
+ */
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
@@ -62,68 +65,65 @@ public class us040201 {
 
 
     /**
-     * Test that filtering recent week should not include post before that week
+     * Test that filtering recent week should not include my post before recent week
+     * @throws InterruptedException
      */
 
     @Test
-    public void filterRecentWeekInMyPostsShouldNotDisplayOnlyValidEvent() throws InterruptedException {
+    public void filterRecentWeekInMyPostsShouldNotDisplayEventOutsideRecentWeek() throws InterruptedException {
         //Ensure that test is on myPosts tab
         onView(withId(R.id.tab_myposts)).perform(click());
 
-        onView(withText("Test during week")).check(ViewAssertions.matches(isDisplayed()));
+        //Make sure added events are displayed
+        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
+        onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
 
         //click on menu button to select filter
         onView(withId(R.id.menu_button)).perform(click());
 
         //click on filter to see last 7 days post
-        onView(withText("Show posts from last 7 days")).perform(click());
+        onView(withId(R.id.recent_week_option)).perform(click());
 
         //test that created last year should not appear
-        onView(withText("Test during week")).check((ViewAssertion) isDisplayed());
+        onView(withText("Test last year")).check(doesNotExist());
 
     }
+
+    /**
+     * Test that filtering recent week should include my post during the recent week
+     * @throws InterruptedException
+     */
+    @Test
+    public void filterRecentWeekInMyPostsShouldDisplayEventDuringRecentWeek() throws InterruptedException {
+        //Ensure that test is on myPosts tab
+        onView(withId(R.id.tab_myposts)).perform(click());
+
+        //Make sure added events are displayed
+        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
+        onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
+
+        //click on menu button to select filter
+        onView(withId(R.id.menu_button)).perform(click());
+
+        //click on filter to see last 7 days post
+        onView(withId(R.id.recent_week_option)).perform(click());
+
+        //test that created last year should not appear
+        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
+
+    }
+
+
     /**
      * Add events that needed in the testing to the database
+     * Log in to start the test
+     * @throws InterruptedException
      */
     @Before // run before every test
-    public void setUpDB() throws InterruptedException {
-        /*
-        Database db = new Database();
-        CollectionReference postsRef = db.getMyPostsRef();
-        CountDownLatch latch = new CountDownLatch(1); // Synchronization mechanism
+    public void setUp() throws InterruptedException {
 
-        Event event = new Event("TestBeforeRecWk", "Test before recent week", "12 MAR 2024, 12:04", "CC0099", "", 0, false, true, "Surprise", "", "", "testUser3", null, null, true);
-        postsRef.document(event.getID()).set(event)
-                .addOnSuccessListener(aVoid -> {
-                    Log.d("Firestore", "Event successfully added");
-                    latch.countDown(); // Release the lock
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("Firestore", "Failed to add event", e);
-                    latch.countDown(); // Release the lock even on failure
-                });
-
-        latch.await(); // Wait for Firestore operation to complete before proceeding
-        */
+        seedMyPostDB();
         logIn();
-
-        createEvents();
-        createLastYearEvent();
-
-        // log in
-        /*
-        Event[] events = {
-                new Event("TestBeforeRecWk", "Test before recent week", "12 MAR 2024, 12:04", "CC0099", "", 0, false, true, "Surprise", "", "", "moodgramGrace", null, null, true),
-                //new Event("TestDuringRecWk", "Test during recent week", "24 MAR 2025, 12:04", "CC0099", "", 0, false, true, "Surprise", "", "", "moodgramGrace", null, null, true)
-        };
-
-        for (Event mood : events) {
-            postsRef.document(mood.getID()).set(mood)
-                    .addOnSuccessListener(aVoid -> Log.d("Firestore", "Event added: " + mood.getID()))
-                    .addOnFailureListener(e -> Log.e("Firestore", "Failed to add event", e));
-        }
-        Thread.sleep(12000);
-         */
 
     }
 
@@ -142,36 +142,43 @@ public class us040201 {
 
         onView(withId(R.id.login_username)).perform(typeText("testUser3"));
         onView(withId(R.id.login_button)).perform(click());
-        Thread.sleep(12000);
+        Thread.sleep(5000);
 
     }
 
     /**
-     * Create event for during the week
+     * Add my posts to database with date before recent week and during recent week
+     * @throws InterruptedException
      */
-    public void createEvents() throws InterruptedException {
-        onView(withId(R.id.addButton)).perform(click());
-        onView(withId(R.id.mood_event_title)).perform(typeText("Test during week")).perform(closeSoftKeyboard());
-        onView(withId(R.id.emotion_arrow)).perform(click());
-        onView(withText("Anger")).perform(click());
-        onView(withId(R.id.confirm_mood_create_button)).perform(click());
-        onView(withText("POST")).perform(click());
-        Thread.sleep(5000);
+    public void seedMyPostDB() throws InterruptedException {
+        Database db = new Database();
+        CollectionReference postsRef = db.getMyPostsRef();
+        CountDownLatch latch = new CountDownLatch(1); // Synchronization mechanism
+
+        Event event = new Event("TestBeforeRecWk", "Test last year", "12 MAR 2024, 12:04", "#CC0099", "", 0, false, true, "Surprise", "", "", "testUser3", null, null, true);
+        Event event2 = new Event("TestDuringRecWk", "Test during recent week", "27 MAR 2025, 12:04", "#FF6347", "", 0, false, true, "Anger", "", "", "testUser3", null, null, true);
+        postsRef.document(event.getID()).set(event)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("Firestore", "Event successfully added");
+                    latch.countDown(); // Release the lock
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Firestore", "Failed to add event", e);
+                    latch.countDown(); // Release the lock even on failure
+                });
+        postsRef.document(event2.getID()).set(event2)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("Firestore", "Event successfully added");
+                    latch.countDown(); // Release the lock
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Firestore", "Failed to add event", e);
+                    latch.countDown(); // Release the lock even on failure
+                });
+        latch.await();
     }
 
-    public void createLastYearEvent() throws InterruptedException {
-        Thread.sleep(5000);
-        onView(withId(R.id.addButton)).perform(click());
-        onView(withId(R.id.mood_event_title)).perform(typeText("Test last year")).perform(closeSoftKeyboard());
 
-
-        onView(withId(R.id.emotion_arrow)).perform(click());
-        onView(withText("Fear")).perform(click());
-        onView(withId(R.id.confirm_mood_create_button)).perform(click());
-        onView(withText("POST")).perform(click());
-        Thread.sleep(5000);
-
-    }
     /**
      * Remove any of the data that were added in the beginning of the test
      */
