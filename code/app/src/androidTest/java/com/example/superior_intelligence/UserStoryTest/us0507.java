@@ -1,4 +1,4 @@
-package com.example.superior_intelligence;
+package com.example.superior_intelligence.UserStoryTest;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.Espresso.pressBack;
@@ -17,6 +17,11 @@ import android.util.Log;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.rule.ActivityTestRule;
 
+import com.example.superior_intelligence.Database;
+import com.example.superior_intelligence.Event;
+import com.example.superior_intelligence.HomeActivity;
+import com.example.superior_intelligence.R;
+import com.example.superior_intelligence.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 

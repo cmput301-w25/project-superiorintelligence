@@ -1,4 +1,4 @@
-package com.example.superior_intelligence;
+package com.example.superior_intelligence.UserStoryTest;
 
 import static androidx.test.espresso.Espresso.closeSoftKeyboard;
 import static androidx.test.espresso.Espresso.onData;
@@ -20,8 +20,11 @@ import android.content.Intent;
 import android.os.SystemClock;
 import android.util.Log;
 
+import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.rule.ActivityTestRule;
 
+import com.example.superior_intelligence.LoginPageActivity;
+import com.example.superior_intelligence.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -106,7 +109,7 @@ public class us010401_us010501_us010601 {
 
         SystemClock.sleep(3000);
 
-        onView(withId(R.id.addButton)).perform(click());
+        onView(ViewMatchers.withId(R.id.addButton)).perform(click());
         onView(withId(R.id.mood_event_title)).perform(typeText("Original Title"));
         closeSoftKeyboard();
 

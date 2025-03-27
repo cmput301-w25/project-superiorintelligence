@@ -1,4 +1,4 @@
-package com.example.superior_intelligence;
+package com.example.superior_intelligence.UserStoryTest;
 
 import static androidx.test.espresso.Espresso.closeSoftKeyboard;
 import static androidx.test.espresso.Espresso.onView;
@@ -15,10 +15,12 @@ import android.icu.text.SimpleDateFormat;
 import android.os.SystemClock;
 import android.util.Log;
 
+import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.rule.ActivityTestRule;
 
+import com.example.superior_intelligence.LoginPageActivity;
+import com.example.superior_intelligence.R;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.junit.After;
@@ -86,7 +88,7 @@ public class us050101andus050102 {
         loginRule.launchActivity(intent);  // Finally start LoginPageActivity
 
         // Then do the usual login steps
-        onView(withId(R.id.login_username)).perform(typeText("userB"));
+        onView(ViewMatchers.withId(R.id.login_username)).perform(typeText("userB"));
         closeSoftKeyboard();
         onView(withId(R.id.login_button)).perform(click());
         SystemClock.sleep(3000);

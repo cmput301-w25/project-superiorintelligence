@@ -1,143 +1,137 @@
-package com.example.superior_intelligence;
+package com.example.superior_intelligence.UserStoryTest;
 
 import static androidx.test.espresso.Espresso.onData;
-import static androidx.test.espresso.action.ViewActions.replaceText;
-import static androidx.test.espresso.assertion.ViewAssertions.*;
-import static androidx.test.espresso.matcher.ViewMatchers.*;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.Espresso.closeSoftKeyboard;
 import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.action.ViewActions.typeText;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.instanceOf;
+import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static androidx.test.espresso.matcher.RootMatchers.isDialog;
+
 import static org.hamcrest.Matchers.is;
+
 import android.content.Intent;
 import android.os.SystemClock;
 import android.util.Log;
 
+import androidx.test.espresso.matcher.ViewMatchers;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.rule.ActivityTestRule;
 
-import com.google.firebase.auth.FirebaseAuth;
+import com.example.superior_intelligence.HomeActivity;
+import com.example.superior_intelligence.R;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
-public class us010101_us010201_us020401 {
-
+/**
+ * UI Test for US 02.01.01 - As a participant, I want to express the reason why for a mood event,
+ * using a brief textual explanation no more than 200 characters or 3 words.
+ */
+@RunWith(AndroidJUnit4.class)
+public class us020101 {
     @Rule
-    public ActivityTestRule<LoginPageActivity> loginRule =
-            new ActivityTestRule<>(LoginPageActivity.class, true, false);
-
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    public ActivityTestRule<HomeActivity> activityRule =
+            new ActivityTestRule<>(HomeActivity.class, true, false);
 
     /**
-     * Signs out any existing Firebase user, connects to the emulator, and ensures a test user exists.
+     * Sets up Firebase emulator and ensures test user exists before each test.
      */
     @Before
-    public void setup() throws InterruptedException {
-        FirebaseAuth.getInstance().signOut();
-        db.useEmulator("10.0.2.2", 8080);
-
+    public void setUp() throws InterruptedException {
+        FirebaseFirestore.getInstance().useEmulator("10.0.2.2", 8080);
         ensureUserExists("testUser", "Test User");
     }
 
     /**
-     * End-to-end test that logs in as testUser, creates a complete mood post with:
-     * title, emotion ("Happiness"), trigger text, and social situation ("Alone"),
-     * then verifies the post appears in the MyPosts tab.
+     * Tests whether a mood reason over 200 characters is allowed or correctly handled.
+     * This checks the system's limit handling.
      */
     @Test
-    public void testCreateMoodEventWithAllFields() throws InterruptedException {
+    public void testValidAndInvalidMoodReasons() throws InterruptedException {
         loginAs("testUser");
 
-        onView(withId(R.id.addButton)).perform(click());
+        onView(ViewMatchers.withId(R.id.addButton)).perform(click());
         SystemClock.sleep(1000);
 
-        onView(withId(R.id.mood_event_title)).perform(typeText("Test Mood"));
-        androidx.test.espresso.Espresso.closeSoftKeyboard();
+        onView(withId(R.id.mood_event_title)).perform(replaceText("Too Long Reason Example"));
 
-        // Open emotion spinner
-        onView(withId(R.id.emotional_state_banner)).perform(click());
-
-        // Select "happiness" from the dropdown dialog
+        // Select mood: Sadness
         onView(withId(R.id.emotion_arrow)).perform(click());
-        SystemClock.sleep(2000);
-        onData(allOf(is(instanceOf(String.class)), is("Happiness"))).perform(click());
+        onData(is("Sadness")).perform(click());
 
-        onView(withId(R.id.selected_mood)).check(matches(withText("Happiness")));
-        onView(withId(R.id.trigger_response)).perform(replaceText("Had a great day!"));
-        Thread.sleep(500);
+        // Generate a string over 200 characters
+        StringBuilder longText = new StringBuilder();
+        for (int i = 0; i < 220; i++) longText.append("x");
 
-        onView(withId(R.id.situation_arrow)).perform(click());
-        SystemClock.sleep(2000);
-        onData(allOf(is(instanceOf(String.class)), is("Alone"))).perform(click());
-        onView(withId(R.id.selected_situation)).check(matches(withText("Alone")));
-
+        // Type it into the reason field
+        onView(withId(R.id.trigger_response)).perform(replaceText(longText.toString()));
+        closeSoftKeyboard();
+        SystemClock.sleep(3000);
         // Submit post
         onView(withId(R.id.confirm_mood_create_button)).perform(click());
+        SystemClock.sleep(500);
 
-        SystemClock.sleep(1000);
-        onView(withId(R.id.public_checkbox)).perform(click());
-
-        onView(withText("POST")).perform(click());
-        SystemClock.sleep(3000);
-
-        // Go to MyPosts to verify
-        onView(withId(R.id.tab_myposts)).perform(click());
+        // Select public in the dialog
+        onView(withId(R.id.public_checkbox)).inRoot(isDialog()).perform(click());
+        onView(withText("POST")).inRoot(isDialog()).perform(click());
         SystemClock.sleep(1000);
 
-        onView(withText("Test Mood")).check(matches(isDisplayed()));
+        // Verify we're either still on the page or redirected correctly
+        onView(withId(R.id.tab_myposts)).check(matches(isDisplayed()));
     }
 
     /**
-     * Logs in with the provided username using the login screen.
-     * @param username the username to sign in as
+     * Logs in using the given username.
      */
     private void loginAs(String username) throws InterruptedException {
         Intent intent = new Intent();
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        loginRule.launchActivity(intent);
+        activityRule.launchActivity(intent);
 
         onView(withId(R.id.login_username)).perform(typeText(username));
         closeSoftKeyboard();
         onView(withId(R.id.login_button)).perform(click());
+
         SystemClock.sleep(3000);
     }
 
     /**
-     * Ensures a user with the specified username and display name exists in the Firestore emulator.
-     * @param username unique user ID
-     * @param name     visible display name
+     * Creates a test user in the Firestore emulator if not already present.
      */
     private void ensureUserExists(String username, String name) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
         Map<String, Object> user = new HashMap<>();
         user.put("username", username);
         user.put("name", name);
         user.put("followers", new ArrayList<>());
         user.put("following", new ArrayList<>());
-
         db.collection("users").document(username).set(user)
                 .addOnCompleteListener(task -> latch.countDown());
-
         latch.await();
     }
 
     /**
-     * Clears the emulated database.
+     * Clears all documents from Firestore after tests.
      */
     @After
     public void tearDown() {
@@ -163,3 +157,4 @@ public class us010101_us010201_us020401 {
         }
     }
 }
+

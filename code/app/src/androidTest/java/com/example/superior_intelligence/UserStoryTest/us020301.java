@@ -1,5 +1,4 @@
-package com.example.superior_intelligence;
-
+package com.example.superior_intelligence.UserStoryTest;
 
 import android.Manifest;
 import android.app.Activity;
@@ -13,13 +12,18 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import androidx.core.content.FileProvider;
+import static androidx.test.espresso.Espresso.closeSoftKeyboard;
+
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.espresso.intent.Intents;
-import static androidx.test.espresso.Espresso.closeSoftKeyboard;
+import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.rule.GrantPermissionRule;
 
+import com.example.superior_intelligence.LoginPageActivity;
+import com.example.superior_intelligence.PhotoActivity;
+import com.example.superior_intelligence.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -44,13 +48,13 @@ import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.intent.Intents.*;
 import static androidx.test.espresso.intent.matcher.IntentMatchers.*;
 import static androidx.test.espresso.matcher.ViewMatchers.*;
-import static org.hamcrest.Matchers.*;
 
 /**
- * UI test for US 02.02.01 - As a participant, I want to add a photo to my mood event.
+ * Tests that uploading a photo larger than 64 KB triggers
+ * the "size limit exceeded" dialog in PhotoActivity.
  */
 @RunWith(AndroidJUnit4.class)
-public class us020201 {
+public class us020301 {
 
     @Rule
     public ActivityTestRule<LoginPageActivity> loginRule =
@@ -74,59 +78,77 @@ public class us020201 {
     }
 
     /**
-     * Full flow test to create a mood event and add a photo to it.
-     * Verifies image selection and post visibility.
+     * Simulates when a user tries to upload a photo larger than 64KB.
+     * Verifies that the "Image size exceed limit" dialog is shown with the correct message.
      */
     @Test
-    public void testAddPhotoFlow() throws InterruptedException {
+    public void testUploadTooLargeImage_ShowsSizeLimitDialog() throws InterruptedException {
         loginAs("testUser");
 
         // Start creating event
-        onView(withId(R.id.addButton)).perform(click());
+        onView(ViewMatchers.withId(R.id.addButton)).perform(click());
         SystemClock.sleep(1000);
 
-        onView(withId(R.id.mood_event_title)).perform(typeText("Photo Mood"));
+        onView(withId(R.id.mood_event_title)).perform(typeText("Large Photo Test"));
         closeSoftKeyboard();
 
         // Click to add photo
         onView(withId(R.id.add_photo_button)).perform(click());
         intended(hasComponent(PhotoActivity.class.getName()));
 
-        // Mock photo selection
-        Uri mockPhoto = createSolidColorImage(ApplicationProvider.getApplicationContext());
+        Uri largeImageUri = createLargeMockImageUri(ApplicationProvider.getApplicationContext());
         Intent resultData = new Intent();
-        resultData.setData(mockPhoto);
+        resultData.setData(largeImageUri);
         Instrumentation.ActivityResult result =
                 new Instrumentation.ActivityResult(Activity.RESULT_OK, resultData);
         intending(hasAction(Intent.ACTION_PICK)).respondWith(result);
 
-        // Upload and confirm
         onView(withId(R.id.upload_photo_button)).perform(click());
-        SystemClock.sleep(1000);
 
-        onView(withId(R.id.confirm_button)).perform(click());
-        SystemClock.sleep(2000);
+        onView(withId(R.id.size_exceeded_title))
+                .check(matches(withText("Image size exceed limit")))
+                .check(matches(isDisplayed()));
 
-        // Select emotion
-        onView(withId(R.id.emotion_arrow)).perform(click());
-        onData(is("Happiness")).perform(click());
-        onView(withId(R.id.selected_mood)).check(matches(withText("Happiness")));
+        onView(withId(R.id.error_message))
+                .check(matches(withText("Image must be under 65536 bytes")))
+                .check(matches(isDisplayed()));
 
-        // Enter trigger text
-        onView(withId(R.id.trigger_response)).perform(replaceText("With photo!"));
-        closeSoftKeyboard();
+        onView(withText(R.string.ok_button_text)).perform(click());
+    }
 
-        // Post the event
-        onView(withId(R.id.confirm_mood_create_button)).perform(click());
-        SystemClock.sleep(1000);
-        onView(withId(R.id.public_checkbox)).perform(click());
-        onView(withText("POST")).perform(click());
+    /**
+     * Creates a large bitmap, writes it at 100% JPEG quality,
+     * and returns a content:// Uri from FileProvider.
+     * This ensures the final size easily exceeds 64KB even after re-compression in PhotoActivity.
+     */
+    private Uri createLargeMockImageUri(Context context) {
+        // something large like 4096x4096
+        int width = 4096;
+        int height = 4096;
+        Bitmap bigBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 
-        // Verify in MyPosts
-        SystemClock.sleep(3000);
-        onView(withId(R.id.tab_myposts)).perform(click());
-        SystemClock.sleep(1000);
-        onView(withText("Photo Mood")).check(matches(isDisplayed()));
+        // fill every pixel with random colors (make the JPEG larger)
+        Random random = new Random();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int color = Color.rgb(random.nextInt(256), random.nextInt(256), random.nextInt(256));
+                bigBitmap.setPixel(x, y, color);
+            }
+        }
+
+        File cacheFile = new File(context.getCacheDir(), "large_test_image.jpg");
+        try (FileOutputStream fos = new FileOutputStream(cacheFile)) {
+            bigBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return FileProvider.getUriForFile(
+                context,
+                "com.example.superior_intelligence.file_provider",
+                cacheFile
+        );
     }
 
     /**
@@ -182,26 +204,5 @@ public class us020201 {
                 urlConnection.disconnect();
             }
         }
-    }
-
-    /**
-     * Creates and returns a mock URI for a solid color image used for testing image upload.
-     * @param context Application context
-     * @return URI pointing to the mock image file
-     */
-    private Uri createSolidColorImage(Context context) {
-        Bitmap bmp = Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888);
-        bmp.eraseColor(Color.BLUE);
-        File file = new File(context.getCacheDir(), "mock_photo.jpg");
-        try (FileOutputStream fos = new FileOutputStream(file)) {
-            bmp.compress(Bitmap.CompressFormat.JPEG, 80, fos);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return FileProvider.getUriForFile(
-                context,
-                "com.example.superior_intelligence.file_provider",
-                file
-        );
     }
 }

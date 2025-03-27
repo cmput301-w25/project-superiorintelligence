@@ -1,4 +1,4 @@
-package com.example.superior_intelligence;
+package com.example.superior_intelligence.UserStoryTest;
 /**
  * Test filtering recent week for my posts:
  */
@@ -8,31 +8,25 @@ import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
 import static androidx.test.espresso.action.ViewActions.typeText;
 import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
-import static androidx.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 import static org.junit.Assert.assertTrue;
-import static java.util.Calendar.SECOND;
-import static java.util.regex.Pattern.matches;
 
-import android.graphics.Movie;
 import android.util.Log;
-import android.widget.DatePicker;
 
-import androidx.test.espresso.Espresso;
-import androidx.test.espresso.ViewAssertion;
 import androidx.test.espresso.assertion.ViewAssertions;
+import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
-import com.google.android.gms.tasks.Tasks;
+import com.example.superior_intelligence.Database;
+import com.example.superior_intelligence.Event;
+import com.example.superior_intelligence.MainActivity;
+import com.example.superior_intelligence.R;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
-import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -45,12 +39,8 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneOffset;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 @RunWith(JUnit4.class)
 public class us040201 {
@@ -72,7 +62,7 @@ public class us040201 {
     @Test
     public void filterRecentWeekInMyPostsShouldNotDisplayEventOutsideRecentWeek() throws InterruptedException {
         //Ensure that test is on myPosts tab
-        onView(withId(R.id.tab_myposts)).perform(click());
+        onView(ViewMatchers.withId(R.id.tab_myposts)).perform(click());
 
         //Make sure added events are displayed
         onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));

@@ -1,21 +1,25 @@
-package com.example.superior_intelligence;
+package com.example.superior_intelligence.UserStoryTest;
 
 import static androidx.test.espresso.Espresso.onData;
-import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.action.ViewActions.*;
-import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.action.ViewActions.replaceText;
+import static androidx.test.espresso.assertion.ViewAssertions.*;
 import static androidx.test.espresso.matcher.ViewMatchers.*;
-
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.Espresso.closeSoftKeyboard;
+import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.action.ViewActions.typeText;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-
 import android.content.Intent;
 import android.os.SystemClock;
 import android.util.Log;
 
+import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.rule.ActivityTestRule;
 
+import com.example.superior_intelligence.LoginPageActivity;
+import com.example.superior_intelligence.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -28,17 +32,13 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
-/**
- * UI test for US 01.03.01: ensures consistent emoticons and colors for each emotional state.
- */
-public class us010301 {
+public class us010101_us010201_us020401 {
 
     @Rule
     public ActivityTestRule<LoginPageActivity> loginRule =
@@ -46,69 +46,68 @@ public class us010301 {
 
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    private final List<String> emotions = Arrays.asList(
-            "Anger", "Confusion", "Disgust", "Fear", "Happiness", "Sadness", "Shame", "Surprise"
-    );
-
     /**
-     * Signs out, connects to the emulator, and ensures the test user exists.
+     * Signs out any existing Firebase user, connects to the emulator, and ensures a test user exists.
      */
     @Before
     public void setup() throws InterruptedException {
         FirebaseAuth.getInstance().signOut();
         db.useEmulator("10.0.2.2", 8080);
-        ensureUserExists("emoticonTester", "Emoticon Tester");
+
+        ensureUserExists("testUser", "Test User");
     }
 
     /**
-     * Creates one mood event per emotion, each with its emoji and situation set.
+     * End-to-end test that logs in as testUser, creates a complete mood post with:
+     * title, emotion ("Happiness"), trigger text, and social situation ("Alone"),
+     * then verifies the post appears in the MyPosts tab.
      */
     @Test
-    public void testEmoticonsForEachEmotion() throws InterruptedException {
-        loginAs("emoticonTester");
+    public void testCreateMoodEventWithAllFields() throws InterruptedException {
+        loginAs("testUser");
 
-        for (String emotion : emotions) {
-            // Open mood creation screen
-            onView(withId(R.id.addButton)).perform(click());
-            SystemClock.sleep(1000);
+        onView(ViewMatchers.withId(R.id.addButton)).perform(click());
+        SystemClock.sleep(1000);
 
-            // Set title to emotion name
-            onView(withId(R.id.mood_event_title)).perform(replaceText(emotion));
-            closeSoftKeyboard();
+        onView(withId(R.id.mood_event_title)).perform(typeText("Test Mood"));
+        androidx.test.espresso.Espresso.closeSoftKeyboard();
 
-            // Open and select emotion
-            onView(withId(R.id.emotional_state_banner)).perform(click());
-            onView(withId(R.id.emotion_arrow)).perform(click());
-            SystemClock.sleep(500);
-            onData(allOf(is(instanceOf(String.class)), is(emotion))).perform(click());
-            onView(withId(R.id.selected_mood)).check(matches(withText(emotion)));
+        // Open emotion spinner
+        onView(withId(R.id.emotional_state_banner)).perform(click());
 
-            // Optional: Select emoji (you could click the emoji button here if needed)
-            onView(withId(R.id.include_emoji_checkbox)).perform(click());
-
-            // Optional: Add reason and situation
-            onView(withId(R.id.trigger_response)).perform(replaceText("Testing emoji for " + emotion));
-            closeSoftKeyboard();
-            onView(withId(R.id.situation_arrow)).perform(click());
-            SystemClock.sleep(500);
-            onData(allOf(is(instanceOf(String.class)), is("Alone"))).perform(click());
-
-            // Confirm and submit
-            onView(withId(R.id.confirm_mood_create_button)).perform(click());
-            SystemClock.sleep(1000);
-            onView(withId(R.id.public_checkbox)).perform(click());
-
-            onView(withText("POST")).perform(click());
-            SystemClock.sleep(1500);
-        }
-
-        // Switch to MyPosts tab
-        onView(withId(R.id.tab_myposts)).perform(click());
+        // Select "happiness" from the dropdown dialog
+        onView(withId(R.id.emotion_arrow)).perform(click());
         SystemClock.sleep(2000);
+        onData(allOf(is(instanceOf(String.class)), is("Happiness"))).perform(click());
+
+        onView(withId(R.id.selected_mood)).check(matches(withText("Happiness")));
+        onView(withId(R.id.trigger_response)).perform(replaceText("Had a great day!"));
+        Thread.sleep(500);
+
+        onView(withId(R.id.situation_arrow)).perform(click());
+        SystemClock.sleep(2000);
+        onData(allOf(is(instanceOf(String.class)), is("Alone"))).perform(click());
+        onView(withId(R.id.selected_situation)).check(matches(withText("Alone")));
+
+        // Submit post
+        onView(withId(R.id.confirm_mood_create_button)).perform(click());
+
+        SystemClock.sleep(1000);
+        onView(withId(R.id.public_checkbox)).perform(click());
+
+        onView(withText("POST")).perform(click());
+        SystemClock.sleep(3000);
+
+        // Go to MyPosts to verify
+        onView(withId(R.id.tab_myposts)).perform(click());
+        SystemClock.sleep(1000);
+
+        onView(withText("Test Mood")).check(matches(isDisplayed()));
     }
 
     /**
-     * Logs in using the given username.
+     * Logs in with the provided username using the login screen.
+     * @param username the username to sign in as
      */
     private void loginAs(String username) throws InterruptedException {
         Intent intent = new Intent();
@@ -122,15 +121,17 @@ public class us010301 {
     }
 
     /**
-     * Creates a test user in the Firestore emulator if not already present.
+     * Ensures a user with the specified username and display name exists in the Firestore emulator.
+     * @param username unique user ID
+     * @param name     visible display name
      */
     private void ensureUserExists(String username, String name) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         Map<String, Object> user = new HashMap<>();
         user.put("username", username);
         user.put("name", name);
-        user.put("followers", new java.util.ArrayList<>());
-        user.put("following", new java.util.ArrayList<>());
+        user.put("followers", new ArrayList<>());
+        user.put("following", new ArrayList<>());
 
         db.collection("users").document(username).set(user)
                 .addOnCompleteListener(task -> latch.countDown());
@@ -139,7 +140,7 @@ public class us010301 {
     }
 
     /**
-     * Clears all documents from Firestore after tests.
+     * Clears the emulated database.
      */
     @After
     public void tearDown() {
