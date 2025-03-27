@@ -457,7 +457,7 @@ public class HomeActivity extends AppCompatActivity {
      * @param posts  list of posts (myPosts/followedPosts) to find recent week posts
      * @return recentWeekEvents list of posts from last 7 days sorted desc
      */
-    private List<Event> recentWeek(List<Event> posts) throws ParseException {
+    private void recentWeek(List<Event> posts) throws ParseException {
         /*Stackoverflow:
         https://stackoverflow.com/questions/16982056/how-to-get-the-date-7-days-earlier-date-from-current-date-in-java
          */
@@ -489,7 +489,6 @@ public class HomeActivity extends AppCompatActivity {
         recentWeekEvents.sort(dateDescComparator);
 
         adapter.setEvents(recentWeekEvents);
-        return recentWeekEvents;
     }
 
     // --- New Methods for Emotional State Filtering ---
@@ -566,6 +565,9 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * filter the followedEvents to recent 3 and update adapter
+     */
     private void filterRecentThree(){
         List<Event> followedPosts = followedEvents;
         List<Event> recentThree = new ArrayList<Event>();
