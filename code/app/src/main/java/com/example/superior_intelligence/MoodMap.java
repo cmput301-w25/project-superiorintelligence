@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -96,7 +97,7 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
     public void onMapReady(@NonNull GoogleMap map) {
         googleMap = map;
 
-        // Move camera to Edmonton
+        // Move camera to Edmonton (for example)
         LatLng edmonton = new LatLng(53.5461, -113.4938);
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(edmonton, 11.5f));
 
@@ -127,6 +128,11 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
         }
         // Clear old markers
         googleMap.clear();
+
+        // Get the current location.
+        // Here, we use the camera position's target as a proxy for current location.
+        // In a real app, use a proper location provider.
+        LatLng currentLocation = googleMap.getCameraPosition().target;
 
         // Build a Firestore query based on which checkboxes are checked.
         Query query = db.collection("MyPosts");
@@ -172,6 +178,15 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
                         if (lat == null || lng == null || lat == 0.0 || lng == 0.0) {
                             Log.d(TAG, "Skipping document " + doc.getId()
                                     + " due to invalid lat/lng.");
+                            continue;
+                        }
+
+                        // Check if event is within 5 km of the current location.
+                        float[] distanceResult = new float[1];
+                        Location.distanceBetween(currentLocation.latitude, currentLocation.longitude,
+                                lat, lng, distanceResult);
+                        if (distanceResult[0] > 5000) { // distance in meters
+                            Log.d(TAG, "Event " + doc.getId() + " is " + distanceResult[0] + " meters away; skipping event.");
                             continue;
                         }
 
@@ -223,6 +238,10 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
     private BitmapDescriptor createLabeledMarker(int baseIconRes, String label) {
         // 1) Decode the base icon from resources
         Bitmap original = BitmapFactory.decodeResource(getResources(), baseIconRes);
+        if (original == null) {
+            Log.e(TAG, "Failed to decode resource with id: " + baseIconRes);
+            return BitmapDescriptorFactory.defaultMarker();
+        }
 
         // 2) Scale it to a desired size
         int iconWidth = 150;
@@ -230,7 +249,6 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
         Bitmap scaledIcon = Bitmap.createScaledBitmap(original, iconWidth, iconHeight, false);
 
         // 3) Create a bitmap that can hold the icon + text
-        //    We'll add extra height at the bottom for the username text
         int extraHeight = 60; // space for text below icon
         Bitmap combined = Bitmap.createBitmap(iconWidth, iconHeight + extraHeight, Bitmap.Config.ARGB_8888);
 
@@ -243,9 +261,8 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
         paint.setColor(Color.BLACK);
         paint.setTextSize(40f);
         paint.setTextAlign(Paint.Align.CENTER);
-        // Position the text at the bottom center
         float xPos = iconWidth / 2f;
-        float yPos = iconHeight + 40f; // 40px down from the top of the extra space
+        float yPos = iconHeight + 40f;
         canvas.drawText(label, xPos, yPos, paint);
 
         // 6) Convert the combined bitmap to a BitmapDescriptor
@@ -275,7 +292,6 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
                 .append("Situation: ").append(situation != null ? situation : "N/A").append("\n")
                 .append("Date: ").append(date != null ? date : "N/A").append("\n");
 
-        // Create and show the dialog.
         new AlertDialog.Builder(this)
                 .setTitle(title != null ? title : "Mood Event")
                 .setMessage(messageBuilder.toString())
