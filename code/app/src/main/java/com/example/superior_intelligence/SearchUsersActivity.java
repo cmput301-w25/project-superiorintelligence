@@ -7,6 +7,7 @@
 package com.example.superior_intelligence;
 
 import android.os.Bundle;
+import android.content.Intent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -40,7 +41,7 @@ public class SearchUsersActivity extends AppCompatActivity {
         currentUsername = User.getInstance().getUsername();
 
         // Initialize UI components
-        searchEditText = findViewById(R.id.editText);
+        searchEditText = findViewById(R.id.search_bar);
         recyclerView = findViewById(R.id.recyclerView); // Add this to your layout
         AppCompatButton searchButton = findViewById(R.id.user_search_button);
         AppCompatButton clearButton = findViewById(R.id.clear_button);
@@ -48,7 +49,13 @@ public class SearchUsersActivity extends AppCompatActivity {
         // Setup RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         userList = new ArrayList<>();
-        userAdapter = new UserAdapter(userList);
+
+        userAdapter = new UserAdapter(userList, foundUser -> {
+            Intent intent = new Intent(SearchUsersActivity.this, OtherUserProfileActivity.class);
+            intent.putExtra("username", foundUser.getUsername());
+            startActivity(intent);
+        });
+
         recyclerView.setAdapter(userAdapter);
 
         // Back button to returns to HomeActivity

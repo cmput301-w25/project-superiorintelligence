@@ -15,6 +15,8 @@ import android.content.Intent;
 import android.os.SystemClock;
 import android.util.Log;
 
+import androidx.test.espresso.action.ViewActions;
+import androidx.test.espresso.intent.Intents;
 import androidx.test.rule.ActivityTestRule;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -51,7 +53,8 @@ public class us010101_us010201_us020401 {
         FirebaseAuth.getInstance().signOut();
         db.useEmulator("10.0.2.2", 8080);
 
-        ensureUserExists("testUser", "Test User");
+        ensureUserExists("testUser", "Test User", "TestPass");
+        Intents.init();
     }
 
     /**
@@ -61,7 +64,7 @@ public class us010101_us010201_us020401 {
      */
     @Test
     public void testCreateMoodEventWithAllFields() throws InterruptedException {
-        loginAs("testUser");
+        loginAs("testUser", "TestPass");
 
         onView(withId(R.id.addButton)).perform(click());
         SystemClock.sleep(1000);
@@ -106,13 +109,17 @@ public class us010101_us010201_us020401 {
      * Logs in with the provided username using the login screen.
      * @param username the username to sign in as
      */
-    private void loginAs(String username) throws InterruptedException {
+    private void loginAs(String username, String password) throws InterruptedException {
         Intent intent = new Intent();
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         loginRule.launchActivity(intent);
 
         onView(withId(R.id.login_username)).perform(typeText(username));
-        closeSoftKeyboard();
+        ViewActions.closeSoftKeyboard();
+
+        onView(withId(R.id.login_password)).perform(typeText(password));
+        ViewActions.closeSoftKeyboard();
+
         onView(withId(R.id.login_button)).perform(click());
         SystemClock.sleep(3000);
     }
@@ -122,13 +129,16 @@ public class us010101_us010201_us020401 {
      * @param username unique user ID
      * @param name     visible display name
      */
-    private void ensureUserExists(String username, String name) throws InterruptedException {
+    private void ensureUserExists(String username, String name, String rawPassword) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         Map<String, Object> user = new HashMap<>();
         user.put("username", username);
         user.put("name", name);
-        user.put("followers", new ArrayList<>());
-        user.put("following", new ArrayList<>());
+        user.put("followers", new java.util.ArrayList<>());
+        user.put("following", new java.util.ArrayList<>());
+
+        String hashedPassword = PasswordHasher.hashPassword(rawPassword);
+        user.put("password", hashedPassword);
 
         db.collection("users").document(username).set(user)
                 .addOnCompleteListener(task -> latch.countDown());
