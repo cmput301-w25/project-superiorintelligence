@@ -15,14 +15,15 @@ import java.util.List;
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
 
     private List<HelperClass> userList;
-
+    private OnUserClickListener listener;
     /**
      * Constructs a new {@code UserAdapter} with the specified list of users.
      *
      * @param userList the list of {@link HelperClass} objects to be displayed.
      */
-    public UserAdapter(List<HelperClass> userList) {
+    public UserAdapter(List<HelperClass> userList, OnUserClickListener listener) {
         this.userList = userList;
+        this.listener = listener;
     }
 
     /**
@@ -50,6 +51,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         HelperClass user = userList.get(position);
         holder.nameTextView.setText(user.getName());
         holder.usernameTextView.setText(user.getUsername());
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onUserClick(user);
+            }
+        });
     }
 
     /**
@@ -78,5 +85,9 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             nameTextView = itemView.findViewById(R.id.user_name);
             usernameTextView = itemView.findViewById(R.id.user_username);
         }
+    }
+
+    public interface OnUserClickListener {
+        void onUserClick(HelperClass user);
     }
 }

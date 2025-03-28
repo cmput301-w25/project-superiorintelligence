@@ -19,9 +19,12 @@ import android.content.Intent;
 import android.os.SystemClock;
 import android.util.Log;
 
+import androidx.test.espresso.action.ViewActions;
+import androidx.test.espresso.intent.Intents;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.rule.ActivityTestRule;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.junit.After;
@@ -51,13 +54,17 @@ public class us020101 {
     public ActivityTestRule<HomeActivity> activityRule =
             new ActivityTestRule<>(HomeActivity.class, true, false);
 
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+
     /**
      * Sets up Firebase emulator and ensures test user exists before each test.
      */
     @Before
     public void setUp() throws InterruptedException {
-        FirebaseFirestore.getInstance().useEmulator("10.0.2.2", 8080);
-        ensureUserExists("testUser", "Test User");
+        FirebaseAuth.getInstance().signOut();
+        db.useEmulator("10.0.2.2", 8080);
+        ensureUserExists("testUser", "Test User", "TestPass");
+        Intents.init();
     }
 
     /**
@@ -66,7 +73,7 @@ public class us020101 {
      */
     @Test
     public void testValidAndInvalidMoodReasons() throws InterruptedException {
-        loginAs("testUser");
+        loginAs("testUser","TestPass");
 
         onView(withId(R.id.addButton)).perform(click());
         SystemClock.sleep(1000);
@@ -101,30 +108,38 @@ public class us020101 {
     /**
      * Logs in using the given username.
      */
-    private void loginAs(String username) throws InterruptedException {
+    private void loginAs(String username, String password) throws InterruptedException {
         Intent intent = new Intent();
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         activityRule.launchActivity(intent);
 
         onView(withId(R.id.login_username)).perform(typeText(username));
-        closeSoftKeyboard();
-        onView(withId(R.id.login_button)).perform(click());
+        ViewActions.closeSoftKeyboard();
 
+        onView(withId(R.id.login_password)).perform(typeText(password));
+        ViewActions.closeSoftKeyboard();
+
+        onView(withId(R.id.login_button)).perform(click());
         SystemClock.sleep(3000);
     }
 
     /**
      * Creates a test user in the Firestore emulator if not already present.
      */
-    private void ensureUserExists(String username, String name) throws InterruptedException {
+    private void ensureUserExists(String username, String name, String rawPassword) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
         Map<String, Object> user = new HashMap<>();
         user.put("username", username);
         user.put("name", name);
-        user.put("followers", new ArrayList<>());
-        user.put("following", new ArrayList<>());
+        user.put("followers", new java.util.ArrayList<>());
+        user.put("following", new java.util.ArrayList<>());
+
+        String hashedPassword = PasswordHasher.hashPassword(rawPassword);
+        user.put("password", hashedPassword);
+
         db.collection("users").document(username).set(user)
                 .addOnCompleteListener(task -> latch.countDown());
+
         latch.await();
     }
 

@@ -274,9 +274,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
 
         emotionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(
-                    AdapterView<?> parent, View view, int position, long id
-            ) {
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position == 0) {
                     isEmotionSelected = false;
                     return;
@@ -285,6 +283,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
                 selectedMood.setText(chosenEmotion);
                 updateEmojiIcon(chosenEmotion);
                 isEmotionSelected = true;
+
                 emotionSpinner.setVisibility(View.GONE);
             }
 
