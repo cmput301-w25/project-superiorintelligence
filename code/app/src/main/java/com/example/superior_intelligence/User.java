@@ -14,6 +14,16 @@ public class User {
     // Private constructor to prevent direct instantiation
     private User() {}
 
+    /**
+     * Constructor to create user in test case
+     * @param name
+     * @param username
+     */
+    public User(String name, String username){
+        this.name = name;
+        this.username = username;
+    }
+
     // Get the singleton instance
     public static User getInstance() {
         if (instance == null) {
