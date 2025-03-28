@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Date;
+
 import com.google.firebase.Timestamp;
 
 /**
@@ -47,10 +47,10 @@ public class Event implements Serializable {
      * @param emojiResource The emoji resource ID for the mood.
      * @param isFollowed    Whether the event is followed by the user.
      * @param isMyPost      Whether the event was created by the user.25
-     * @param user          The username of the event creator.
+     * @param postUser          The username of the event creator.
      * @param public_status True if the post is public, otherwise private.
      */
-    public Event(String id, String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String user, Double lat, Double lng, List<Comment> comments, boolean public_status) {
+    public Event(String id, String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String postUser, Double lat, Double lng, List<Comment> comments, boolean public_status) {
         this.id = id;
         this.title = title;
         this.date = date;
@@ -59,7 +59,7 @@ public class Event implements Serializable {
         this.emojiResource = emojiResource;
         this.isFollowed = isFollowed;
         this.isMyPost = isMyPost;
-        this.postUser = user;
+        this.postUser = postUser;
         this.lat = lat;
         this.lng = lng;
         this.comments = (comments != null) ? comments : new ArrayList<>();
@@ -80,10 +80,10 @@ public class Event implements Serializable {
      * @param mood           The mood associated with the event.
      * @param moodExplanation The explanation for the mood.
      * @param situation      The social situation during the event.
-     * @param user           The username of the event creator.
+     * @param postUser           The username of the event creator.
      * @param public_status  Post status, true if post is public, false otherwise
      */
-    public Event(String id, String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String mood, String moodExplanation, String situation, String user, Double lat, Double lng, boolean public_status) {
+    public Event(String id, String title, String date, String overlayColor, String imageUrl, int emojiResource, boolean isFollowed, boolean isMyPost, String mood, String moodExplanation, String situation, String postUser, Double lat, Double lng, boolean public_status) {
         this.id = id;
         this.title = title;
         this.date = date;
@@ -95,7 +95,7 @@ public class Event implements Serializable {
         this.situation = situation;
         this.mood = mood;
         this.moodExplanation = moodExplanation;
-        this.postUser = user;
+        this.postUser = postUser;
         this.lat = lat;
         this.lng = lng;
         this.public_status = public_status;
@@ -290,16 +290,16 @@ public class Event implements Serializable {
      * Gets the username of the event creator.
      * @return The username.
      */
-    public String getUser() {
+    public String getPostUser() {
         return this.postUser;
     }
 
     /**
      * Sets the username of the event creator.
-     * @param user The username to set.
+     * @param postUser The username to set.
      */
-    public void setUser(String user) {
-        this.postUser = user;
+    public void setPostUser(String postUser) {
+        this.postUser = postUser;
     }
 
     public void setLat(Double lat) {

@@ -1,6 +1,5 @@
 package com.example.superior_intelligence;
 
-import com.example.superior_intelligence.Event;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
 
@@ -27,7 +26,7 @@ public class Mapper {
         eventData.put("mood", event.getMood());
         eventData.put("situation", event.getSituation());
         eventData.put("moodExplanation", event.getMoodExplanation());
-        eventData.put("user", event.getUser());
+        eventData.put("postUser", event.getPostUser());
         eventData.put("lat", event.getLat());
         eventData.put("lng", event.getLng());
         eventData.put("public_status", event.isPublic_status());
@@ -50,7 +49,7 @@ public class Mapper {
             String mood = document.getString("mood");
             String situation = document.getString("situation");
             String moodExplanation = document.getString("moodExplanation");
-            String postUser = document.getString("user");
+            String postUser = document.getString("postUser");
             boolean publicStat = document.getBoolean("public_status");
             String dateString = "Unknown Date";
             if (rawDate instanceof String) {

@@ -3,6 +3,7 @@ package com.example.superior_intelligence;
 import android.util.Log;
 
 import com.example.superior_intelligence.User;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -14,8 +15,15 @@ import java.util.List;
 public class Userbase {
     private final FirebaseFirestore db;
     private static Userbase instance;
+    private CollectionReference usersRef;
+
+
+    /**
+     *
+     */
     public Userbase() {
         db = FirebaseFirestore.getInstance();
+        usersRef = db.collection("users");
     }
 
     public static Userbase getInstance() {
@@ -335,5 +343,9 @@ public class Userbase {
 
     public interface UserListCallback {
         void onUserListRetrieved(List<String> users);
+    }
+
+    public CollectionReference getUsersRef() {
+        return usersRef;
     }
 }

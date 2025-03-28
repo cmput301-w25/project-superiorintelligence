@@ -40,13 +40,13 @@ public class Database {
             event.setID(java.util.UUID.randomUUID().toString());
         }
         try {
-            Map<String, Object> eventMap = Mapper.eventToMap(event);
+            //Map<String, Object> eventMap = Mapper.eventToMap(event);
 
             // Step 2: Debug log before saving to Firestore
-            Log.d("DebugFirestore", "Mapped Event before saving: " + eventMap.toString());
+            //Log.d("DebugFirestore", "Mapped Event before saving: " + eventMap.toString());
 
             // Use UUID as the document ID
-            myPostsRef.document(event.getID()).set(eventMap)
+            myPostsRef.document(event.getID()).set(Mapper.eventToMap(event))
                     .addOnSuccessListener(aVoid -> {
                         Log.d("EventRepository", "Event saved with ID: " + event.getID());
                         callback.onEventSaved(true);
@@ -91,12 +91,18 @@ public class Database {
      * based on the current logged in user.
      */
     public void loadEventsFromFirebase(@NonNull User currentUser, @NonNull OnEventsLoadedCallback callback) {
+
         myPostsRef.get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
                         List<Event> myPosts = new ArrayList<>();
                         List<Event> explore = new ArrayList<>();
                         List<Event> followed = new ArrayList<>();
+
+                        if (currentUser == null) {
+                            Log.e("Database", "Null event encountered!");
+                            return; // Exit function early
+                        }
 
                         String loggedInUsername = currentUser.getUsername();
                         List<DocumentSnapshot> documents = task.getResult().getDocuments();
@@ -113,13 +119,25 @@ public class Database {
 
                         // Loop all docs
                         for (DocumentSnapshot document : documents) {
+                            Log.d("DatabaseDebug", "Raw Firestore Document: " + document.getData()); // 🔍 Log raw data
                             Event event = Mapper.docToEvent(document);
-                            Log.d("DebugFirestore", "Loaded event user: " + event.getUser());
+
+                            // Null Check: Ensure event is not null
                             if (event == null) {
                                 Log.e("DatabaseDebug", "Failed to convert document to Event: " + document.getId());
                                 processedCount[0]++;
                                 continue;
                             }
+
+                            // Null Check: Ensure event.getUser() is not null
+                            if (event.getPostUser() == null) {
+                                Log.e("DatabaseDebug", "Event has null user! Event ID: " + document.getId());
+                                processedCount[0]++;
+                                continue;
+                            }
+
+                            Log.d("DebugFirestore", "Loaded event user: " + event.getPostUser());
+
 
                             String dtString = document.getString("date");
                             if (dtString != null) {
@@ -140,10 +158,10 @@ public class Database {
                             }
 
                             Log.d("DatabaseDebug", "loggedInUsername: " + loggedInUsername);
-                            Log.d("DatabaseDebug", "event.getUser(): " + event.getUser());
-                            Log.d("DatabaseDebug", "Event Title: " + event.getTitle() + " | User: " + event.getUser());
+                            Log.d("DatabaseDebug", "event.getUser(): " + event.getPostUser());
+                            Log.d("DatabaseDebug", "Event Title: " + event.getTitle() + " | User: " + event.getPostUser());
 
-                            if (loggedInUsername != null && loggedInUsername.equals(event.getUser())) {
+                            if (loggedInUsername != null && loggedInUsername.equals(event.getPostUser())) {
                                 myPosts.add(event);
                                 processedCount[0]++;
                                 if (processedCount[0] == totalDocuments) {
@@ -155,7 +173,7 @@ public class Database {
                                     callback.onEventsLoaded(myPosts, explore, followed);
                                 }
                             } else {
-                                Userbase.getInstance().checkFollowStatus(loggedInUsername, event.getUser(), isFollowing -> {
+                                Userbase.getInstance().checkFollowStatus(loggedInUsername, event.getPostUser(), isFollowing -> {
                                     // if event is private, don't add to any tab
                                     if (event.isPublic_status()) {
                                         if (isFollowing) {
