@@ -105,6 +105,7 @@ public class us050401 {
     public void setUp() throws InterruptedException {
 
         seedMyPostDB();
+        seedUsersDB();
         logIn();
 
     }
@@ -133,8 +134,32 @@ public class us050401 {
         loggedInUserName = "loggedInUser";
         User loggedInUser = new User("Test user", loggedInUserName);
         User followedUser = new User("Test followed user", "followedUser");
-        CountDownLatch latch = new CountDownLatch(1); // Synchronization mechanism
+        //CountDownLatch latch = new CountDownLatch(1); // Synchronization mechanism
 
+        udb.createUser(loggedInUser.getName(), loggedInUserName, success -> {
+            if (success){
+                Log.d("CreateUserDebug", "LoggedIn user is successfully created");
+            } else {
+                Log.e("CreateUserDebug", "Failed to create LoggedIn user");
+            }
+        });
+        udb.createUser(followedUser.getName(), followedUser.getUsername(), success -> {
+            if (success) {
+                Log.d("CreateUserDebug", "Followed user is successfully created");
+            } else {
+                Log.e("CreateUserDebug", "Failed to create followed user");
+            }
+        });
+
+        udb.followUserManually(loggedInUserName, followedUser.getUsername(), success -> {
+            if (success) {
+                Log.d("FollowDebug", "LoggedIn user is now following followed user");
+            } else {
+                Log.e("FollowDebug", "Failed to manually follow");
+            }
+        });
+        Thread.sleep(12000);
+        /*
         usersRef.document(loggedInUserName).set(loggedInUser)
                 .addOnSuccessListener(aVoid -> {
                     Log.d("Firestore", "User successfully added");
@@ -154,8 +179,9 @@ public class us050401 {
                     Log.e("Firestore", "Failed to add user", e);
                     latch.countDown(); // Release the lock even on failure
                 });
+         */
 
-        latch.await();
+        //latch.await();
 
     }
     /**

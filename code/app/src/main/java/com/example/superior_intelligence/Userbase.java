@@ -75,7 +75,7 @@ public class Userbase {
         // In this example, we use a simple User (or HelperClass) object.
         // You can also rename HelperClass to something like SignUpUser if you prefer.
         HelperClass userData = new HelperClass(name, username);
-        db.collection("users")
+        usersRef
                 .document(username)
                 .set(userData)
                 .addOnSuccessListener(aVoid -> {
@@ -348,4 +348,32 @@ public class Userbase {
     public CollectionReference getUsersRef() {
         return usersRef;
     }
+
+    public void followUserManually(String currentUser, String targetUser, FollowActionCallback callback) {
+        Log.d("FollowDebug", "Manually adding " + currentUser + " to follow " + targetUser);
+
+        // Add targetUser to currentUser's "following" list
+        db.collection("users").document(currentUser)
+                .update("following", FieldValue.arrayUnion(targetUser))
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("FollowDebug", currentUser + " is now following " + targetUser);
+
+                    // Add currentUser to targetUser's "followers" list
+                    db.collection("users").document(targetUser)
+                            .update("followers", FieldValue.arrayUnion(currentUser))
+                            .addOnSuccessListener(aVoid2 -> {
+                                Log.d("FollowDebug", targetUser + " now has " + currentUser + " as a follower");
+                                callback.onFollowAction(true);
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e("FollowDebug", "Failed to update followers for " + targetUser, e);
+                                callback.onFollowAction(false);
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("FollowDebug", "Failed to update following for " + currentUser, e);
+                    callback.onFollowAction(false);
+                });
+    }
 }
+
