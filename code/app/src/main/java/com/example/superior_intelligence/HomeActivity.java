@@ -1,52 +1,50 @@
 package com.example.superior_intelligence;
 
-import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.net.Uri;
+import android.health.connect.LocalTimeRangeFilter;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupMenu;
+import android.widget.PopupWindow;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Pattern;
 
-public class HomeActivity extends AppCompatActivity {
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.type.DateTime;
 
-    private static final String TAG = "HomeActivity";
+public class HomeActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private EventAdapter adapter;
@@ -58,30 +56,30 @@ public class HomeActivity extends AppCompatActivity {
     private List<Event> myPostsEvents = new ArrayList<>();
 
     private TextView tabExplore, tabFollowed, tabMyPosts, tabMap;
-    private ImageButton filterButton;
-
-    // We'll display the user’s profile photo in this ImageView
-    private CardView profileImageCard;
-    private SharedPreferences prefs;
-    private FirebaseFirestore db;
 
     private String currentTextFilter = null;
     private String currentTab = null;
+    private ImageButton filterButton;
 
     private final ActivityResultLauncher<Intent> viewDetailsLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                     Intent data = result.getData();
+
                     String incomingFilter = data.getStringExtra("textFilter");
                     if (incomingFilter != null) {
                         currentTextFilter = incomingFilter;
                     }
+
                     String selectedTab = data.getStringExtra("selectedTab");
                     if (selectedTab != null) {
-                        data.putExtra("selectedTab", selectedTab);
+                        data.putExtra("selectedTab", selectedTab); // persist
                     }
-                    setIntent(data);
-                    loadAllEvents(this::handleIncomingEvent);
+
+                    setIntent(data); // Save into activity
+                    loadAllEvents(() -> {
+                        handleIncomingEvent(); // Apply after loading finishes
+                    });
                 }
             });
 
@@ -97,7 +95,7 @@ public class HomeActivity extends AppCompatActivity {
             Intent loginIntent = new Intent(this, LoginPageActivity.class);
             loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(loginIntent);
-            finish();
+            finish(); // Stop execution of HomeActivity if user is not logged in
         } else {
             Log.d("AuthDebug", "User logged in: " + currentUser.getEmail());
         }
@@ -108,11 +106,8 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_page);
 
-        db = FirebaseFirestore.getInstance();
-        prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
         database = new Database();
 
-        // RecyclerView + Adapter
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new EventAdapter(this, event -> {
@@ -121,83 +116,85 @@ public class HomeActivity extends AppCompatActivity {
             intent.putExtra("textFilter", currentTextFilter);
             viewDetailsLauncher.launch(intent);
         });
+
         recyclerView.setAdapter(adapter);
 
-        // Category Tabs
+        // Tab UI elements
         tabExplore = findViewById(R.id.tab_explore);
         tabFollowed = findViewById(R.id.tab_followed);
         tabMyPosts = findViewById(R.id.tab_myposts);
         tabMap = findViewById(R.id.tab_map);
-
-        // Filter Button + Spinner
         filterButton = findViewById(R.id.menu_button);
-        Spinner filterSpinner = findViewById(R.id.filter_spinner);
+        //Spinner filterSpinner = findViewById(R.id.filter_spinner);
 
-        ArrayAdapter<CharSequence> filterAdapter = ArrayAdapter.createFromResource(
-                this,
-                R.array.filter_options,
-                android.R.layout.simple_spinner_item
-        );
-        filterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        filterSpinner.setAdapter(filterAdapter);
 
+        // set up popupMenu for both followed and myposts tab
         filterButton.setOnClickListener(v -> {
-            if (filterSpinner.getVisibility() == View.GONE) {
-                filterSpinner.setSelection(0, false);
-                filterSpinner.setVisibility(View.VISIBLE);
-                filterSpinner.performClick();
+            View popupView = getLayoutInflater().inflate(R.layout.filter_popup_menu, null);
+            PopupWindow popupWindow = new PopupWindow(popupView,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT, true);
+
+            popupWindow.showAsDropDown(filterButton);
+
+            Button recentWeekButton = popupView.findViewById(R.id.recent_week_option);
+            Button emotionalStateButton = popupView.findViewById(R.id.emotional_state_option);
+            Button filterTextButton = popupView.findViewById(R.id.text_filter_option);
+            Button clearFilter = popupView.findViewById(R.id.clear_filter_option);
+            Button threeRecentPost = popupView.findViewById(R.id.three_recent_option);
+
+            if ("myposts".equals(currentTab)) {
+                // Show multiple options
+                threeRecentPost.setVisibility(View.GONE);
             } else {
-                filterSpinner.setVisibility(View.GONE);
+                threeRecentPost.setOnClickListener(view -> {
+                    filterRecentThree();
+                });
             }
-        });
 
-        filterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selectedFilter = parent.getItemAtPosition(position).toString();
-                if (position == 0) return; // Skip dummy item
-                filterSpinner.setSelection(0, false);
-                filterSpinner.setVisibility(View.GONE);
-
-                switch (selectedFilter) {
-                    case "Filter by text":
-                        showTextFilterDialog();
-                        break;
-                    case "Filter by emotional state":
-                        showEmotionFilterDialog();
-                        break;
-                    case "Show posts from last 7 days":
-                        if ("myposts".equals(currentTab)) {
-                            try {
-                                recentWeek(myPostsEvents);
-                            } catch (ParseException e) {
-                                throw new RuntimeException(e);
-                            }
-                        } else if ("followed".equals(currentTab)) {
-                            try {
-                                recentWeek(followedEvents);
-                            } catch (ParseException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-                        break;
-                    case "Clear filter":
-                        currentTextFilter = null;
-                        if ("myposts".equals(currentTab)) {
-                            adapter.setEvents(myPostsEvents);
-                        } else if ("followed".equals(currentTab)) {
-                            adapter.setEvents(followedEvents);
-                        } else if ("explore".equals(currentTab)) {
-                            adapter.setEvents(exploreEvents);
-                        }
-                        break;
+            recentWeekButton.setOnClickListener(view -> {
+                if ("followed".equals(currentTab)){
+                    try {
+                        recentWeek(followedEvents);
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    try {
+                        recentWeek(myPostsEvents);
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) { }
+                popupWindow.dismiss();
+            });
+
+            emotionalStateButton.setOnClickListener(view -> {
+                showEmotionFilterDialog();
+                popupWindow.dismiss();
+            });
+
+            filterTextButton.setOnClickListener(view -> {
+                showFilterTextDialog();
+                popupWindow.dismiss();
+            });
+
+            clearFilter.setOnClickListener(view -> {
+                currentTextFilter = null;
+                if ("myposts".equals(currentTab)) {
+                    adapter.setEvents(myPostsEvents);
+                } else if ("followed".equals(currentTab)) {
+                    adapter.setEvents(followedEvents);
+                } else if ("explore".equals(currentTab)) {
+                    adapter.setEvents(exploreEvents);
+                }
+                popupWindow.dismiss();
+            });
+
+
         });
 
-        // Tab listeners
+        // Set tab listeners (do this ONCE, not inside switchTab!)
         tabExplore.setOnClickListener(v -> switchTab(exploreEvents, tabExplore));
         tabFollowed.setOnClickListener(v -> switchTab(followedEvents, tabFollowed));
         tabMyPosts.setOnClickListener(v -> switchTab(myPostsEvents, tabMyPosts));
@@ -206,15 +203,13 @@ public class HomeActivity extends AppCompatActivity {
             startActivity(new Intent(HomeActivity.this, MoodMap.class));
         });
 
-        // Floating Add Button
+        // Add new event
         ImageButton addButton = findViewById(R.id.addButton);
         addButton.setOnClickListener(v -> startActivity(new Intent(HomeActivity.this, MoodCreateAndEditActivity.class)));
 
-        // Profile Icon + Notification
-        profileImageCard = findViewById(R.id.profile_image);
-        profileImageCard.setOnClickListener(v -> {
-            startActivity(new Intent(HomeActivity.this, ProfileActivity.class));
-        });
+        // Profile and notification buttons
+        CardView profileImage = findViewById(R.id.profile_image);
+        profileImage.setOnClickListener(v -> startActivity(new Intent(HomeActivity.this, ProfileActivity.class)));
 
         ImageButton notificationButton = findViewById(R.id.notification_button);
         ActivityResultLauncher<Intent> notificationLauncher = registerForActivityResult(
@@ -222,11 +217,12 @@ public class HomeActivity extends AppCompatActivity {
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         Intent data = result.getData();
-                        setIntent(data);
-                        handleIncomingEvent();
+                        setIntent(data); // Retain selectedTab and textFilter for handleIncomingEvent()
+                        handleIncomingEvent(); // Reapply tab and filter
                     }
                 }
         );
+
         notificationButton.setOnClickListener(view -> {
             Intent intent = new Intent(HomeActivity.this, NotificationActivity.class);
             intent.putExtra("selectedTab", currentTab);
@@ -234,85 +230,24 @@ public class HomeActivity extends AppCompatActivity {
             notificationLauncher.launch(intent);
         });
 
-        // Load events
+
+        // Load events and handle any incoming event
         loadAllEvents(this::handleIncomingEvent);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // Reload events in case something changed
         loadAllEvents(this::handleIncomingEvent);
-
-        // Also load or refresh the user’s profile photo
-        loadProfilePhotoForHome();
     }
+
 
     /**
-     * Attempt to load the user's profile photo from SharedPreferences.
-     * If none is found, load from Firestore's "profile_photo" collection.
+     * Handle incoming event to add or update.
      */
-    private void loadProfilePhotoForHome() {
-        User currentUser = User.getInstance();
-        if (currentUser == null) {
-            Log.e(TAG, "No current user; cannot load profile photo.");
-            return;
-        }
-        String username = currentUser.getUsername();
-        if (username == null || username.isEmpty()) {
-            Log.e(TAG, "Username is empty; cannot load profile photo.");
-            return;
-        }
-
-        // Check local
-        SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-        String encodedPhoto = prefs.getString("photo", null);
-        if (encodedPhoto != null) {
-            loadProfilePhotoFromBase64(encodedPhoto);
-        } else {
-            // Otherwise fetch from Firestore
-            loadProfilePhotoFromFirestore(username);
-        }
-    }
-
-    /**
-     * Load the Base64-encoded photo into the top-right icon.
-     */
-    private void loadProfilePhotoFromBase64(String encodedImage) {
-        ImageView profilePng = findViewById(R.id.profile_image_png);
-        try {
-            byte[] imageBytes = Base64.decode(encodedImage, Base64.DEFAULT);
-            Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-            profilePng.setImageBitmap(bitmap);
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to decode profile image for HomeActivity.", e);
-        }
-    }
-
-    /**
-     * Load the user's profile photo from Firestore "profile_photo/{username}" doc if not in SharedPreferences.
-     */
-    private void loadProfilePhotoFromFirestore(String username) {
-        db.collection("profile_photo").document(username)
-                .get()
-                .addOnSuccessListener(doc -> {
-                    if (doc.exists()) {
-                        String encodedPhoto = doc.getString("photo");
-                        if (encodedPhoto != null && !encodedPhoto.isEmpty()) {
-                            prefs.edit().putString("photo", encodedPhoto).apply();
-                            loadProfilePhotoFromBase64(encodedPhoto);
-                        }
-                    }
-                })
-                .addOnFailureListener(e -> Log.e(TAG, "Failed to load profile photo from Firestore in HomeActivity", e));
-    }
-
-    // -----------------------------------------
-    // Existing methods from your HomeActivity
-    // -----------------------------------------
-
     private void handleIncomingEvent() {
         Intent intent = getIntent();
+
         Event newEvent = (Event) intent.getSerializableExtra("newEvent");
         if (newEvent != null && newEvent.isMyPost()) {
             boolean found = false;
@@ -338,7 +273,7 @@ public class HomeActivity extends AppCompatActivity {
         } else if ("followed".equals(selectedTab)) {
             switchTab(followedEvents, tabFollowed);
         } else {
-            // default to EXPLORE
+            // DEFAULT TO EXPLORE TAB IF NOTHING SELECTED
             switchTab(exploreEvents, tabExplore);
         }
 
@@ -348,22 +283,30 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Load events from Firestore and update UI.
+     * And edited to force sort
+     */
     private void loadAllEvents(Runnable afterLoad) {
         User currentUser = User.getInstance();
+
         if (currentUser == null) {
             Log.e("UserDebug", "User instance is NULL! Skipping event loading.");
-            return;
+            return; // Prevent crash
         }
+
         database.loadEventsFromFirebase(currentUser, (myPosts, explore, followed) -> {
             if (myPosts != null && explore != null && followed != null) {
                 myPostsEvents.clear();
                 exploreEvents.clear();
                 followedEvents.clear();
 
+                // 2. Sort each list by timestamp descending
                 myPosts.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
                 explore.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
                 followed.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
 
+                // 3. Add them to your local lists
                 myPostsEvents.addAll(myPosts);
                 exploreEvents.addAll(explore);
                 followedEvents.addAll(followed);
@@ -371,7 +314,7 @@ public class HomeActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
 
                 if (afterLoad != null) {
-                    afterLoad.run();
+                    afterLoad.run(); // Run your logic after everything is loaded
                 }
             } else {
                 Log.w("HomeActivity", "Failed to load events from Firestore");
@@ -379,24 +322,31 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Switch tabs and update UI.
+     */
     private void switchTab(List<Event> targetList, TextView selectedTabView) {
         currentTab = selectedTabView.getText().toString().toLowerCase();
 
+        // Reset styles for all tabs
         tabExplore.setTypeface(null, android.graphics.Typeface.NORMAL);
         tabFollowed.setTypeface(null, android.graphics.Typeface.NORMAL);
         tabMyPosts.setTypeface(null, android.graphics.Typeface.NORMAL);
         tabMap.setTypeface(null, android.graphics.Typeface.NORMAL);
 
+        // Highlight selected tab
         selectedTabView.setTypeface(null, android.graphics.Typeface.BOLD);
 
+        // Enable/disable filter button
         if ("explore".equals(currentTab)) {
             filterButton.setEnabled(false);
-            filterButton.setAlpha(0.3f);
+            filterButton.setAlpha(0.3f); // Visually indicate it's disabled
         } else {
             filterButton.setEnabled(true);
-            filterButton.setAlpha(1f);
+            filterButton.setAlpha(1f); // Full opacity
         }
 
+        // Apply filter if applicable
         if (("myposts".equals(currentTab) || "followed".equals(currentTab)) &&
                 currentTextFilter != null && !currentTextFilter.isEmpty()) {
             filterEventsByReason(currentTextFilter);
@@ -405,46 +355,7 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    private void filterEventsByReason(String keyword) {
-        if (keyword.isEmpty()) {
-            if ("myposts".equals(currentTab)) {
-                switchTab(myPostsEvents, tabMyPosts);
-            } else if ("followed".equals(currentTab)) {
-                switchTab(followedEvents, tabFollowed);
-            }
-            return;
-        }
-
-        List<Event> sourceList = null;
-        if ("myposts".equals(currentTab)) {
-            sourceList = myPostsEvents;
-        } else if ("followed".equals(currentTab)) {
-            sourceList = followedEvents;
-        }
-        if (sourceList == null) return;
-
-        String lowerKeyword = keyword.toLowerCase();
-        List<Event> exactMatches = new ArrayList<>();
-        List<Event> partialMatches = new ArrayList<>();
-
-        for (Event e : sourceList) {
-            String reason = e.getMoodExplanation() != null ? e.getMoodExplanation().toLowerCase() : "";
-            if (reason.matches(".*\\b" + Pattern.quote(lowerKeyword) + "\\b.*")) {
-                exactMatches.add(e);
-            } else if (reason.contains(lowerKeyword)) {
-                partialMatches.add(e);
-            }
-        }
-
-        exactMatches.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
-        partialMatches.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
-
-        List<Event> filteredList = new ArrayList<>(exactMatches);
-        filteredList.addAll(partialMatches);
-        adapter.setEvents(filteredList);
-    }
-
-    private void showTextFilterDialog() {
+    private void showFilterTextDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this, R.style.DialogTheme);
         builder.setTitle("Enter search phrase");
 
@@ -462,14 +373,137 @@ public class HomeActivity extends AppCompatActivity {
         dialog.show();
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.BLACK);
+
+    }
+    private void filterEventsByReason(String keyword) {
+        if (keyword.isEmpty()) {
+            if ("myposts".equals(currentTab)) {
+                switchTab(myPostsEvents, tabMyPosts);
+            } else if ("followed".equals(currentTab)) {
+                switchTab(followedEvents, tabFollowed);
+            }
+            return;
+        }
+
+        List<Event> sourceList = null;
+        if ("myposts".equals(currentTab)) {
+            sourceList = myPostsEvents;
+        } else if ("followed".equals(currentTab)) {
+            sourceList = followedEvents;
+        }
+
+        if (sourceList == null) return;
+
+        String lowerKeyword = keyword.toLowerCase();
+        List<Event> exactMatches = new ArrayList<>();
+        List<Event> partialMatches = new ArrayList<>();
+
+        for (Event e : sourceList) {
+            String reason = e.getMoodExplanation() != null ? e.getMoodExplanation().toLowerCase() : "";
+
+            if (reason.matches(".*\\b" + Pattern.quote(lowerKeyword) + "\\b.*")) {
+                exactMatches.add(e);
+            } else if (reason.contains(lowerKeyword)) {
+                partialMatches.add(e);
+            }
+        }
+
+
+        // Sort both lists by date descending
+        Comparator<Event> dateDescComparator = (e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp());
+
+        exactMatches.sort(dateDescComparator);
+        partialMatches.sort(dateDescComparator);
+
+        List<Event> filteredList = new ArrayList<>(exactMatches);
+        filteredList.addAll(partialMatches);
+
+        adapter.setEvents(filteredList);
     }
 
+    /**
+     * Saves a new event to Firestore under the "MyPosts" collection.
+     * @param event event to be saved to the firebase
+     */
+    private void saveEventToFirebase(Event event) {
+        database.saveEventToFirebase(event, success -> {
+            if (success) {
+                Log.d("HomeActivity", "Event saved successfully");
+            } else {
+                Log.e("HomeActivity", "Error saving event");
+            }
+        });
+    }
+
+    /**
+     * Update event in Firestore using Database.java
+     * @param event event to be updated on the firebase
+     */
+    private void updateEventInFirebase(Event event) {
+        database.updateEvent(event, success -> {
+            if (success) {
+                Log.d("HomeActivity", "Event updated successfully");
+                Toast.makeText(this, "Event updated successfully!", Toast.LENGTH_SHORT).show();
+            } else {
+                Log.e("HomeActivity", "Error updating event");
+                Toast.makeText(this, "Failed to update event!", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /**
+     * Get recent week of mood for either my mood events or the people that the user followed's posts
+     * set the adapter to the new recent week mood list
+     * @param posts  list of posts (myPosts/followedPosts) to find recent week posts
+     * @return recentWeekEvents list of posts from last 7 days sorted desc
+     */
+    private void recentWeek(List<Event> posts) throws ParseException {
+        /*Stackoverflow:
+        https://stackoverflow.com/questions/16982056/how-to-get-the-date-7-days-earlier-date-from-current-date-in-java
+         */
+
+        List<Event> recentWeekEvents = new ArrayList<>();
+
+        // get Calendar instance
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        Date currentDate = cal.getTime();
+        // substract 7 days
+        // If we give 7 there it will give 8 days back
+        cal.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH)-6);
+        // convert to date
+        Date recentWeekDate = cal.getTime();
+
+        for (Event e: posts) {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMM yyyy, HH:mm");
+            Date eventDate = simpleDateFormat.parse(e.getDate());
+
+            // if event date is not before the recent week and after current date
+            if (!eventDate.before(recentWeekDate) && !eventDate.after(currentDate)) {
+                recentWeekEvents.add(e);
+            }
+        }
+
+        // Sort both lists by date descending
+        Comparator<Event> dateDescComparator = (e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp());
+        recentWeekEvents.sort(dateDescComparator);
+
+        adapter.setEvents(recentWeekEvents);
+    }
+
+    // --- New Methods for Emotional State Filtering ---
+
+    /**
+     * Displays a multi-choice dialog for filtering posts by emotional state.
+     */
     private void showEmotionFilterDialog() {
+        // Retrieve the emotional state options from strings.xml
         final String[] moodOptions = getResources().getStringArray(R.array.emotional_state_list);
         final boolean[] selectedMoods = new boolean[moodOptions.length];
 
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.DialogTheme);
-        builder.setTitle(getString(R.string.select_emotion_prompt));
+        builder.setTitle(getString(R.string.select_emotion_prompt)); // uses "Select Emotion Prompt" from strings.xml
 
         builder.setMultiChoiceItems(moodOptions, selectedMoods, (dialog, which, isChecked) -> {
             selectedMoods[which] = isChecked;
@@ -484,7 +518,7 @@ public class HomeActivity extends AppCompatActivity {
             }
             if ("myposts".equals(currentTab)) {
                 filterPostsByMood(chosenMoods, myPostsEvents);
-            } else if ("followed".equals(currentTab)) {
+            } else if ("followed".equals(currentTab)){
                 filterPostsByMood(chosenMoods, followedEvents);
             }
         });
@@ -492,56 +526,60 @@ public class HomeActivity extends AppCompatActivity {
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
         AlertDialog dialog = builder.create();
         dialog.show();
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
-        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.BLACK);
+        dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK);
+        dialog.getButton(android.app.AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.BLACK);
+
     }
 
+    /**
+     * Filters the posts list based on the selected emotional states.
+     * @param chosenMoods List of selected moods.
+     * @param allPosts list of all posts in the current tab
+     */
     private void filterPostsByMood(List<String> chosenMoods, List<Event> allPosts) {
         if (chosenMoods.isEmpty()) {
             if (allPosts == myPostsEvents) {
                 switchTab(myPostsEvents, tabMyPosts);
-            } else if (allPosts == followedEvents) {
+            } else if (allPosts == followedEvents){
                 switchTab(followedEvents, tabFollowed);
             }
             return;
         }
+
         List<Event> filteredList = new ArrayList<>();
         for (Event event : allPosts) {
+            // Ensure the event's mood matches one of the chosen moods
             if (chosenMoods.contains(event.getMood())) {
                 filteredList.add(event);
             }
         }
-        filteredList.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
-        adapter.setEvents(filteredList);
 
-        if (allPosts == myPostsEvents) {
+        // Sort filtered events by timestamp descending
+        filteredList.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
+
+        adapter.setEvents(filteredList);
+        if (allPosts == myPostsEvents){
             switchTab(filteredList, tabMyPosts);
         } else if (allPosts == followedEvents) {
             switchTab(filteredList, tabFollowed);
         }
     }
 
-    private void recentWeek(List<Event> posts) throws ParseException {
-        List<Event> recentWeekEvents = new ArrayList<>();
-
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date());
-        Date currentDate = cal.getTime();
-        cal.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH)-6);
-        Date recentWeekDate = cal.getTime();
-
-        for (Event e : posts) {
-            SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.ENGLISH);
-            Date eventDate = sdf.parse(e.getDate());
-            if (!eventDate.before(recentWeekDate) && !eventDate.after(currentDate)) {
-                recentWeekEvents.add(e);
-            }
+    /**
+     * filter the followedEvents to recent 3 and update adapter
+     */
+    private void filterRecentThree(){
+        if (followedEvents.isEmpty()){
+            Toast.makeText(this, "No posts to filter", Toast.LENGTH_SHORT).show();
+            return;
         }
-        recentWeekEvents.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
-        adapter.setEvents(recentWeekEvents);
+        List<Event> followedPosts = followedEvents;
+        List<Event> recentThree = new ArrayList<Event>();
+        for (int i = 0; i < 3; i++){
+            recentThree.add(followedPosts.get(i));
+        }
+        adapter.setEvents(recentThree);
     }
 
-//    private void filterPostsByMood(List<String> chosenMoods, List<Event> allPosts) {
-//        // (already implemented above; ensure no duplication)
-//    }
+
 }
