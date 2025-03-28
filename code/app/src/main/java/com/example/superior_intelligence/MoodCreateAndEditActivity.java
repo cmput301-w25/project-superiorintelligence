@@ -177,15 +177,17 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
             // Set mood spinner
             if (currentEvent.getMood() != null) {
                 ArrayAdapter<String> moodAdapter = (ArrayAdapter<String>) emotionSpinner.getAdapter();
-                int moodPosition = moodAdapter.getPosition(currentEvent.getMood());
-                if (moodPosition >= 0) emotionSpinner.setSelection(moodPosition);
+                selectedMood.setText(currentEvent.getMood());
+                // int moodPosition = moodAdapter.getPosition(currentEvent.getMood());
+                // if (moodPosition >= 0) emotionSpinner.setSelection(moodPosition);
             }
 
             // Set situation spinner
             if (currentEvent.getSituation() != null) {
                 ArrayAdapter<String> situationAdapter = (ArrayAdapter<String>) situationSpinner.getAdapter();
-                int situationPosition = situationAdapter.getPosition(currentEvent.getSituation());
-                if (situationPosition >= 0) situationSpinner.setSelection(situationPosition);
+                selectedSituation.setText(currentEvent.getSituation());
+                // int situationPosition = situationAdapter.getPosition(currentEvent.getSituation());
+                // if (situationPosition >= 0) situationSpinner.setSelection(situationPosition);
             }
         }
 
