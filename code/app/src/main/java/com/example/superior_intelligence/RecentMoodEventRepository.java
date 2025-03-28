@@ -58,7 +58,7 @@ public class RecentMoodEventRepository {
                         if (isMyPost != null) {event.setMyPost(isMyPost);}
                         event.setMoodExplanation(doc.getString("moodExplanation"));
                         event.setSituation(doc.getString("situation"));
-                        event.setUser(doc.getString("user"));
+                        event.setPostUser(doc.getString("user"));
                         Double lat = doc.getDouble("lat");
 
                         Double lng = doc.getDouble("lng");

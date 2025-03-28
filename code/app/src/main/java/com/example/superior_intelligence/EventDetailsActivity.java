@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.View;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,7 +25,6 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -69,9 +67,9 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
         }
 
         Log.d("EventDetailsActivity", "Event loaded: " + currentEvent.getTitle());
-        Log.d("EventDetailsActivity", "Event posted by: " + currentEvent.getUser());
+        Log.d("EventDetailsActivity", "Event posted by: " + currentEvent.getPostUser());
 
-        isMyPost = currentUser != null && currentUser.equals(currentEvent.getUser());
+        isMyPost = currentUser != null && currentUser.equals(currentEvent.getPostUser());
 
         // Load appropriate layout
         setContentView(isMyPost ? R.layout.event_details : R.layout.others_event_details);
@@ -204,7 +202,7 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
             eventSituation.setText("Social Situation: " + (situation != null ? situation : "No situation provided"));
         }
         eventDate.setText("Date: " + (currentEvent.getDate() != null ? currentEvent.getDate() : "Unknown Date"));
-        eventUser.setText("Posted by: " + (currentEvent.getUser() != null ? currentEvent.getUser() : "Anonymous"));
+        eventUser.setText("Posted by: " + (currentEvent.getPostUser() != null ? currentEvent.getPostUser() : "Anonymous"));
 
         if (isMyPost) {
             // Set public status emoticon
@@ -215,7 +213,7 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
             }
         }
 
-        Log.d("EventDetails", "Loading event by user: " + currentEvent.getUser());
+        Log.d("EventDetails", "Loading event by user: " + currentEvent.getPostUser());
         // Handle image loading
         String imageDocID = currentEvent.getImageUrl();
         if (imageDocID != null && !imageDocID.isEmpty()) {
@@ -291,11 +289,11 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
             });
 
             profileCard.setOnClickListener(view -> {
-                String eventUsername = currentEvent.getUser();
+                String eventUsername = currentEvent.getPostUser();
                 Log.d("EventDetailsActivity", "Attempting to open profile for user: " + eventUsername);
-                if (currentEvent.getUser() != null) {
+                if (currentEvent.getPostUser() != null) {
                     Intent profileIntent = new Intent(EventDetailsActivity.this, OtherUserProfileActivity.class);
-                    profileIntent.putExtra("username", currentEvent.getUser());
+                    profileIntent.putExtra("username", currentEvent.getPostUser());
                     startActivity(profileIntent);
                 }
                 else {

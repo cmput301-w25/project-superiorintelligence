@@ -95,7 +95,7 @@ public class us0507 {
         testEvent.setMood("Happiness");
         testEvent.setMoodExplanation("This is a test event from another user");
         testEvent.setSituation("Alone");
-        testEvent.setUser("otherUser");
+        testEvent.setPostUser("otherUser");
         testEvent.setLat(0.0);
         testEvent.setLng(0.0);
         testEvent.setPublic_status(true);
