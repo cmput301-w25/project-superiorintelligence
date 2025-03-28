@@ -1,4 +1,4 @@
-package com.example.superior_intelligence.UserStoryTest;
+package com.example.superior_intelligence;
 /**
  * Test filtering recent week for my posts:
  */
@@ -8,25 +8,31 @@ import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
 import static androidx.test.espresso.action.ViewActions.typeText;
 import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
+import static androidx.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 import static org.junit.Assert.assertTrue;
+import static java.util.Calendar.SECOND;
+import static java.util.regex.Pattern.matches;
 
+import android.graphics.Movie;
 import android.util.Log;
+import android.widget.DatePicker;
 
+import androidx.test.espresso.Espresso;
+import androidx.test.espresso.ViewAssertion;
 import androidx.test.espresso.assertion.ViewAssertions;
-import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
-import com.example.superior_intelligence.Database;
-import com.example.superior_intelligence.Event;
-import com.example.superior_intelligence.MainActivity;
-import com.example.superior_intelligence.R;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
+import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -39,15 +45,21 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(JUnit4.class)
 public class us040201 {
 
-    /**
-     * Rule to start test from HomeActivity class
-     */
     // Start at HomeActivity
     @Rule
     public ActivityScenarioRule<MainActivity> scenario = new
@@ -62,8 +74,8 @@ public class us040201 {
     @Test
     public void filterRecentWeekInMyPostsShouldNotDisplayEventOutsideRecentWeek() throws InterruptedException {
         //Ensure that test is on myPosts tab
-        onView(ViewMatchers.withId(R.id.tab_myposts)).perform(click());
-
+        onView(withId(R.id.tab_myposts)).perform(click());
+        Thread.sleep(5000);
         //Make sure added events are displayed
         onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
         onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
@@ -146,7 +158,13 @@ public class us040201 {
         CountDownLatch latch = new CountDownLatch(1); // Synchronization mechanism
 
         Event event = new Event("TestBeforeRecWk", "Test last year", "12 MAR 2024, 12:04", "#CC0099", "", 0, false, true, "Surprise", "", "", "testUser3", null, null, true);
-        Event event2 = new Event("TestDuringRecWk", "Test during recent week", "27 MAR 2025, 12:04", "#FF6347", "", 0, false, true, "Anger", "", "", "testUser3", null, null, true);
+        Event event2 = new Event("TestDuringRecWk", "Test during recent week", null, "#FF6347", "", 0, false, true, "Anger", "", "", "testUser3", null, null, true);
+
+        // current date to ensure test will work regardless of the time
+        String eventDate = new SimpleDateFormat("dd MMM yyyy, HH:mm",
+                Locale.getDefault()).format(new Date());
+        event2.setDate(eventDate);
+
         postsRef.document(event.getID()).set(event)
                 .addOnSuccessListener(aVoid -> {
                     Log.d("Firestore", "Event successfully added");
@@ -196,9 +214,12 @@ public class us040201 {
         }
     }
 
+    /**
+     * Set up emulators before the test class is run
+     */
     // only run once
     @BeforeClass
-    public static void setup(){
+    public static void setupEmulator(){
         // Specific address for emulated device to access our localHost
         String androidLocalhost = "10.0.2.2";
 

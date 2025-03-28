@@ -44,8 +44,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.type.DateTime;
 
+/**
+ * Represents home page where user can switched between
+ * explore/followed/myposts/mood map tabs
+ */
 public class HomeActivity extends AppCompatActivity {
 
+    // RecyclerView for all events and events storage
     private RecyclerView recyclerView;
     private EventAdapter adapter;
     private Database database;
@@ -55,10 +60,13 @@ public class HomeActivity extends AppCompatActivity {
     private List<Event> followedEvents = new ArrayList<>();
     private List<Event> myPostsEvents = new ArrayList<>();
 
+    // Tab textview
     private TextView tabExplore, tabFollowed, tabMyPosts, tabMap;
 
+    // current status
     private String currentTextFilter = null;
     private String currentTab = null;
+
     private ImageButton filterButton;
 
     private final ActivityResultLauncher<Intent> viewDetailsLauncher =
@@ -83,6 +91,9 @@ public class HomeActivity extends AppCompatActivity {
                 }
             });
 
+    /**
+     * Initialize database and get information of current logged in user
+     */
     @Override
     protected void onStart() {
         super.onStart();
@@ -101,6 +112,11 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Main function of HomeActivity.java
+     * Set recyclerView, handle switching tab, filter button/menu
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,6 +124,7 @@ public class HomeActivity extends AppCompatActivity {
 
         database = new Database();
 
+        // connect recycler view
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new EventAdapter(this, event -> {
@@ -125,8 +142,6 @@ public class HomeActivity extends AppCompatActivity {
         tabMyPosts = findViewById(R.id.tab_myposts);
         tabMap = findViewById(R.id.tab_map);
         filterButton = findViewById(R.id.menu_button);
-        //Spinner filterSpinner = findViewById(R.id.filter_spinner);
-
 
         // set up popupMenu for both followed and myposts tab
         filterButton.setOnClickListener(v -> {
@@ -137,12 +152,14 @@ public class HomeActivity extends AppCompatActivity {
 
             popupWindow.showAsDropDown(filterButton);
 
+            // connect filter option buttons to xml
             Button recentWeekButton = popupView.findViewById(R.id.recent_week_option);
             Button emotionalStateButton = popupView.findViewById(R.id.emotional_state_option);
             Button filterTextButton = popupView.findViewById(R.id.text_filter_option);
             Button clearFilter = popupView.findViewById(R.id.clear_filter_option);
             Button threeRecentPost = popupView.findViewById(R.id.three_recent_option);
 
+            // only show recent 3 posts option in followed tab
             if ("myposts".equals(currentTab)) {
                 // Show multiple options
                 threeRecentPost.setVisibility(View.GONE);
@@ -152,6 +169,7 @@ public class HomeActivity extends AppCompatActivity {
                 });
             }
 
+            // if filtering recent week post is selected
             recentWeekButton.setOnClickListener(view -> {
                 if ("followed".equals(currentTab)){
                     try {
@@ -169,16 +187,19 @@ public class HomeActivity extends AppCompatActivity {
                 popupWindow.dismiss();
             });
 
+            // if filtering by emotional state is selected
             emotionalStateButton.setOnClickListener(view -> {
                 showEmotionFilterDialog();
                 popupWindow.dismiss();
             });
 
+            // if filtering by text is selected
             filterTextButton.setOnClickListener(view -> {
                 showFilterTextDialog();
                 popupWindow.dismiss();
             });
 
+            // if clear filter button is selected
             clearFilter.setOnClickListener(view -> {
                 currentTextFilter = null;
                 if ("myposts".equals(currentTab)) {
@@ -210,7 +231,6 @@ public class HomeActivity extends AppCompatActivity {
         // Profile and notification buttons
         CardView profileImage = findViewById(R.id.profile_image);
         profileImage.setOnClickListener(v -> startActivity(new Intent(HomeActivity.this, ProfileActivity.class)));
-
         ImageButton notificationButton = findViewById(R.id.notification_button);
         ActivityResultLauncher<Intent> notificationLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -223,6 +243,7 @@ public class HomeActivity extends AppCompatActivity {
                 }
         );
 
+        // handle notification button
         notificationButton.setOnClickListener(view -> {
             Intent intent = new Intent(HomeActivity.this, NotificationActivity.class);
             intent.putExtra("selectedTab", currentTab);
@@ -230,12 +251,16 @@ public class HomeActivity extends AppCompatActivity {
             notificationLauncher.launch(intent);
         });
 
-
         // Load events and handle any incoming event
         loadAllEvents(this::handleIncomingEvent);
     }
 
-    @Override
+
+    /**
+     * Called when the activity resumes after being paused.
+     * This method ensures that all events are reloaded and processed.
+     */
+     @Override
     protected void onResume() {
         super.onResume();
         loadAllEvents(this::handleIncomingEvent);
@@ -355,6 +380,11 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * When Filter by text option is selected, this function pop dialog
+     * for user to enter text/keyword and call filterEventsByReason to
+     * set adapter to the filtered events
+     */
     private void showFilterTextDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this, R.style.DialogTheme);
         builder.setTitle("Enter search phrase");
@@ -375,6 +405,12 @@ public class HomeActivity extends AppCompatActivity {
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.BLACK);
 
     }
+
+    /**
+     * Filter events that contains given keyword in the moodExplanation
+     * Set adapter to the filter events
+     * @param keyword
+     */
     private void filterEventsByReason(String keyword) {
         if (keyword.isEmpty()) {
             if ("myposts".equals(currentTab)) {
@@ -455,7 +491,6 @@ public class HomeActivity extends AppCompatActivity {
      * Get recent week of mood for either my mood events or the people that the user followed's posts
      * set the adapter to the new recent week mood list
      * @param posts  list of posts (myPosts/followedPosts) to find recent week posts
-     * @return recentWeekEvents list of posts from last 7 days sorted desc
      */
     private void recentWeek(List<Event> posts) throws ParseException {
         /*Stackoverflow:
@@ -491,7 +526,6 @@ public class HomeActivity extends AppCompatActivity {
         adapter.setEvents(recentWeekEvents);
     }
 
-    // --- New Methods for Emotional State Filtering ---
 
     /**
      * Displays a multi-choice dialog for filtering posts by emotional state.
@@ -567,6 +601,7 @@ public class HomeActivity extends AppCompatActivity {
 
     /**
      * filter the followedEvents to recent 3 and update adapter
+     * And set adapter to the filtered events
      */
     private void filterRecentThree(){
         List<Event> followedPosts = followedEvents;
