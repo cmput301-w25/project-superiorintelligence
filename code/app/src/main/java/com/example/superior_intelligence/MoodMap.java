@@ -65,7 +65,7 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
         cbFear        = findViewById(R.id.cb_fear);
         cbDisgust     = findViewById(R.id.cb_disgust);
         cbHappy       = findViewById(R.id.cb_happy);
-        cbSad         = findViewById(R.id.cb_sad);
+        cbSad         = findViewById(R.id.cb_sadness);
         cbShame       = findViewById(R.id.cb_shame);
         cbSurprise    = findViewById(R.id.cb_surprise);
         cbMyPosts     = findViewById(R.id.cb_myposts);
