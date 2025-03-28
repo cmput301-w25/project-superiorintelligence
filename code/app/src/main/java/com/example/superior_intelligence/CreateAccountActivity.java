@@ -1,10 +1,3 @@
-/**
- * completes sub-issue: CreateAccountPage #144
- * link: https://github.com/orgs/cmput301-w25/projects/9/views/1?pane=issue&itemId=100541362&issue=cmput301-w25%7Cproject-superiorintelligence%7C144
- * Creates an account by entering a unique username. Checks database to ensure username is unique and doesn't exist
- * checkUsernameExists: check to see if the username exists in the database, taosts if it does not, else calls createUser()
- * createUser: adds a new account with the given username to the database
- */
 package com.example.superior_intelligence;
 
 import android.content.Intent;
@@ -18,10 +11,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.superior_intelligence.Userbase;
 
-
 public class CreateAccountActivity extends AppCompatActivity {
 
-    EditText signupName, signupUsername;
+    EditText signupName, signupUsername, signupPassword;
     Button signupButton;
     private Userbase userbase;
 
@@ -32,6 +24,7 @@ public class CreateAccountActivity extends AppCompatActivity {
 
         signupName = findViewById(R.id.signup_name);
         signupUsername = findViewById(R.id.signup_username);
+        signupPassword = findViewById(R.id.signup_password);
         signupButton = findViewById(R.id.signup_button);
 
         userbase = Userbase.getInstance();
@@ -42,8 +35,9 @@ public class CreateAccountActivity extends AppCompatActivity {
             public void onClick(View view) {
                 String name = signupName.getText().toString().trim();
                 String username = signupUsername.getText().toString().trim();
+                String password = signupPassword.getText().toString().trim();
 
-                if (name.isEmpty() || username.isEmpty()) {
+                if (name.isEmpty() || username.isEmpty() || password.isEmpty()) {
                     Toast.makeText(CreateAccountActivity.this, "All fields are required", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -67,7 +61,7 @@ public class CreateAccountActivity extends AppCompatActivity {
      * Uses the Userbase to check if the username already exists.
      */
     private void checkUsernameExists(final String name, final String username) {
-        userbase.checkUserExists(username, (exists, existingName, existingUsername) -> {
+        userbase.checkUserExists(username, (exists, existingName, existingUsername, ignoredPassword) -> {
             if (exists) {
                 signupUsername.setError("Username already exists");
                 signupUsername.requestFocus();
@@ -81,7 +75,11 @@ public class CreateAccountActivity extends AppCompatActivity {
      * Creates a new user using the userbase.
      */
     private void createUser(final String name, final String username) {
-        userbase.createUser(name, username, success -> {
+        // Retrieve the password from the EditText and hash it using SHA-256.
+        final String plainPassword = signupPassword.getText().toString().trim();
+        final String hashedPassword = PasswordHasher.hashPassword(plainPassword);
+
+        userbase.createUser(name, username, hashedPassword, success -> {
             if (success) {
                 Toast.makeText(CreateAccountActivity.this, "Signup successful", Toast.LENGTH_SHORT).show();
 
