@@ -40,8 +40,13 @@ public class Database {
             event.setID(java.util.UUID.randomUUID().toString());
         }
         try {
+            Map<String, Object> eventMap = Mapper.eventToMap(event);
+
+            // Step 2: Debug log before saving to Firestore
+            Log.d("DebugFirestore", "Mapped Event before saving: " + eventMap.toString());
+
             // Use UUID as the document ID
-            myPostsRef.document(event.getID()).set(Mapper.eventToMap(event))
+            myPostsRef.document(event.getID()).set(eventMap)
                     .addOnSuccessListener(aVoid -> {
                         Log.d("EventRepository", "Event saved with ID: " + event.getID());
                         callback.onEventSaved(true);
@@ -50,6 +55,7 @@ public class Database {
                         Log.w("EventRepository", "Error saving event", e);
                         callback.onEventSaved(false);
                     });
+
         } catch (Exception e) {
             Log.e("EventRepository", "Failed to convert event", e);
             callback.onEventSaved(false);
@@ -108,6 +114,7 @@ public class Database {
                         // Loop all docs
                         for (DocumentSnapshot document : documents) {
                             Event event = Mapper.docToEvent(document);
+                            Log.d("DebugFirestore", "Loaded event user: " + event.getUser());
                             if (event == null) {
                                 Log.e("DatabaseDebug", "Failed to convert document to Event: " + document.getId());
                                 processedCount[0]++;
