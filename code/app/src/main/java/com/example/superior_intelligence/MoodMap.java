@@ -26,14 +26,22 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.firebase.auth.FirebaseAuth;
+
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * MoodMap activity that displays mood events on a map.
+ * - If "My Posts" is checked, shows ALL of the current user's events.
+ * - Otherwise, shows ONLY the single most recent event for each followed user,
+ *   filtered to within 5 km from the current map center.
+ */
 public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final String TAG = "MoodMap";
@@ -41,18 +49,17 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
     private FirebaseFirestore db;
 
     // Filter CheckBoxes
-    private CheckBox cbLast12Hours, cbConfusion, cbAnger, cbFear,
+    private CheckBox cbConfusion, cbAnger, cbFear,
             cbDisgust, cbHappy, cbSad, cbShame, cbSurprise, cbMyPosts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.map); // Must contain <fragment> for SupportMapFragment and the filter checkboxes
+        setContentView(R.layout.map); // Must contain <fragment> for SupportMapFragment and filter checkboxes
 
         db = FirebaseFirestore.getInstance();
 
-        // Find checkboxes (ensure your layout has a CheckBox with id "cb_myposts")
-        cbLast12Hours = findViewById(R.id.cb_last_12_hours);
+        // Find checkboxes
         cbConfusion   = findViewById(R.id.cb_confusion);
         cbAnger       = findViewById(R.id.cb_anger);
         cbFear        = findViewById(R.id.cb_fear);
@@ -79,24 +86,18 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
         }
     }
 
-    /**
-     * Called when the Google Map is ready to be used.
-     * Moves the camera to Edmonton, loads markers, and sets up a marker click listener.
-     *
-     * @param map The GoogleMap instance.
-     */
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
         googleMap = map;
 
-        // Move camera to Edmonton (example location)
+        // Move camera to Edmonton
         LatLng edmonton = new LatLng(53.5461, -113.4938);
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(edmonton, 11.5f));
 
         // Load markers immediately
         applyFilters();
 
-        // Set a marker click listener to show event details.
+        // Show event details on marker click
         googleMap.setOnMarkerClickListener(marker -> {
             Object tag = marker.getTag();
             if (tag instanceof DocumentSnapshot) {
@@ -108,9 +109,10 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
     }
 
     /**
-     * Retrieves mood events from Firestore applying filters for time, mood, location (within 5 km),
-     * and user. If "My Posts" is checked, only events created by the current user are shown.
-     * Otherwise, only events from users that the current user follows are displayed.
+     * Main filter logic:
+     * 1) If "My Posts" is checked, show ALL events from the current user.
+     * 2) Otherwise, show ONLY the single most recent event from each followed user,
+     *    within 5 km of the current map center.
      */
     private void applyFilters() {
         if (googleMap == null) {
@@ -118,20 +120,27 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
         }
         googleMap.clear();
 
-        // Use the camera's target as a proxy for the current location.
-        LatLng currentLocation = googleMap.getCameraPosition().target;
-
-        // 1) Build a base query from the "MyPosts" collection, applying time & mood filters.
-        Query baseQuery = db.collection("MyPosts");
-
-        // Apply "Last 12 hours" filter.
-        if (cbLast12Hours.isChecked()) {
-            long twelveHoursAgo = System.currentTimeMillis() - (12L * 60L * 60L * 1000L);
-            Log.d(TAG, "Applying last 12 hours filter. Time cutoff = " + twelveHoursAgo);
-            baseQuery = baseQuery.whereGreaterThan("timestamp", twelveHoursAgo);
+        // Get the current user from your app's singleton
+        User currentUser = User.getInstance();
+        if (currentUser == null) {
+            Log.e(TAG, "No current user found (User.getInstance() == null). Cannot filter events.");
+            Toast.makeText(this, "No current user available.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String currentUsername = currentUser.getUsername();
+        if (currentUsername == null || currentUsername.isEmpty()) {
+            Log.e(TAG, "Current user has no username set!");
+            Toast.makeText(this, "No username found for current user.", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        // Apply mood filter.
+        // We'll use the map center as a proxy for the user's current location
+        LatLng currentLocation = googleMap.getCameraPosition().target;
+
+        // Base Firestore query
+        Query baseQuery = db.collection("MyPosts");
+
+        // 2) Mood filters
         List<String> selectedMoods = new ArrayList<>();
         if (cbConfusion.isChecked()) selectedMoods.add("Confusion");
         if (cbAnger.isChecked())     selectedMoods.add("Anger");
@@ -147,41 +156,128 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
             baseQuery = baseQuery.whereIn("mood", selectedMoods);
         }
 
-        // 2) Apply the user filter (my posts vs. followed users).
-        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
+        // 3) My Posts vs. Followed Users
         if (cbMyPosts.isChecked()) {
-            // Show only the current user's events
-            Query myQuery = baseQuery.whereEqualTo("postUser", currentUserId);
-            Log.d(TAG, "Filtering to show only current user's posts.");
+            // Show ALL of my events
+            Query myQuery = baseQuery.whereEqualTo("postUser", currentUsername);
+            Log.d(TAG, "Showing all events by user: " + currentUsername);
+            // We can reuse the existing "executeQuery" method to place all markers
             executeQuery(myQuery, currentLocation);
+
         } else {
-            // By default, show events from followed users.
+            // Show only the single most recent event for each followed user
             Query finalBaseQuery = baseQuery;
-            Userbase.getInstance().getUserFollowing(currentUserId, followedUsers -> {
+            Userbase.getInstance().getUserFollowing(currentUsername, followedUsers -> {
                 if (followedUsers == null || followedUsers.isEmpty()) {
                     Log.d(TAG, "No followed users found; no events will be shown.");
                     return;
                 }
-                // Derive a new query from baseQuery with the 'whereIn' constraint.
+                Log.d(TAG, "Filtering to show single most recent event from followed users: " + followedUsers);
+
+                // Build a query for all events by followed users
                 Query followedQuery = finalBaseQuery.whereIn("postUser", followedUsers);
-                Log.d(TAG, "Filtering to show events from followed users: " + followedUsers);
-                executeQuery(followedQuery, currentLocation);
+
+                // Now fetch those events and group by user, picking only the most recent
+                followedQuery.get()
+                        .addOnSuccessListener(snap -> {
+                            Log.d(TAG, "Documents found: " + snap.size());
+
+                            // We'll store only the single doc with the largest timestamp per user
+                            Map<String, DocumentSnapshot> latestByUser = new HashMap<>();
+
+                            for (DocumentSnapshot doc : snap.getDocuments()) {
+                                String postUser = doc.getString("postUser");
+                                if (postUser == null) continue;
+
+                                Long docTimestamp = doc.getLong("timestamp");
+                                if (docTimestamp == null) docTimestamp = 0L;
+
+                                // Keep track of the doc with the largest timestamp for this user
+                                if (!latestByUser.containsKey(postUser)) {
+                                    latestByUser.put(postUser, doc);
+                                } else {
+                                    DocumentSnapshot existing = latestByUser.get(postUser);
+                                    Long existingTs = existing.getLong("timestamp");
+                                    if (existingTs == null) existingTs = 0L;
+
+                                    if (docTimestamp > existingTs) {
+                                        latestByUser.put(postUser, doc);
+                                    }
+                                }
+                            }
+
+                            // Now place a marker only for the single doc per user
+                            // if it's within 5 km of currentLocation
+                            for (DocumentSnapshot doc : latestByUser.values()) {
+                                placeMarkerIfWithinRange(doc, currentLocation);
+                            }
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(MoodMap.this,
+                                    "Error loading events: " + e.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                            Log.e(TAG, "Query failed: ", e);
+                        });
             });
         }
     }
 
     /**
-     * Executes the Firestore query and processes the results.
-     *
-     * @param query           The Firestore query to execute.
-     * @param currentLocation The current location (as a LatLng) to filter events within 5 km.
+     * Places a marker for the given doc if it's within 5 km of the given location.
+     * This is used for the "single most recent event" approach in the else branch.
+     */
+    private void placeMarkerIfWithinRange(DocumentSnapshot doc, LatLng currentLocation) {
+        Double lat = doc.getDouble("lat");
+        Double lng = doc.getDouble("lng");
+        if (lat == null || lng == null || lat == 0.0 || lng == 0.0) {
+            Log.d(TAG, "Skipping doc " + doc.getId() + " due to invalid lat/lng.");
+            return;
+        }
+
+        float[] distanceResult = new float[1];
+        Location.distanceBetween(
+                currentLocation.latitude, currentLocation.longitude,
+                lat, lng, distanceResult
+        );
+        if (distanceResult[0] > 5000) {
+            Log.d(TAG, "Event " + doc.getId() + " is " + distanceResult[0] + "m away; skipping.");
+            return;
+        }
+
+        // If we reach here, doc is within 5 km
+        LatLng position = new LatLng(lat, lng);
+        String mood = doc.getString("mood");
+        String user = doc.getString("postUser");
+        String markerTitle = (user != null) ? user : "Unknown User";
+        String markerSnippet = (mood != null) ? "Mood: " + mood : "No Mood";
+
+        MarkerOptions options = new MarkerOptions()
+                .position(position)
+                .title(markerTitle)
+                .snippet(markerSnippet)
+                .anchor(0.5f, 1.0f);
+
+        int iconRes = getMoodMarkerIcon(mood);
+        if (iconRes != -1) {
+            BitmapDescriptor labeledIcon = createLabeledMarker(iconRes, markerTitle);
+            options.icon(labeledIcon);
+        }
+
+        Marker marker = googleMap.addMarker(options);
+        if (marker != null) {
+            marker.setTag(doc);
+        }
+    }
+
+    /**
+     * Executes the Firestore query and processes the results (including a 5 km distance filter).
+     * This method places ALL docs that match the query (for "my posts" scenario).
      */
     private void executeQuery(Query query, LatLng currentLocation) {
         query.get()
                 .addOnSuccessListener(snap -> {
                     Log.d(TAG, "Documents found: " + snap.size());
-                    for (DocumentSnapshot doc : snap) {
+                    for (DocumentSnapshot doc : snap.getDocuments()) {
                         Double lat = doc.getDouble("lat");
                         Double lng = doc.getDouble("lng");
                         String mood = doc.getString("mood");
@@ -191,24 +287,25 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
                                 + ", lat: " + lat + ", lng: " + lng
                                 + ", mood: " + mood);
 
-                        // Skip if lat/lng is null or invalid.
                         if (lat == null || lng == null || lat == 0.0 || lng == 0.0) {
-                            Log.d(TAG, "Skipping document " + doc.getId() + " due to invalid lat/lng.");
+                            Log.d(TAG, "Skipping doc " + doc.getId() + " due to invalid lat/lng.");
                             continue;
                         }
 
-                        // Check if event is within 5 km of the current location.
+                        // Check if event is within 5 km
                         float[] distanceResult = new float[1];
-                        Location.distanceBetween(currentLocation.latitude, currentLocation.longitude,
-                                lat, lng, distanceResult);
-                        if (distanceResult[0] > 5000) { // 5000 meters = 5 km
-                            Log.d(TAG, "Event " + doc.getId() + " is " + distanceResult[0] + " meters away; skipping event.");
+                        Location.distanceBetween(
+                                currentLocation.latitude, currentLocation.longitude,
+                                lat, lng, distanceResult
+                        );
+                        if (distanceResult[0] > 5000) {
+                            Log.d(TAG, "Event " + doc.getId() + " is " + distanceResult[0] + " meters away; skipping.");
                             continue;
                         }
 
                         LatLng position = new LatLng(lat, lng);
 
-                        // Prepare marker title and snippet.
+                        // Marker info
                         String markerTitle = (user != null) ? user : "Unknown User";
                         String markerSnippet = (mood != null) ? "Mood: " + mood : "No Mood";
 
@@ -240,27 +337,18 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
 
     /**
      * Creates a custom marker icon by combining the mood icon and the username text.
-     *
-     * @param baseIconRes The drawable resource ID for the base (mood) icon.
-     * @param label       The username text to render.
-     * @return A BitmapDescriptor of the combined image.
      */
     private BitmapDescriptor createLabeledMarker(int baseIconRes, String label) {
-        // Decode the base icon.
         Bitmap original = BitmapFactory.decodeResource(getResources(), baseIconRes);
-
-        // Scale the icon to a desired size.
-        int iconWidth = 150;
-        int iconHeight = 150;
+        int iconWidth = 150, iconHeight = 150;
         Bitmap scaledIcon = Bitmap.createScaledBitmap(original, iconWidth, iconHeight, false);
 
-        // Create a bitmap with extra space for text.
         int extraHeight = 60;
         Bitmap combined = Bitmap.createBitmap(iconWidth, iconHeight + extraHeight, Bitmap.Config.ARGB_8888);
 
-        // Draw the icon and text.
         Canvas canvas = new Canvas(combined);
         canvas.drawBitmap(scaledIcon, 0, 0, null);
+
         Paint paint = new Paint();
         paint.setColor(Color.BLACK);
         paint.setTextSize(40f);
@@ -274,9 +362,7 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
     }
 
     /**
-     * Displays an AlertDialog showing the details of a mood event.
-     *
-     * @param docSnap The DocumentSnapshot containing the event data.
+     * Shows an AlertDialog with details of the clicked mood event.
      */
     private void showEventDialog(DocumentSnapshot docSnap) {
         String title = docSnap.getString("title");
@@ -302,9 +388,6 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
 
     /**
      * Returns the drawable resource ID for the given mood string, or -1 if unrecognized.
-     *
-     * @param mood The mood string from Firestore.
-     * @return The drawable resource ID, or -1 if not recognized.
      */
     private int getMoodMarkerIcon(String mood) {
         if (mood == null) {
