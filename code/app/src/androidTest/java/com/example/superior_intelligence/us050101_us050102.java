@@ -20,7 +20,6 @@ import androidx.test.espresso.intent.Intents;
 import androidx.test.rule.ActivityTestRule;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.junit.After;
@@ -32,7 +31,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -40,7 +38,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
-public class us050101andus050102 {
+public class us050101_us050102 {
 
     // 1) TELL JUnit NOT to auto-start the Activity: launchActivity=false
     @Rule
@@ -91,6 +89,8 @@ public class us050101andus050102 {
         // Then do the usual login steps
         onView(withId(R.id.login_username)).perform(typeText("userB"));
         closeSoftKeyboard();
+        onView(withId(R.id.login_password)).perform(typeText("pass2"));
+        closeSoftKeyboard();
         onView(withId(R.id.login_button)).perform(click());
         SystemClock.sleep(3000);
 
@@ -115,8 +115,9 @@ public class us050101andus050102 {
 
         // Check we can see "Pending requests"
         onView(withId(R.id.notification_button)).perform(click());
-        onView(withText("Pending requests")).perform(click());
-        SystemClock.sleep(1000);
+        SystemClock.sleep(2000);
+        onView(withText("Pending Requests")).perform(click());
+        SystemClock.sleep(2000);
 
         onView(withText("You requested to follow userA. Pending approval."))
                 .check(matches(isDisplayed()));

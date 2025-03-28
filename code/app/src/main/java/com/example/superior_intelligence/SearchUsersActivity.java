@@ -41,7 +41,7 @@ public class SearchUsersActivity extends AppCompatActivity {
         currentUsername = User.getInstance().getUsername();
 
         // Initialize UI components
-        searchEditText = findViewById(R.id.editText);
+        searchEditText = findViewById(R.id.search_bar);
         recyclerView = findViewById(R.id.recyclerView); // Add this to your layout
         AppCompatButton searchButton = findViewById(R.id.user_search_button);
         AppCompatButton clearButton = findViewById(R.id.clear_button);
