@@ -1,13 +1,5 @@
-/**
- * completes sub issue: Create log-in screen #123
- * link: https://github.com/orgs/cmput301-w25/projects/9/views/1?pane=issue&itemId=99937029&issue=cmput301-w25%7Cproject-superiorintelligence%7C123
- * Connects to login_page.xml, provide button to enter CreateAccount.java
- * if user enters login and enters username, will check database to see if existing
- * validateUsername returns true if a username was given, false if empty (bool)
- * checkUser: checks if username exist in db, error else update db and go to login page
- */
-
 package com.example.superior_intelligence;
+
 import com.example.superior_intelligence.Userbase;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -27,11 +19,11 @@ import androidx.appcompat.widget.AppCompatButton;
 public class LoginPageActivity extends AppCompatActivity {
 
     EditText loginUsername;
+    EditText loginPassword;
     Button loginButton;
     Button signUpButton;
     private Userbase userbase = Userbase.getInstance();
     private ProgressBar loadingIndicator;
-    //TextView signupRedirectText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,25 +31,24 @@ public class LoginPageActivity extends AppCompatActivity {
         setContentView(R.layout.login_page);
 
         loginUsername = findViewById(R.id.login_username);
-        //signupRedirectText = findViewById(R.id.signupRedirectText);
+        loginPassword = findViewById(R.id.login_password);
         loginButton = findViewById(R.id.login_button);
         signUpButton = findViewById(R.id.signup_page_button);
         loadingIndicator = findViewById(R.id.loading_indicator);
 
-        // Find the back button
+        // Find the back button and set click listener to navigate back
         ImageButton backButton = findViewById(R.id.back_button);
-        // Set click listener to navigate back
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(LoginPageActivity.this, MainActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
-                finish(); // Close current activity to prevent returning to it
+                finish();
             }
         });
 
-        // login page to sign up page
+        // Navigate to CreateAccountActivity when sign-up button is pressed
         signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -66,12 +57,13 @@ public class LoginPageActivity extends AppCompatActivity {
             }
         });
 
-        // login button pressed, go to home page
-        AppCompatButton loginButton = findViewById(R.id.login_button);
-        loginButton.setOnClickListener(new View.OnClickListener() {
+        // Login button pressed, check validation then attempt login
+        AppCompatButton loginBtn = findViewById(R.id.login_button);
+        loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!validateUsername() | !validateUsername()) {
+                if (!validateUsername() || !validatePassword()) {
+                    return;
                 } else {
                     checkUser();
                 }
@@ -95,36 +87,64 @@ public class LoginPageActivity extends AppCompatActivity {
     }
 
     /**
+     * Validates that the password field is not empty.
+     * @return true if valid, false otherwise.
+     */
+    public Boolean validatePassword() {
+        String val = loginPassword.getText().toString();
+        if (val.isEmpty()) {
+            loginPassword.setError("Password cannot be empty");
+            return false;
+        } else {
+            loginPassword.setError(null);
+            return true;
+        }
+    }
+
+    /**
      * Checks if the user exists in the database.
-     * If the user exists, the global User instance is updated and HomeActivity is launched.
-     * Otherwise, an error is displayed.
+     * If the user exists, compares the hashed entered password with the stored hashed password.
+     * If they match, updates SharedPreferences, the global User instance, and navigates to HomeActivity.
+     * Otherwise, shows an error.
      */
     public void checkUser() {
         String userUsername = loginUsername.getText().toString().trim();
+        String userPassword = loginPassword.getText().toString().trim();
         loadingIndicator.setVisibility(View.VISIBLE);
         loginButton.setEnabled(false);
 
-        userbase.checkUserExists(userUsername, (exists, name, username) -> {
+        // Retrieve the stored hash via the callback.
+        userbase.checkUserExists(userUsername, (exists, name, username, passwordFromDB) -> {
             if (exists) {
-                // Save user details in SharedPreferences
-                SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putString("name", name);
-                editor.putString("username", username);
-                editor.apply(); // Save changes
-                // Populate the global User instance
-                User user = User.getInstance();
-                user.setName(name);
-                user.setUsername(username);
-                // Navigate to HomeActivity
+                // Hash the entered password using SHA-256 before comparison.
+                String hashedEnteredPassword = PasswordHasher.hashPassword(userPassword);
+                if (hashedEnteredPassword.equals(passwordFromDB)) {
+                    // Save user details in SharedPreferences
+                    SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putString("name", name);
+                    editor.putString("username", username);
+                    editor.apply();
 
-                ensureFirebaseAuth(() -> ensureDatabaseIsReady(() -> {
+                    // Populate the global User instance
+                    User user = User.getInstance();
+                    user.setName(name);
+                    user.setUsername(username);
+
+                    // Proceed to HomeActivity after ensuring FirebaseAuth and Database readiness.
+                    ensureFirebaseAuth(() -> ensureDatabaseIsReady(() -> {
+                        loadingIndicator.setVisibility(View.GONE);
+                        loginButton.setEnabled(true);
+                        startActivity(new Intent(LoginPageActivity.this, HomeActivity.class));
+                        finish();
+                    }));
+                } else {
+                    // Password does not match, show error.
+                    loginPassword.setError("Incorrect password");
+                    loginPassword.requestFocus();
                     loadingIndicator.setVisibility(View.GONE);
                     loginButton.setEnabled(true);
-
-                    startActivity(new Intent(LoginPageActivity.this, HomeActivity.class));
-                    finish();
-                }));
+                }
             } else {
                 loginUsername.setError("User does not exist");
                 loginUsername.requestFocus();
@@ -155,18 +175,18 @@ public class LoginPageActivity extends AppCompatActivity {
      */
     private void ensureFirebaseAuth(Runnable onAuthenticated) {
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            onAuthenticated.run(); // Already signed in
+            onAuthenticated.run();
         } else {
             FirebaseAuth.getInstance().signInAnonymously()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        onAuthenticated.run();
-                    } else {
-                        Toast.makeText(this, "Firebase authentication failed.", Toast.LENGTH_SHORT).show();
-                        loadingIndicator.setVisibility(View.GONE);
-                        loginButton.setEnabled(true);
-                    }
-                });
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            onAuthenticated.run();
+                        } else {
+                            Toast.makeText(this, "Firebase authentication failed.", Toast.LENGTH_SHORT).show();
+                            loadingIndicator.setVisibility(View.GONE);
+                            loginButton.setEnabled(true);
+                        }
+                    });
         }
     }
 }
