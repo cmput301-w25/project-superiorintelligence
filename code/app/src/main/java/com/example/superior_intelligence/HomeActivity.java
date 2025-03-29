@@ -149,7 +149,8 @@ public class HomeActivity extends AppCompatActivity {
             } else {
                 threeRecentPost.setOnClickListener(view -> {
                     filterRecentThree();
-                    filterApplied(popupWindow);
+                    filterApplied();
+                    popupWindow.dismiss();
                 });
             }
 
@@ -167,17 +168,17 @@ public class HomeActivity extends AppCompatActivity {
                         throw new RuntimeException(e);
                     }
                 }
-                filterApplied(popupWindow);
+                popupWindow.dismiss();
             });
 
             emotionalStateButton.setOnClickListener(view -> {
                 showEmotionFilterDialog();
-                filterApplied(popupWindow);
+                popupWindow.dismiss();
             });
 
             filterTextButton.setOnClickListener(view -> {
                 showFilterTextDialog();
-                filterApplied(popupWindow);
+                popupWindow.dismiss();
             });
 
             clearFilter.setOnClickListener(view -> {
@@ -441,6 +442,7 @@ public class HomeActivity extends AppCompatActivity {
         filteredList.addAll(partialMatches);
 
         adapter.setEvents(filteredList);
+        filterApplied();
     }
 
     /**
@@ -511,6 +513,7 @@ public class HomeActivity extends AppCompatActivity {
         recentWeekEvents.sort(dateDescComparator);
 
         adapter.setEvents(recentWeekEvents);
+        filterApplied();
     }
 
     // --- New Methods for Emotional State Filtering ---
@@ -580,11 +583,7 @@ public class HomeActivity extends AppCompatActivity {
         filteredList.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
 
         adapter.setEvents(filteredList);
-        if (allPosts == myPostsEvents){
-            switchTab(filteredList, tabMyPosts);
-        } else if (allPosts == followedEvents) {
-            switchTab(filteredList, tabFollowed);
-        }
+        filterApplied();
     }
 
     /**
@@ -621,9 +620,8 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
-    private void filterApplied(PopupWindow popupWindow){
+    private void filterApplied(){
         Toast.makeText(this, "Filter applied", Toast.LENGTH_SHORT).show();
-        popupWindow.dismiss();
     }
 
 }
