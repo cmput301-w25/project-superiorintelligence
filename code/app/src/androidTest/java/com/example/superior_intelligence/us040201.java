@@ -11,7 +11,9 @@ import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
+import static androidx.test.espresso.matcher.ViewMatchers.withHint;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withInputType;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 import static org.junit.Assert.assertTrue;
@@ -52,7 +54,9 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -65,6 +69,7 @@ public class us040201 {
     public ActivityScenarioRule<MainActivity> scenario = new
             ActivityScenarioRule<MainActivity>(MainActivity.class);
 
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     /**
      * Test that filtering recent week should not include my post before recent week
@@ -125,6 +130,7 @@ public class us040201 {
     public void setUp() throws InterruptedException {
 
         seedMyPostDB();
+        seedUserDB("testUser", "Test User", "TestPass");
         logIn();
 
     }
@@ -135,19 +141,30 @@ public class us040201 {
      */
     public void logIn() throws InterruptedException {
         onView(withId(R.id.login_button_login_page)).perform(click());
-        onView(withId(R.id.signup_page_button)).perform(click());
-        onView(withId(R.id.signup_name)).perform(typeText("TestUser"));
-        onView(withId(R.id.signup_username)).perform(typeText("testUser3")).perform(closeSoftKeyboard());
-        onView(withId(R.id.create_password_label)).perform(typeText("123")).perform(closeSoftKeyboard());
-        Thread.sleep(2000);
-        onView(withId(R.id.signup_button)).perform(click());
-        Thread.sleep(5000);
 
-        onView(withId(R.id.login_username)).perform(typeText("testUser3")).perform(closeSoftKeyboard());
-        onView(withId(R.id.password_label)).perform(typeText("123")).perform(closeSoftKeyboard());
+        onView(withId(R.id.login_username)).perform(typeText("testUser")).perform(closeSoftKeyboard());
+        onView(withId(R.id.login_password)).perform(typeText("TestPass")).perform(closeSoftKeyboard());
         onView(withId(R.id.login_button)).perform(click());
         Thread.sleep(5000);
+    }
 
+    /**
+     * Add user to database with name, user, password
+     */
+    private void seedUserDB(String username, String name, String rawPassword) throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        Map<String, Object> user = new HashMap<>();
+        user.put("username", username);
+        user.put("name", name);
+        user.put("followers", new java.util.ArrayList<>());
+        user.put("following", new java.util.ArrayList<>());
+
+        String hashedPassword = PasswordHasher.hashPassword(rawPassword);
+        user.put("password", hashedPassword);
+
+        db.collection("users").document(username).set(user)
+                .addOnCompleteListener(task -> latch.countDown());
+        latch.await();
     }
 
     /**
@@ -159,8 +176,8 @@ public class us040201 {
         CollectionReference postsRef = db.getMyPostsRef();
         CountDownLatch latch = new CountDownLatch(1); // Synchronization mechanism
 
-        Event event = new Event("TestBeforeRecWk", "Test last year", "12 MAR 2024, 12:04", "#CC0099", "", 0, false, true, "Surprise", "", "", "testUser3", null, null, true);
-        Event event2 = new Event("TestDuringRecWk", "Test during recent week", null, "#FF6347", "", 0, false, true, "Anger", "", "", "testUser3", null, null, true);
+        Event event = new Event("TestBeforeRecWk", "Test last year", "12 MAR 2024, 12:04", "#CC0099", "", 0, false, true, "Surprise", "", "", "testUser", null, null, true);
+        Event event2 = new Event("TestDuringRecWk", "Test during recent week", null, "#FF6347", "", 0, false, true, "Anger", "", "", "testUser", null, null, true);
 
         // current date to ensure test will work regardless of the time
         String eventDate = new SimpleDateFormat("dd MMM yyyy, HH:mm",
