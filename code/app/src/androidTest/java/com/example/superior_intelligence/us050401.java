@@ -9,12 +9,15 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
+import android.content.Intent;
 import android.util.Log;
 
 import androidx.test.espresso.assertion.ViewAssertions;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
+import androidx.test.rule.ActivityTestRule;
 
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.junit.After;
@@ -31,7 +34,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
@@ -44,7 +49,7 @@ public class us050401 {
     @Rule
     public ActivityScenarioRule<MainActivity> scenario = new
             ActivityScenarioRule<MainActivity>(MainActivity.class);
-
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     /**
      * Test that filtering recent week should not include followed post before recent week
@@ -103,10 +108,9 @@ public class us050401 {
      */
     @Before // run before every test
     public void setUp() throws InterruptedException {
-
         seedMyPostDB();
+        seedUserDB();
         logIn();
-
     }
 
     /**
@@ -115,17 +119,60 @@ public class us050401 {
      */
     public void logIn() throws InterruptedException {
         onView(withId(R.id.login_button_login_page)).perform(click());
-        onView(withId(R.id.signup_page_button)).perform(click());
-        onView(withId(R.id.signup_name)).perform(typeText("TestUser"));
-        onView(withId(R.id.signup_username)).perform(typeText("testUser3")).perform(closeSoftKeyboard());
-        Thread.sleep(2000);
-        onView(withId(R.id.signup_button)).perform(click());
-        Thread.sleep(5000);
 
-        onView(withId(R.id.login_username)).perform(typeText("testUser3"));
+        onView(withId(R.id.login_username)).perform(typeText("followedUser")).perform(closeSoftKeyboard());
+        onView(withId(R.id.login_password)).perform(typeText("TestPasss")).perform(closeSoftKeyboard());
         onView(withId(R.id.login_button)).perform(click());
         Thread.sleep(5000);
+    }
 
+    /**
+     * Set up user and its following in the database
+     */
+    private void seedUserDB() throws InterruptedException {
+        String username = "testUser", name = "Test User", rawPassword = "TestPass";
+        String username2 = "followedUser", name2 = "Test User Logged In", rawPassword2 = "TestPasss";
+        seedUser(username, name, rawPassword);
+        seedUser(username2, name2, rawPassword2);
+
+        followUser(username2, username, success -> {
+            Log.d("FollowDebug", "followedUser successfully follow testUser");
+        });
+
+    }
+
+    /**
+     * Add a user to the database
+     * @param username
+     * @param name
+     * @param rawPassword
+     * @throws InterruptedException
+     */
+    public void seedUser(String username, String name, String rawPassword) throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        Map<String, Object> user = new HashMap<>();
+        user.put("username", username);
+        user.put("name", name);
+        user.put("followers", new java.util.ArrayList<>());
+        user.put("following", new java.util.ArrayList<>());
+
+        String hashedPassword = PasswordHasher.hashPassword(rawPassword);
+        user.put("password", hashedPassword);
+        db.collection("users").document(username).set(user)
+                .addOnCompleteListener(task -> latch.countDown());
+        latch.await();
+    }
+
+    public void followUser(String followingUser, String followedUser, Userbase.FollowActionCallback callback) throws InterruptedException {
+        db.collection("users").document(followingUser)
+                .update("following", FieldValue.arrayUnion(followedUser))
+                .addOnSuccessListener(aVoid -> {
+                    db.collection("users").document(followedUser)
+                            .update("followers", FieldValue.arrayUnion(followingUser))
+                            .addOnSuccessListener(aVoid2 -> callback.onFollowAction(true))
+                            .addOnFailureListener(e -> callback.onFollowAction(false));
+                })
+                .addOnFailureListener(e -> callback.onFollowAction(false));
     }
 
     /**
@@ -137,8 +184,8 @@ public class us050401 {
         CollectionReference postsRef = db.getMyPostsRef();
         CountDownLatch latch = new CountDownLatch(1); // Synchronization mechanism
 
-        Event event = new Event("TestBeforeRecWk", "Test last year", "12 MAR 2024, 12:04", "#CC0099", "", 0, false, true, "Surprise", "", "", "followedUser", null, null, true);
-        Event event2 = new Event("TestDuringRecWk", "Test during recent week", null, "#FF6347", "", 0, false, true, "Anger", "", "", "followedUser", null, null, true);
+        Event event = new Event("TestBeforeRecWk", "Test last year", "12 MAR 2024, 12:04", "#CC0099", "", 0, true, false, "Surprise", "", "", "testUser", null, null, true);
+        Event event2 = new Event("TestDuringRecWk", "Test during recent week", null, "#FF6347", "", 0, true, false, "Anger", "", "", "testUser", null, null, true);
 
         // current date to ensure test will work regardless of the time
         String eventDate = new SimpleDateFormat("dd MMM yyyy, HH:mm",
