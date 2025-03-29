@@ -126,22 +126,31 @@ public class Userbase {
     }
 
     public void sendFollowRequest(String requester, String requested, FollowRequestActionCallback callback) {
-        Log.d("FollowDebug", " Sending follow request: " + requester + " -> " + requested);
-        HashMap<String, Object> requestData = new HashMap<>();
-        requestData.put("requester", requester);
-        requestData.put("requested", requested);
-        requestData.put("timestamp", System.currentTimeMillis());
+        Log.d("FollowDebug", "Attempting to send follow request: " + requester + " -> " + requested);
 
-        db.collection("follow_requests")
-                .add(requestData)
-                .addOnSuccessListener(documentReference -> {
-                    Log.d("FollowDebug", "Follow request sent from " + requester + " to " + requested);
-                    callback.onFollowRequestAction(true);
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("FollowDebug", "Failed to send follow request.", e);
-                    callback.onFollowRequestAction(false);
-                });
+        // First, check if a request already exists
+        checkFollowRequest(requester, requested, exists -> {
+            if (exists) {
+                Log.d("FollowDebug", "Follow request already exists, skipping duplicate.");
+                callback.onFollowRequestAction(false); // Or provide a separate status for "already exists"
+            } else {
+                HashMap<String, Object> requestData = new HashMap<>();
+                requestData.put("requester", requester);
+                requestData.put("requested", requested);
+                requestData.put("timestamp", System.currentTimeMillis());
+
+                db.collection("follow_requests")
+                        .add(requestData)
+                        .addOnSuccessListener(documentReference -> {
+                            Log.d("FollowDebug", "Follow request sent from " + requester + " to " + requested);
+                            callback.onFollowRequestAction(true);
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e("FollowDebug", "Failed to send follow request.", e);
+                            callback.onFollowRequestAction(false);
+                        });
+            }
+        });
     }
 
     public void getIncomingFollowRequests(String username, FollowRequestListCallback callback) {
@@ -319,3 +328,4 @@ public class Userbase {
         void onUserListRetrieved(List<String> users);
     }
 }
+
