@@ -149,6 +149,8 @@ public class HomeActivity extends AppCompatActivity {
             } else {
                 threeRecentPost.setOnClickListener(view -> {
                     filterRecentThree();
+                    filterApplied();
+                    popupWindow.dismiss();
                 });
             }
 
@@ -188,6 +190,7 @@ public class HomeActivity extends AppCompatActivity {
                 } else if ("explore".equals(currentTab)) {
                     adapter.setEvents(exploreEvents);
                 }
+                Toast.makeText(this, "Filter cleared", Toast.LENGTH_SHORT).show();
                 popupWindow.dismiss();
             });
 
@@ -439,6 +442,7 @@ public class HomeActivity extends AppCompatActivity {
         filteredList.addAll(partialMatches);
 
         adapter.setEvents(filteredList);
+        filterApplied();
     }
 
     /**
@@ -509,6 +513,7 @@ public class HomeActivity extends AppCompatActivity {
         recentWeekEvents.sort(dateDescComparator);
 
         adapter.setEvents(recentWeekEvents);
+        filterApplied();
     }
 
     // --- New Methods for Emotional State Filtering ---
@@ -578,11 +583,7 @@ public class HomeActivity extends AppCompatActivity {
         filteredList.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
 
         adapter.setEvents(filteredList);
-        if (allPosts == myPostsEvents){
-            switchTab(filteredList, tabMyPosts);
-        } else if (allPosts == followedEvents) {
-            switchTab(filteredList, tabFollowed);
-        }
+        filterApplied();
     }
 
     /**
@@ -595,10 +596,16 @@ public class HomeActivity extends AppCompatActivity {
         }
         List<Event> followedPosts = followedEvents;
         List<Event> recentThree = new ArrayList<Event>();
-        for (int i = 0; i < 3; i++){
-            recentThree.add(followedPosts.get(i));
+
+        int i = 0;
+        for (Event e: followedPosts){
+            recentThree.add(e);
+            i++;
+            if (i >= 3){
+                adapter.setEvents(recentThree);
+                return;
+            }
         }
-        adapter.setEvents(recentThree);
     }
 
     private void refreshNotificationIcon(ImageButton notificationButton) {
@@ -611,6 +618,10 @@ public class HomeActivity extends AppCompatActivity {
                 notificationButton.setImageResource(R.drawable.notfication_icon_default); // white
             }
         });
+    }
+
+    private void filterApplied(){
+        Toast.makeText(this, "Filter applied", Toast.LENGTH_SHORT).show();
     }
 
 }
