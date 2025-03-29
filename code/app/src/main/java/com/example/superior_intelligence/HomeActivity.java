@@ -149,6 +149,8 @@ public class HomeActivity extends AppCompatActivity {
             } else {
                 threeRecentPost.setOnClickListener(view -> {
                     filterRecentThree();
+                    filterApplied();
+                    popupWindow.dismiss();
                 });
             }
 
@@ -188,6 +190,7 @@ public class HomeActivity extends AppCompatActivity {
                 } else if ("explore".equals(currentTab)) {
                     adapter.setEvents(exploreEvents);
                 }
+                Toast.makeText(this, "Filter cleared", Toast.LENGTH_SHORT).show();
                 popupWindow.dismiss();
             });
 
@@ -212,14 +215,29 @@ public class HomeActivity extends AppCompatActivity {
         profileImage.setOnClickListener(v -> startActivity(new Intent(HomeActivity.this, ProfileActivity.class)));
 
         ImageButton notificationButton = findViewById(R.id.notification_button);
+
+        refreshNotificationIcon(notificationButton);
+
+        String currentUsername = User.getInstance().getUsername();
+        Userbase.getInstance().getIncomingFollowRequests(currentUsername, requests -> {
+            if (!requests.isEmpty()) {
+                notificationButton.setImageResource(R.drawable.notification_icon_alert); // sky blue
+            } else {
+                notificationButton.setImageResource(R.drawable.notfication_icon_default); // white
+            }
+        });
+
         ActivityResultLauncher<Intent> notificationLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    if (result.getData() != null) {
                         Intent data = result.getData();
-                        setIntent(data); // Retain selectedTab and textFilter for handleIncomingEvent()
-                        handleIncomingEvent(); // Reapply tab and filter
+                        setIntent(data);
+                        handleIncomingEvent();
                     }
+
+                    // Always refresh icon on return
+                    refreshNotificationIcon(notificationButton);
                 }
         );
 
@@ -239,7 +257,12 @@ public class HomeActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         loadAllEvents(this::handleIncomingEvent);
+
+        // Refresh icon in case new requests came in while app was paused
+        ImageButton notificationButton = findViewById(R.id.notification_button);
+        refreshNotificationIcon(notificationButton);
     }
+
 
 
     /**
@@ -419,6 +442,7 @@ public class HomeActivity extends AppCompatActivity {
         filteredList.addAll(partialMatches);
 
         adapter.setEvents(filteredList);
+        filterApplied();
     }
 
     /**
@@ -489,6 +513,7 @@ public class HomeActivity extends AppCompatActivity {
         recentWeekEvents.sort(dateDescComparator);
 
         adapter.setEvents(recentWeekEvents);
+        filterApplied();
     }
 
     // --- New Methods for Emotional State Filtering ---
@@ -558,11 +583,7 @@ public class HomeActivity extends AppCompatActivity {
         filteredList.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
 
         adapter.setEvents(filteredList);
-        if (allPosts == myPostsEvents){
-            switchTab(filteredList, tabMyPosts);
-        } else if (allPosts == followedEvents) {
-            switchTab(filteredList, tabFollowed);
-        }
+        filterApplied();
     }
 
     /**
@@ -575,11 +596,32 @@ public class HomeActivity extends AppCompatActivity {
         }
         List<Event> followedPosts = followedEvents;
         List<Event> recentThree = new ArrayList<Event>();
-        for (int i = 0; i < 3; i++){
-            recentThree.add(followedPosts.get(i));
+
+        int i = 0;
+        for (Event e: followedPosts){
+            recentThree.add(e);
+            i++;
+            if (i >= 3){
+                adapter.setEvents(recentThree);
+                return;
+            }
         }
-        adapter.setEvents(recentThree);
     }
 
+    private void refreshNotificationIcon(ImageButton notificationButton) {
+        String currentUsername = User.getInstance().getUsername();
+
+        Userbase.getInstance().getIncomingFollowRequests(currentUsername, requests -> {
+            if (!requests.isEmpty()) {
+                notificationButton.setImageResource(R.drawable.notification_icon_alert); // sky blue
+            } else {
+                notificationButton.setImageResource(R.drawable.notfication_icon_default); // white
+            }
+        });
+    }
+
+    private void filterApplied(){
+        Toast.makeText(this, "Filter applied", Toast.LENGTH_SHORT).show();
+    }
 
 }
