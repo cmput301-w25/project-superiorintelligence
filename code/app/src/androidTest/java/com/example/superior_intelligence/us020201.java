@@ -14,6 +14,7 @@ import android.util.Log;
 
 import androidx.core.content.FileProvider;
 import androidx.test.core.app.ApplicationProvider;
+import androidx.test.espresso.action.ViewActions;
 import androidx.test.espresso.intent.Intents;
 import static androidx.test.espresso.Espresso.closeSoftKeyboard;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -69,7 +70,7 @@ public class us020201 {
     public void setup() throws InterruptedException {
         FirebaseAuth.getInstance().signOut();
         db.useEmulator("10.0.2.2", 8080);
-        ensureUserExists("testUser", "Test User");
+        ensureUserExists("testUser", "Test User", "TestPass");
         Intents.init();
     }
 
@@ -79,7 +80,7 @@ public class us020201 {
      */
     @Test
     public void testAddPhotoFlow() throws InterruptedException {
-        loginAs("testUser");
+        loginAs("testUser","TestPass");
 
         // Start creating event
         onView(withId(R.id.addButton)).perform(click());
@@ -132,12 +133,17 @@ public class us020201 {
     /**
      * Logs in using the given username.
      */
-    private void loginAs(String username) throws InterruptedException {
+    private void loginAs(String username, String password) throws InterruptedException {
         Intent intent = new Intent();
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         loginRule.launchActivity(intent);
+
         onView(withId(R.id.login_username)).perform(typeText(username));
-        closeSoftKeyboard();
+        ViewActions.closeSoftKeyboard();
+
+        onView(withId(R.id.login_password)).perform(typeText(password));
+        ViewActions.closeSoftKeyboard();
+
         onView(withId(R.id.login_button)).perform(click());
         SystemClock.sleep(3000);
     }
@@ -145,15 +151,20 @@ public class us020201 {
     /**
      * Creates a test user in the Firestore emulator if not already present.
      */
-    private void ensureUserExists(String username, String name) throws InterruptedException {
+    private void ensureUserExists(String username, String name, String rawPassword) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         Map<String, Object> user = new HashMap<>();
         user.put("username", username);
         user.put("name", name);
-        user.put("followers", new ArrayList<>());
-        user.put("following", new ArrayList<>());
+        user.put("followers", new java.util.ArrayList<>());
+        user.put("following", new java.util.ArrayList<>());
+
+        String hashedPassword = PasswordHasher.hashPassword(rawPassword);
+        user.put("password", hashedPassword);
+
         db.collection("users").document(username).set(user)
                 .addOnCompleteListener(task -> latch.countDown());
+
         latch.await();
     }
 

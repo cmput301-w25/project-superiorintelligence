@@ -1,13 +1,9 @@
 package com.example.superior_intelligence;
 
 import android.util.Log;
-
-import com.example.superior_intelligence.User;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,15 +11,9 @@ import java.util.List;
 public class Userbase {
     private final FirebaseFirestore db;
     private static Userbase instance;
-    private CollectionReference usersRef;
 
-
-    /**
-     *
-     */
     public Userbase() {
         db = FirebaseFirestore.getInstance();
-        usersRef = db.collection("users");
     }
 
     public static Userbase getInstance() {
@@ -33,6 +23,7 @@ public class Userbase {
         return instance;
     }
 
+    // Updated to include the password from Firestore.
     public void checkUserExists(String username, UserCheckCallback callback) {
         db.collection("users")
                 .document(username)
@@ -40,13 +31,14 @@ public class Userbase {
                 .addOnSuccessListener(document -> {
                     if (document.exists()) {
                         String name = document.getString("name");
-                        callback.onUserChecked(true, name, username);
+                        String password = document.getString("password"); // new field
+                        callback.onUserChecked(true, name, username, password);
                     } else {
-                        callback.onUserChecked(false, null, null);
+                        callback.onUserChecked(false, null, null, null);
                     }
                 })
                 .addOnFailureListener(e -> {
-                    callback.onUserChecked(false, null, null);
+                    callback.onUserChecked(false, null, null, null);
                 });
     }
 
@@ -70,11 +62,10 @@ public class Userbase {
                 .addOnFailureListener(e -> callback.onUserDetailsFetched(false, null, null));
     }
 
-
-    public void createUser(String name, String username, UserCreationCallback callback) {
-        // In this example, we use a simple User (or HelperClass) object.
-        // You can also rename HelperClass to something like SignUpUser if you prefer.
-        HelperClass userData = new HelperClass(name, username);
+    // Updated createUser method to accept a password and store it.
+    public void createUser(String name, String username, String password, UserCreationCallback callback) {
+        // Use the HelperClass constructor that includes password.
+        HelperClass userData = new HelperClass(name, username, password);
         db.collection("users")
                 .document(username)
                 .set(userData)
@@ -94,17 +85,16 @@ public class Userbase {
                 .addOnFailureListener(e -> callback.onUserCreated(false));
     }
 
-
     public void unfollowUser(String currentUser, String targetUser, FollowActionCallback callback) {
         db.collection("users").document(currentUser)
                 .update("following", FieldValue.arrayRemove(targetUser))
                 .addOnSuccessListener(aVoid -> {
                     db.collection("users").document(targetUser)
                             .update("followers", FieldValue.arrayRemove(currentUser))
-                            .addOnSuccessListener(aVoid2 -> callback.onFollowAction(true)) // Success
-                            .addOnFailureListener(e -> callback.onFollowAction(false)); // Failed to remove from "followers"
+                            .addOnSuccessListener(aVoid2 -> callback.onFollowAction(true))
+                            .addOnFailureListener(e -> callback.onFollowAction(false));
                 })
-                .addOnFailureListener(e -> callback.onFollowAction(false)); // Failed to remove from "following"
+                .addOnFailureListener(e -> callback.onFollowAction(false));
     }
 
     public void checkFollowStatus(String currentUser, String targetUser, FollowCheckCallback callback) {
@@ -143,7 +133,7 @@ public class Userbase {
         requestData.put("timestamp", System.currentTimeMillis());
 
         db.collection("follow_requests")
-            .add(requestData)
+                .add(requestData)
                 .addOnSuccessListener(documentReference -> {
                     Log.d("FollowDebug", "Follow request sent from " + requester + " to " + requested);
                     callback.onFollowRequestAction(true);
@@ -174,7 +164,7 @@ public class Userbase {
 
     public void getPendingFollowRequests(String requesterUsername, FollowRequestListCallback callback) {
         db.collection("follow_requests")
-                .whereEqualTo("requester", requesterUsername) // Get requests sent by this user
+                .whereEqualTo("requester", requesterUsername)
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     List<String> requests = new ArrayList<>();
@@ -201,7 +191,6 @@ public class Userbase {
                     }
                 });
     }
-
 
     public void getUserFollowing(String username, UserListCallback callback) {
         Log.d("FollowDebug", "Fetching following list for " + username);
@@ -286,53 +275,38 @@ public class Userbase {
                 .addOnFailureListener(e -> Log.e("FollowDebug", "Failed to find notifications for " + requested, e));
     }
 
-
-
-    /**
-     * Callback interface for checking user status.
-     */
+    // Callback interface for checking user status.
+    // Updated to include the password as the fourth parameter.
     public interface UserCheckCallback {
-        void onUserChecked(boolean exists, String name, String username);
+        void onUserChecked(boolean exists, String name, String username, String password);
     }
 
-    /**
-     * Callback interface for fetching user details.
-     */
+    // Callback interface for fetching user details.
     public interface UserDetailsCallback {
         void onUserDetailsFetched(boolean exists, String username, String name);
     }
 
-    /**
-     * Callback interface for creating a user.
-     */
+    // Callback interface for creating a user.
     public interface UserCreationCallback {
         void onUserCreated(boolean success);
     }
 
-    /**
-     * Callback interface for checking following status.
-     */
+    // Callback interface for checking following status.
     public interface FollowCheckCallback {
         void onFollowChecked(boolean isFollowing);
     }
 
-    /**
-     * Callback interface for following another user.
-     */
+    // Callback interface for following another user.
     public interface FollowActionCallback {
         void onFollowAction(boolean success);
     }
 
-    /**
-     * Callback interface for checking if a follow request exists.
-     */
+    // Callback interface for checking if a follow request exists.
     public interface FollowRequestCheckCallback {
         void onFollowRequestChecked(boolean requestExists);
     }
 
-    /**
-     * Callback interface for handling follow request actions.
-     */
+    // Callback interface for handling follow request actions.
     public interface FollowRequestActionCallback {
         void onFollowRequestAction(boolean success);
     }
@@ -343,9 +317,5 @@ public class Userbase {
 
     public interface UserListCallback {
         void onUserListRetrieved(List<String> users);
-    }
-
-    public CollectionReference getUsersRef() {
-        return usersRef;
     }
 }

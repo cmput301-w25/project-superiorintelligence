@@ -138,11 +138,13 @@ public class us040201 {
         onView(withId(R.id.signup_page_button)).perform(click());
         onView(withId(R.id.signup_name)).perform(typeText("TestUser"));
         onView(withId(R.id.signup_username)).perform(typeText("testUser3")).perform(closeSoftKeyboard());
+        onView(withId(R.id.create_password_label)).perform(typeText("123")).perform(closeSoftKeyboard());
         Thread.sleep(2000);
         onView(withId(R.id.signup_button)).perform(click());
         Thread.sleep(5000);
 
-        onView(withId(R.id.login_username)).perform(typeText("testUser3"));
+        onView(withId(R.id.login_username)).perform(typeText("testUser3")).perform(closeSoftKeyboard());
+        onView(withId(R.id.password_label)).perform(typeText("123")).perform(closeSoftKeyboard());
         onView(withId(R.id.login_button)).perform(click());
         Thread.sleep(5000);
 

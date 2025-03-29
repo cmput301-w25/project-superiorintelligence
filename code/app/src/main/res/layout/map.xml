@@ -48,18 +48,21 @@
         app:layout_constraintTop_toTopOf="@id/map_toolbar" />
 
     <!-- Map Container: Changed from FrameLayout to MapView for Mapbox -->
+
+
+    <!-- Filter Panel -->
     <fragment
         android:id="@+id/map_fragment"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@+id/map_toolbar"
         app:layout_constraintBottom_toTopOf="@+id/filter_panel"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/map_toolbar"
+        app:layout_constraintVertical_bias="1.0" />
 
-
-    <!-- Filter Panel -->
     <LinearLayout
         android:id="@+id/filter_panel"
         android:layout_width="0dp"
@@ -88,11 +91,12 @@
             android:useDefaultMargins="true"
             android:padding="16dp">
 
+
             <CheckBox
-                android:id="@+id/cb_last_12_hours"
+                android:id="@+id/cb_myposts"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Last 12 hours"
+                android:text="My Posts"
                 app:buttonTint="@color/checkbox_tint"/>
 
             <CheckBox
@@ -127,14 +131,14 @@
                 android:id="@+id/cb_happy"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Happy"
+                android:text="Happiness"
                 app:buttonTint="@color/checkbox_tint"/>
 
             <CheckBox
-                android:id="@+id/cb_sad"
+                android:id="@+id/cb_sadness"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sad"
+                android:text="Sadness"
                 app:buttonTint="@color/checkbox_tint"/>
 
             <CheckBox

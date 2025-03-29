@@ -49,25 +49,14 @@
         app:layout_constraintTop_toTopOf="@id/signup_toolbar" />
 
     <!-- Username Label -->
-    <TextView
-        android:id="@+id/full_name_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:text="Enter Full Name"
-        android:textColor="@color/black"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/signup_toolbar" />
+
 
     <EditText
         android:id="@+id/signup_name"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_marginStart="30dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="96dp"
         android:layout_marginEnd="30dp"
         android:autofillHints="first and last"
         android:background="@drawable/text_input_rounded_box"
@@ -76,30 +65,16 @@
         android:padding="12dp"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/full_name_label" />
-
-
-    <TextView
-        android:id="@+id/create_username_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="250dp"
-        android:text="Enter Unique Username"
-        android:textColor="@color/black"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/signup_toolbar"></TextView>
+        app:layout_constraintTop_toBottomOf="@+id/signup_toolbar" />
 
     <EditText
         android:id="@+id/signup_username"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_marginStart="30dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="84dp"
         android:layout_marginEnd="30dp"
         android:autofillHints="username"
         android:background="@drawable/text_input_rounded_box"
@@ -108,8 +83,73 @@
         android:padding="12dp"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/create_username_label" />
+        app:layout_constraintTop_toBottomOf="@+id/signup_name" />
+
+    <TextView
+        android:id="@+id/create_password_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:text="Enter Unique Password"
+        android:textColor="@color/black"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/signup_password"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.358"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/signup_username"
+        app:layout_constraintVertical_bias="0.688" />
+
+    <TextView
+        android:id="@+id/create_username_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter Unique Username"
+        android:textColor="@color/black"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/signup_username"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.435"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/full_name_label"
+        app:layout_constraintVertical_bias="0.808" />
+
+    <TextView
+        android:id="@+id/full_name_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="52dp"
+        android:text="Enter Full Name"
+        android:textColor="@color/black"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/signup_name"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/signup_toolbar" />
+
+    <EditText
+        android:id="@+id/signup_password"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="30dp"
+        android:autofillHints="username"
+        android:background="@drawable/text_input_rounded_box"
+        android:hint="Password"
+        android:inputType="textPassword"
+        android:padding="12dp"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/signup_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/signup_username"
+        app:layout_constraintVertical_bias="0.614" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/signup_button"
@@ -128,8 +168,10 @@
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/signup_username" />
+        app:layout_constraintTop_toBottomOf="@+id/signup_username"
+        app:layout_constraintVertical_bias="0.605" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

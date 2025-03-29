@@ -177,15 +177,17 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
             // Set mood spinner
             if (currentEvent.getMood() != null) {
                 ArrayAdapter<String> moodAdapter = (ArrayAdapter<String>) emotionSpinner.getAdapter();
-                int moodPosition = moodAdapter.getPosition(currentEvent.getMood());
-                if (moodPosition >= 0) emotionSpinner.setSelection(moodPosition);
+                selectedMood.setText(currentEvent.getMood());
+                // int moodPosition = moodAdapter.getPosition(currentEvent.getMood());
+                // if (moodPosition >= 0) emotionSpinner.setSelection(moodPosition);
             }
 
             // Set situation spinner
             if (currentEvent.getSituation() != null) {
                 ArrayAdapter<String> situationAdapter = (ArrayAdapter<String>) situationSpinner.getAdapter();
-                int situationPosition = situationAdapter.getPosition(currentEvent.getSituation());
-                if (situationPosition >= 0) situationSpinner.setSelection(situationPosition);
+                selectedSituation.setText(currentEvent.getSituation());
+                // int situationPosition = situationAdapter.getPosition(currentEvent.getSituation());
+                // if (situationPosition >= 0) situationSpinner.setSelection(situationPosition);
             }
         }
 
@@ -274,9 +276,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
 
         emotionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(
-                    AdapterView<?> parent, View view, int position, long id
-            ) {
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position == 0) {
                     isEmotionSelected = false;
                     return;
@@ -285,6 +285,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
                 selectedMood.setText(chosenEmotion);
                 updateEmojiIcon(chosenEmotion);
                 isEmotionSelected = true;
+
                 emotionSpinner.setVisibility(View.GONE);
             }
 

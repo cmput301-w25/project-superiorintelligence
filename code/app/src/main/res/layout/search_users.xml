@@ -50,17 +50,17 @@
 
     <!-- Username Label -->
     <EditText
-        android:id="@+id/editText"
+        android:id="@+id/search_bar"
         android:layout_width="0dp"
         android:layout_height="50dp"
-        android:layout_marginTop="38dp"
+        android:layout_marginTop="10dp"
         android:background="@drawable/text_input_rounded_box"
         android:hint="User ID or Email"
         android:padding="12dp"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/login_toolbar" />
+        app:layout_constraintTop_toBottomOf="@id/search_for_user_text" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/clear_button"
@@ -75,14 +75,14 @@
         android:textAllCaps="false"
         android:textColor="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editText"
+        app:layout_constraintTop_toBottomOf="@+id/search_bar"
         app:strokeColor="@color/black" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/search_for_user_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="20dp"
         android:text="Search For a User"
         android:textColor="@color/black"
         android:textSize="22sp"
@@ -106,7 +106,7 @@
         android:textColor="@color/black"
         android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editText" />
+        app:layout_constraintTop_toBottomOf="@+id/search_bar" />
 
     <!-- RecyclerView to display users -->
     <androidx.recyclerview.widget.RecyclerView

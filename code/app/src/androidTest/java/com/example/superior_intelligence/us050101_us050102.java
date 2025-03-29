@@ -15,10 +15,11 @@ import android.icu.text.SimpleDateFormat;
 import android.os.SystemClock;
 import android.util.Log;
 
+import androidx.test.espresso.action.ViewActions;
+import androidx.test.espresso.intent.Intents;
 import androidx.test.rule.ActivityTestRule;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.junit.After;
@@ -30,7 +31,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
-public class us050101andus050102 {
+public class us050101_us050102 {
 
     // 1) TELL JUnit NOT to auto-start the Activity: launchActivity=false
     @Rule
@@ -63,14 +63,15 @@ public class us050101andus050102 {
         wipeEmulator();
 
         // Now create all the test data
-        ensureUserExists("userA", "Alice A");
-        ensureUserExists("userB", "Bob B");
+        ensureUserExists("userA", "Alice A", "pass1");
+        ensureUserExists("userB", "Bob B", "pass2");
         ensureEventByUserAExists();
 
         // Confirm the docs actually exist before we let the test proceed
         confirmUserExists("userA");
         confirmUserExists("userB");
         confirmEventExists("userA_event");
+        Intents.init();
     }
 
     /**
@@ -87,6 +88,8 @@ public class us050101andus050102 {
 
         // Then do the usual login steps
         onView(withId(R.id.login_username)).perform(typeText("userB"));
+        closeSoftKeyboard();
+        onView(withId(R.id.login_password)).perform(typeText("pass2"));
         closeSoftKeyboard();
         onView(withId(R.id.login_button)).perform(click());
         SystemClock.sleep(3000);
@@ -112,8 +115,9 @@ public class us050101andus050102 {
 
         // Check we can see "Pending requests"
         onView(withId(R.id.notification_button)).perform(click());
-        onView(withText("Pending requests")).perform(click());
-        SystemClock.sleep(1000);
+        SystemClock.sleep(2000);
+        onView(withText("Pending Requests")).perform(click());
+        SystemClock.sleep(2000);
 
         onView(withText("You requested to follow userA. Pending approval."))
                 .check(matches(isDisplayed()));
@@ -127,7 +131,7 @@ public class us050101andus050102 {
         SystemClock.sleep(1000);
 
         // Log back in as userA
-        loginAs("userA");
+        loginAs("userA", "pass1");
         onView(withId(R.id.notification_button)).perform(click());
         onView(withText("userB wants to follow you."))
                 .check(matches(isDisplayed()));
@@ -138,13 +142,17 @@ public class us050101andus050102 {
     /**
      * A shorter "loginAs(...)" method that re-launches the activity.
      */
-    private void loginAs(String username) throws InterruptedException {
+    private void loginAs(String username, String password) throws InterruptedException {
         Intent intent = new Intent();
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         loginRule.launchActivity(intent);
 
         onView(withId(R.id.login_username)).perform(typeText(username));
-        closeSoftKeyboard();
+        ViewActions.closeSoftKeyboard();
+
+        onView(withId(R.id.login_password)).perform(typeText(password));
+        ViewActions.closeSoftKeyboard();
+
         onView(withId(R.id.login_button)).perform(click());
         SystemClock.sleep(3000);
     }
@@ -152,13 +160,16 @@ public class us050101andus050102 {
     /**
      * Ensure user doc is created
      */
-    private void ensureUserExists(String username, String name) throws InterruptedException {
+    private void ensureUserExists(String username, String name, String rawPassword) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         Map<String, Object> user = new HashMap<>();
         user.put("username", username);
         user.put("name", name);
-        user.put("followers", new ArrayList<>());
-        user.put("following", new ArrayList<>());
+        user.put("followers", new java.util.ArrayList<>());
+        user.put("following", new java.util.ArrayList<>());
+
+        String hashedPassword = PasswordHasher.hashPassword(rawPassword);
+        user.put("password", hashedPassword);
 
         db.collection("users").document(username).set(user)
                 .addOnCompleteListener(task -> latch.countDown());
