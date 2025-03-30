@@ -160,7 +160,7 @@ public class TestOfflineActivity {
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
                             assertEquals("Offline Event", documentSnapshot.getString("title"));
-//                            assertEquals("offline@example.com", documentSnapshot.getString("postUser"));
+//                            assertEquals("offline@example.com", documentSnapshot.getStringser"));
                             assertEquals("Shame", documentSnapshot.getString("mood"));
                             System.out.println("Data successfully synced!");
                             synced.set(true);

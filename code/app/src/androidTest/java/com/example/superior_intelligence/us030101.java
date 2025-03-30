@@ -1,5 +1,5 @@
 /**
- * The purpose of this code is to test and ensure the correct impplementation of CreateAccountActivity and LoginPageActivity
+ * The purpose of this code is a UI test and ensure the correct impplementation of CreateAccountActivity and LoginPageActivity
  * test CreateUniqueUserTest ensures newly created usernames are unique and do not already exist in the database
  * test LoginTest ensures users may only log in if they have a username found in the database
  * tests signout as well
@@ -48,6 +48,7 @@ public class us030101 {
     public void testCreateAndLoginFlow() throws InterruptedException {
         String testName = "Test User";
         String testUsername = "testUser123";
+        String testPassword = "Test Password";
         String nonExistentUsername = "doesNotExist";
 
         // go to main page
@@ -57,16 +58,18 @@ public class us030101 {
         onView(withId(R.id.signup_page_button)).perform(click());
         onView(withId(R.id.signup_name)).perform(replaceText(testName));
         onView(withId(R.id.signup_username)).perform(replaceText(testUsername));
+        onView(withId(R.id.signup_password)).perform(replaceText(testPassword));
         closeSoftKeyboard();
         onView(withId(R.id.signup_button)).perform(click());
 
         // Allow time for Firestore to update
-        Thread.sleep(2000);
-        onView(withId(R.id.signup_page_button)).perform(click()); // go back to login
+        Thread.sleep(3000);
+        onView(withId(R.id.signup_page_button)).perform(click()); // go to signup page
 
         // Try creating another account with the same username (should fail)
         onView(withId(R.id.signup_name)).perform(replaceText("Another User"));
         onView(withId(R.id.signup_username)).perform(replaceText(testUsername));
+        onView(withId(R.id.signup_password)).perform(replaceText(testPassword));
         closeSoftKeyboard();
         onView(withId(R.id.signup_button)).perform(click());
 
@@ -76,6 +79,7 @@ public class us030101 {
         // Try logging in with a non-existent username (should fail)
         onView(withId(R.id.back_button)).perform(click());
         onView(withId(R.id.login_username)).perform(replaceText(nonExistentUsername));
+        onView(withId(R.id.login_password)).perform(replaceText(testPassword));
         closeSoftKeyboard();
         onView(withId(R.id.login_button)).perform(click());
 
@@ -84,6 +88,7 @@ public class us030101 {
 
         // Successfully log in with the created username
         onView(withId(R.id.login_username)).perform(replaceText(testUsername));
+        onView(withId(R.id.login_password)).perform(replaceText(testPassword));
         closeSoftKeyboard();
         onView(withId(R.id.login_button)).perform(click());
 
