@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * and retrieving events, as well as adding comments.
  */
 @RunWith(AndroidJUnit4.class)
-public class DatabaseTest {
+public class DatabaseTest { 
 
     private Database db;
     private FirebaseFirestore firestore;
