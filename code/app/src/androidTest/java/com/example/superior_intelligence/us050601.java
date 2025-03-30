@@ -150,11 +150,10 @@ public class us050601 {
 
     /**
      * Log in to enter homepage using testUser who is following followedUser
-     * @throws InterruptedException
+     * @throws InterruptedException wait for all user and post data to load
      */
     public void logIn() throws InterruptedException {
         onView(withId(R.id.login_button_login_page)).perform(click());
-
 
         onView(withId(R.id.login_username)).perform(typeText("testUser")).perform(closeSoftKeyboard());
         onView(withId(R.id.login_password)).perform(typeText("TestPass")).perform(closeSoftKeyboard());
@@ -164,6 +163,7 @@ public class us050601 {
 
     /**
      * Set up user and its following in the database
+     * @throws InterruptedException attempt adding user to database
      */
     private void seedUserDB() throws InterruptedException {
         String username = "testUser", name = "Test User", rawPassword = "TestPass";

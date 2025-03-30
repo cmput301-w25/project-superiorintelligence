@@ -191,7 +191,7 @@ public class us050301 {
 
     /**
      * Add base events and users that are needed in the testing to the database
-     * @throws InterruptedException
+     * @throws InterruptedException wait for user and posts database to load in firestore and onto the tab
      */
     @Before // run before every test
     public void setUp() throws InterruptedException {
@@ -202,7 +202,7 @@ public class us050301 {
 
     /**
      * Log in to enter homepage using testUser who is following followedUser
-     * @throws InterruptedException
+     * @throws InterruptedException wait for all user and post data to load
      */
     public void logIn() throws InterruptedException {
         onView(withId(R.id.login_button_login_page)).perform(click());
@@ -216,6 +216,7 @@ public class us050301 {
 
     /**
      * Set up user and its following in the database
+     * @throws InterruptedException attempt adding user to database
      */
     private void seedUserDB() throws InterruptedException {
         String username = "testUser", name = "Test User", rawPassword = "TestPass";
@@ -233,10 +234,10 @@ public class us050301 {
 
     /**
      * Add a user to the database
-     * @param username
-     * @param name
-     * @param rawPassword
-     * @throws InterruptedException
+     * @param username          username of the account
+     * @param name              name of the user
+     * @param rawPassword       raw password to be hashed
+     * @throws InterruptedException wait for latch release when attemp to add user to database
      */
     public void seedUser(String username, String name, String rawPassword) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
@@ -254,7 +255,13 @@ public class us050301 {
         latch.await();
     }
 
-    public void followUser(String followingUser, String followedUser, Userbase.FollowActionCallback callback) throws InterruptedException {
+    /**
+     * Set followingUser to follow followedUser
+     * @param followingUser     user that is following the other user
+     * @param followedUser      user that is being followed
+     * @param callback          follow whether action is successful or not
+     */
+    public void followUser(String followingUser, String followedUser, Userbase.FollowActionCallback callback){
         db.collection("users").document(followingUser)
                 .update("following", FieldValue.arrayUnion(followedUser))
                 .addOnSuccessListener(aVoid -> {
@@ -268,7 +275,7 @@ public class us050301 {
 
     /**
      * Add posts to database with current date and last year date
-     * @throws InterruptedException
+     * @throws InterruptedException wait for event to be added to database
      */
     public void seedPostDB() throws InterruptedException {
         Event event = new Event("TestBeforeRecWk", "Test last year", "12 MAR 2024, 12:04", "#CC0099", "", 0, true, false, "Surprise", "", "", "followedUser", null, null, true);
@@ -287,8 +294,8 @@ public class us050301 {
 
     /**
      * Add an event to database
-     * @param event
-     * @throws InterruptedException
+     * @param event     event of an Event class containing id, title, date, etc.
+     * @throws InterruptedException     wait for latch to release when attempt to add event to firestore
      */
     public void seedPost(Event event) throws InterruptedException {
         Database db = new Database();
@@ -309,10 +316,10 @@ public class us050301 {
 
     /**
      * Add an event to database with specified number of day(s) from current date
-     * @param eventID
-     * @param eventTitle
-     * @param subtractDay
-     * @throws InterruptedException
+     * @param eventID           id of an event
+     * @param eventTitle        title of a mood event
+     * @param subtractDay       day to subtract from current date (-1 for yesterday etc.)
+     * @throws InterruptedException wait for result of adding event to firestore
      */
     public void addMoreEvent(String eventID, String eventTitle, int subtractDay) throws InterruptedException {
         Event event = new Event(eventID, eventTitle, null, "#FF6347", "", 0, true, false, "Anger", "", "", "followedUser", null, null, true);
