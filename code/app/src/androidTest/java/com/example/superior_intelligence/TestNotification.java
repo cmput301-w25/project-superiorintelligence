@@ -14,14 +14,19 @@ import static org.hamcrest.Matchers.allOf;
 import android.content.Intent;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.View;
 
+import androidx.test.espresso.UiController;
+import androidx.test.espresso.ViewAction;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.rule.ActivityTestRule;
 
+import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import org.hamcrest.Matcher;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -38,6 +43,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
+import static androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom;
+
 
 @RunWith(AndroidJUnit4.class)
 public class TestNotification {
@@ -166,10 +173,17 @@ public class TestNotification {
 
     @Test
     public void testPendingRequest_IsDisplayed() {
-        onView(withText("Pending requests")).perform(click());
+        // Select the second tab (index 1 = "Pending")
+        onView(withId(R.id.notifications_tab_layout)).perform(selectTabAtPosition(1));
+
+        // Optional wait for UI to settle (1s max)
         SystemClock.sleep(1000);
-        onView(withText("You requested to follow bob. Pending approval.")).check(matches(isDisplayed()));
+
+        // Assert that the follow request message is shown
+        onView(withText("You requested to follow bob. Pending approval."))
+                .check(matches(isDisplayed()));
     }
+
 
     @Test
     public void testAcceptFollowRequest_RemovesNotification() throws InterruptedException {
@@ -212,8 +226,27 @@ public class TestNotification {
         assertFollowRequestGone("alice", "testUser");
     }
 
+    private static ViewAction selectTabAtPosition(int position) {
+        return new ViewAction() {
+            @Override
+            public Matcher<View> getConstraints() {
+                return isAssignableFrom(TabLayout.class);
+            }
+
+            @Override
+            public String getDescription() {
+                return "Select tab at index " + position;
+            }
+
+            @Override
+            public void perform(UiController uiController, View view) {
+                ((TabLayout) view).getTabAt(position).select();
+            }
+        };
+    }
+
     @After
-    public static void cleanEmulator() {
+    public void cleanEmulator() {
         String projectId = "moodgram";
         try {
             URL url = new URL("http://10.0.2.2:8080/emulator/v1/projects/" + projectId + "/databases/(default)/documents");
