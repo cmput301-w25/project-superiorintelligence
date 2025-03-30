@@ -2,7 +2,7 @@ package com.example.superior_intelligence;
 
 import java.io.Serializable;
 
-public class Comment implements Serializable {
+public class Comment implements Serializable, Comparable<Comment>  {
 
     private String username;
     private String text;
@@ -73,5 +73,18 @@ public class Comment implements Serializable {
      */
     public void setTime(String time) {
         this.time = time;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Comment)) return false;
+        Comment c = (Comment) o;
+        return username.equals(c.username) && text.equals(c.text) && time.equals(c.time);
+    }
+
+    @Override
+    public int compareTo(Comment other) {
+        return this.time.compareTo(other.time); // For now, compare as strings (dd/MM/yy H:mm)
     }
 }
