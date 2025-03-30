@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Test add/edit/delete mood event when app is disconnected from the network
  */
 @RunWith(AndroidJUnit4.class)
-public class OfflineActivityTest {
+public class TestOfflineActivity {
     // Code is taken from Firestore website and Chatgpt
     private FirebaseFirestore db;
 

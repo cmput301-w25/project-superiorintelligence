@@ -12,7 +12,7 @@ import org.mockito.Mockito;
 /**
  * Unit tests for helper methods in MoodCreateAndEditActivity.
  */
-public class MoodCreateAndEditActivityTest {
+public class TestMoodCreateAndEditActivity {
 
     private MoodCreateAndEditActivity activity;
 

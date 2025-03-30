@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class CommentTest {
+public class TestComment {
 
     private List<Comment> createMockList() {
         List<Comment> list = new ArrayList<>();

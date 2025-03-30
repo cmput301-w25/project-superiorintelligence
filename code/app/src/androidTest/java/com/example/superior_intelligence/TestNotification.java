@@ -44,7 +44,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 
 
 @RunWith(AndroidJUnit4.class)
-public class NotificationTest {
+public class TestNotification {
 
     static {
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();

@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
  * checks user db
  */
 
-public class CreateUserTest {
+public class TestCreateUser {
 
     @Test
     public void testCreateUser_successfulCreation() {
