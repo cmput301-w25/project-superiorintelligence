@@ -49,7 +49,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
     private String eventDate;
 
     // Passing an event
-    private Event currentEvent;
+    Event currentEvent;
 
     // Title
     EditText headerTitle;
