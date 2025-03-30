@@ -333,15 +333,10 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
                     }
                 }
             } else {
-                // If no "comments" field, or doc not found, your list remains empty
                 commentsList.clear();
             }
-
-            // Now that commentsList is updated, show them
             setupCommentsSection();
         }).addOnFailureListener(e -> {
-            Log.e("Firestore", "Error loading comments", e);
-            // Optionally handle error (list remains empty)
             setupCommentsSection();
         });
     }
@@ -354,11 +349,8 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
     @Override
     public void delete(boolean delete_status) {
         if (delete_status) {
-            Log.d("EventDetailsActivity", "User confirmed deletion for event: " + currentEvent.getID());
             Database.getInstance().deleteEvent(currentEvent.getID(), success -> {
                 if (success) {
-                    Log.d("EventDetailsActivity", "Event deleted successfully");
-
                     Intent returnIntent = new Intent();
                     returnIntent.putExtra("eventDeleted", true);
                     returnIntent.putExtra("deletedEventId", currentEvent.getID());
@@ -366,7 +358,6 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
                     setResult(RESULT_OK, returnIntent);
                     finish();
                 } else {
-                    Log.e("EventDetailsActivity", "Failed to delete event");
                     Toast.makeText(EventDetailsActivity.this, "Failed to delete event", Toast.LENGTH_SHORT).show();
                 }
             });
@@ -379,10 +370,8 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
     public void public_status(boolean post_status) {
         if (currentEvent.isPublic_status() != post_status){
             currentEvent.setPublic_status(post_status);
-
-            Database database = new Database();
             // Update in Firestore
-            database.updateEvent(currentEvent, success -> {
+            Database.getInstance().updateEvent(currentEvent, success -> {
                 if (success) {
                     Toast.makeText(EventDetailsActivity.this, "Event updated successfully!", Toast.LENGTH_SHORT).show();
                     Intent returnIntent = new Intent();
