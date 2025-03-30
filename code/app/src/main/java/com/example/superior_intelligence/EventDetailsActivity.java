@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.window.OnBackInvokedDispatcher;
@@ -37,6 +38,7 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
 
     private TextView eventTitle, eventMood, selectedMood, eventReason, eventSituation, eventDate, eventUser;
     private TextView noCommentsText;
+    private LinearLayout commentSectionContainer;
     private EditText commentInput;
     private RecyclerView commentsRecyclerView;
     private ImageView eventImage, publicEmo, privateEmo;
@@ -267,12 +269,15 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
         noCommentsText = findViewById(R.id.no_comments_text);
         commentsRecyclerView = findViewById(R.id.comments_recycler_view);
         profileCard = findViewById(R.id.profile_image);
+        commentSectionContainer = findViewById(R.id.comment_section_container);
 
-        // For others' posts, enable commenting
         if (!isMyPost) {
             commentInput = findViewById(R.id.comment_input);
             sendCommentButton = findViewById(R.id.send_comment_button);
+
             sendCommentButton.setOnClickListener(view -> {
+                if (!currentEvent.isPublic_status()) return;
+
                 String commentText = commentInput.getText().toString().trim();
                 if (!commentText.isEmpty()) {
                     String username = User.getInstance().getUsername();
@@ -280,9 +285,7 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
                     Comment newComment = new Comment(username, commentText, timestamp);
                     commentsList.add(newComment);
 
-                    // Refresh UI
                     setupCommentsSection();
-                    // Clear text input
                     commentInput.setText("");
                     Database.getInstance().saveCommentToEvent(currentEvent.getID(), newComment);
                 }
@@ -295,12 +298,14 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
                     Intent profileIntent = new Intent(EventDetailsActivity.this, OtherUserProfileActivity.class);
                     profileIntent.putExtra("username", currentEvent.getPostUser());
                     startActivity(profileIntent);
-                }
-                else {
+                } else {
                     Log.e("EventDetailsActivity", "currentEvent.getUser() is null or empty");
                 }
             });
         } else {
+            if (!currentEvent.isPublic_status()) {
+                commentSectionContainer.setVisibility(View.GONE);
+            }
             publicEmo = findViewById(R.id.public_status_detail);
             privateEmo = findViewById(R.id.private_status_detail);
         }

@@ -165,56 +165,67 @@
                 android:visibility="gone"
                 app:layout_constraintDimensionRatio="4:3" />
 
-            <!-- Comments Section Title -->
-            <TextView
-                android:id="@+id/comments_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:text="@string/comments"
-                android:textColor="@color/black"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:visibility="visible" />
 
-            <!-- Placeholder for No Comments -->
-            <TextView
-                android:id="@+id/no_comments_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:gravity="center"
-                android:text="No comments yet"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                android:textStyle="italic"
-                android:visibility="gone" />
-
-            <!-- Comments List -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/comments_recycler_view"
+                <!-- Comments List -->
+            <LinearLayout
+                android:id="@+id/comment_section_container"
                 android:layout_width="match_parent"
-                android:layout_height="340dp"
-                android:background="@android:color/white"
-                android:overScrollMode="always"
-                android:padding="8dp"
-                android:visibility="gone" />
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="visible">
 
+                <!-- Comments Section Title -->
+                <TextView
+                    android:id="@+id/comments_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="16dp"
+                    android:text="@string/comments"
+                    android:textColor="@color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:visibility="visible" />
+
+                <!-- Placeholder for No Comments -->
+                <TextView
+                    android:id="@+id/no_comments_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:text="No comments yet"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:textStyle="italic"
+                    android:visibility="gone" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/comments_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxHeight="340dp"
+                    android:background="@android:color/white"
+                    android:overScrollMode="always"
+                    android:padding="8dp"
+                    android:nestedScrollingEnabled="true"
+                    android:visibility="gone" />
+            </LinearLayout>
             <!-- DELETE and UPDATE STATUS button -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingTop="20dp">
 
                 <!-- DELETE button -->
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/delete_button"
                     android:layout_width="180dp"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginEnd="10dp"
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginEnd="10dp"
                     android:background="@drawable/rounded_background"
                     android:clickable="true"
                     android:text="DELETE"
