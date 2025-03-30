@@ -1,20 +1,25 @@
 package com.example.superior_intelligence;
+/**
+ * Test filtering show 3 most recent posts from followed posts
+ */
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
+import static androidx.test.espresso.action.ViewActions.scrollTo;
+import static androidx.test.espresso.action.ViewActions.swipeUp;
 import static androidx.test.espresso.action.ViewActions.typeText;
-import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
-import android.content.Intent;
+import static org.junit.Assert.assertEquals;
+
 import android.util.Log;
 
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.espresso.assertion.ViewAssertions;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
-import androidx.test.rule.ActivityTestRule;
 
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FieldValue;
@@ -33,6 +38,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -41,65 +47,147 @@ import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
 @RunWith(JUnit4.class)
-public class us050401 {
-
-    private String loggedInUserName;
-
+public class us050301 {
     // Start at HomeActivity
     @Rule
     public ActivityScenarioRule<MainActivity> scenario = new
             ActivityScenarioRule<MainActivity>(MainActivity.class);
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+
     /**
-     * Test that filtering recent week should not include followed post before recent week
+     * Test filtering show 3 most recent posts should only display 3 posts
+     * when there are more than 3 followed posts
      * @throws InterruptedException
      */
-
     @Test
-    public void filterRecentWeekInFollowedShouldNotDisplayEventOutsideRecentWeek() throws InterruptedException {
-        //Ensure that test is on myPosts tab
+    public void filter3RecentFollowedPostsDisplayOnly3Post() throws InterruptedException {
+        // add more events to database
+        addMoreEvent("moreTest1", "Test extra yesterday 1", -1);
+        addMoreEvent("moreTest2", "Test extra yesterday 2", -2);
+        logIn();
+
+        //Ensure that test is on followed tab
         onView(withId(R.id.tab_followed)).perform(click());
-        Thread.sleep(5000);
+
+        //Ensure correct number of added events
+        onView(withId(R.id.recycler_view))
+                .check((view, noViewFoundException) -> {
+                    RecyclerView recyclerView = (RecyclerView) view;
+                    int itemCount = recyclerView.getAdapter().getItemCount();
+                    assertEquals("RecyclerView should have exactly 4 items", 4, itemCount);
+                });
+
+
+        //click on menu button to select filter
+        onView(withId(R.id.menu_button)).perform(click());
+        onView(withId(R.id.three_recent_option)).perform(click());
+
+        //Check if only 3 posts are displayed
+        onView(withId(R.id.recycler_view))
+                .check((view, noViewFoundException) -> {
+                    RecyclerView recyclerView = (RecyclerView) view;
+                    int itemCount = recyclerView.getAdapter().getItemCount();
+                    assertEquals("RecyclerView should have exactly 3 items", 3, itemCount);
+                });
+
+    }
+
+    /**
+     * Test filtering show 3 most recent posts should display all followed posts
+     * when there are less than 3 followed posts
+     * @throws InterruptedException
+     */
+    @Test
+    public void filter3RecentFollowedPostsDisplayAllPostsWhenFollowedPostsLessThan3Posts() throws InterruptedException {
+        logIn();
+
+        //Ensure that test is on followed tab
+        onView(withId(R.id.tab_followed)).perform(click());
+        Thread.sleep(1000);
+
         //Make sure added events are displayed
         onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
         onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
 
         //click on menu button to select filter
         onView(withId(R.id.menu_button)).perform(click());
+        onView(withId(R.id.three_recent_option)).perform(click());
 
-        //click on filter to see last 7 days post
-        onView(withId(R.id.recent_week_option)).perform(click());
-
-        //test that created last year should not appear
-        onView(withText("Test last year")).check(doesNotExist());
-
+        //Check if the same events are displayed
+        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
+        onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
     }
 
     /**
-     * Test that filtering recent week should include followed during the recent week
+     * Test filtering show 3 most recent posts should only display
+     * the three most recent posts
      * @throws InterruptedException
      */
     @Test
-    public void filterRecentWeekInFollowedShouldDisplayEventDuringRecentWeek() throws InterruptedException {
-        //Ensure that test is on myPosts tab
+    public void filter3RecentFollowedPostsDisplayRecentPosts() throws InterruptedException {
+        // add more events to the database
+        addMoreEvent("moreTest1", "Test extra yesterday 1", -1);
+        addMoreEvent("moreTest2", "Test extra yesterday 2", -2);
+        logIn();
+
+
+        //Ensure that test is on followed tab
         onView(withId(R.id.tab_followed)).perform(click());
+        Thread.sleep(1000);
 
         //Make sure added events are displayed
         onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
+        onView(withText("Test extra yesterday 1")).check(ViewAssertions.matches(isDisplayed()));
+        onView(withId(R.id.recycler_view)).perform(swipeUp());
+        onView(withText("Test extra yesterday 2")).check(ViewAssertions.matches(isDisplayed()));
+        onView(withId(R.id.recycler_view)).perform(swipeUp());
         onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
 
         //click on menu button to select filter
         onView(withId(R.id.menu_button)).perform(click());
+        onView(withId(R.id.three_recent_option)).perform(click());
 
-        //click on filter to see last 7 days post
-        onView(withId(R.id.recent_week_option)).perform(click());
-
-        //test that created last year should not appear
+        //Check if the three recent posts are displayed
         onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
-
+        onView(withText("Test extra yesterday 1")).check(ViewAssertions.matches(isDisplayed()));
+        onView(withId(R.id.recycler_view)).perform(swipeUp());
+        onView(withText("Test extra yesterday 2")).check(ViewAssertions.matches(isDisplayed()));
+        onView(withId(R.id.recycler_view)).perform(swipeUp());
     }
 
+    /**
+     * Test filtering show 3 most recent posts should not show the non recent posts
+     * that were posted before the recent 3
+     */
+    @Test
+    public void filter3RecentFollowedPostsShouldNotDisplayNonRecentPosts() throws InterruptedException {
+        // add more events to database
+        addMoreEvent("moreTest1", "Test extra yesterday 1", -1);
+        addMoreEvent("moreTest2", "Test extra yesterday 2", -2);
+        logIn();
+
+        //Ensure that test is on followed tab
+        onView(withId(R.id.tab_followed)).perform(click());
+        Thread.sleep(1000);
+
+        //Make sure added events are displayed
+        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
+        onView(withText("Test extra yesterday 1")).check(ViewAssertions.matches(isDisplayed()));
+        onView(withId(R.id.recycler_view)).perform(swipeUp());
+        onView(withText("Test extra yesterday 2")).check(ViewAssertions.matches(isDisplayed()));
+        onView(withId(R.id.recycler_view)).perform(swipeUp());
+        onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
+
+        //click on menu button to select filter
+        onView(withId(R.id.menu_button)).perform(click());
+        onView(withId(R.id.three_recent_option)).perform(click());
+        onView(withId(R.id.recycler_view)).perform(swipeUp());
+
+        // make sure non recent event outside of the 3 recent ones are not displayed
+        onView(withText("Test last year")).check(ViewAssertions.doesNotExist());
+
+    }
 
     /**
      * Add base events and users that are needed in the testing to the database
@@ -109,7 +197,6 @@ public class us050401 {
     public void setUp() throws InterruptedException {
         seedUserDB();
         seedPostDB();
-        logIn();
     }
 
 
@@ -221,6 +308,28 @@ public class us050401 {
 
 
     /**
+     * Add an event to database with specified number of day(s) from current date
+     * @param eventID
+     * @param eventTitle
+     * @param subtractDay
+     * @throws InterruptedException
+     */
+    public void addMoreEvent(String eventID, String eventTitle, int subtractDay) throws InterruptedException {
+        Event event = new Event(eventID, eventTitle, null, "#FF6347", "", 0, true, false, "Anger", "", "", "followedUser", null, null, true);
+        // current date to ensure test will work regardless of the time
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, subtractDay); // Subtract one day
+
+
+        String yesterdayDate = new SimpleDateFormat("dd MMM yyyy, HH:mm",
+                Locale.getDefault()).format(calendar.getTime());
+
+
+        event.setDate(yesterdayDate);
+        seedPost(event);
+    }
+
+    /**
      * Remove any of the data that were added in the beginning of the test
      */
     @After // run after every test
@@ -255,6 +364,7 @@ public class us050401 {
     public static void setupEmulator(){
         // Specific address for emulated device to access our localHost
         String androidLocalhost = "10.0.2.2";
+
 
         int portNumber = 8080;
         FirebaseFirestore.getInstance().useEmulator(androidLocalhost, portNumber);
