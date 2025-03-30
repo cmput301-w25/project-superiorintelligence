@@ -13,7 +13,10 @@ public class EventsTest {
     private EventAdapter adapter;
     private List<Event> mockEvents;
 
-    // ✅ Safe subclass that bypasses notifyDataSetChanged
+    /**
+     * This subclass of EventAdapter is used just for testing.
+     * It skips notifying RecyclerView observers to avoid crashes during tests.
+     */
     private static class TestableEventAdapter extends EventAdapter {
         private List<Event> internalEvents;
 
@@ -24,7 +27,6 @@ public class EventsTest {
         @Override
         public void setEvents(List<Event> events) {
             this.internalEvents = events;
-            // ⚠️ Skipping notifyDataSetChanged to avoid RecyclerView error
         }
 
         @Override
@@ -33,11 +35,17 @@ public class EventsTest {
         }
     }
 
+    /**
+     * Creates a sample event used in some tests.
+     */
     private Event mockEvent() {
         return new Event("1", "Study Group", "27 Mar 2025", "#FF5733", "image123", 123, true, true,
                 "Happy", "Had a good study session", "Alone", "student1", 53.5461, -113.4938, true);
     }
 
+    /**
+     * Runs before every test. It sets up the adapter and a sample list of events.
+     */
     @Before
     public void setUp() {
         adapter = new TestableEventAdapter();
@@ -46,6 +54,9 @@ public class EventsTest {
         mockEvents.add(new Event("2", "Midterm", "25 Mar 2025", "#ADD8E6", "", 0, false, false, "Stressed", "Exams approaching", "Alone", "user456", 0.0, 0.0, true));
     }
 
+    /**
+     * Tests if an Event is created properly and stores all the correct values.
+     */
     @Test
     public void testEventCreation() {
         Event event = mockEvent();
@@ -66,6 +77,9 @@ public class EventsTest {
         assertTrue(event.isPublic_status());
     }
 
+    /**
+     * Tests if all the setter methods in the Event class are working properly.
+     */
     @Test
     public void testSetters() {
         Event event = new Event();
@@ -105,6 +119,9 @@ public class EventsTest {
         assertFalse(event.isPublic_status());
     }
 
+    /**
+     * Tests if comments can be added to an event and retrieved in the right order.
+     */
     @Test
     public void testCommentsHandling() {
         Event event = new Event();
@@ -121,18 +138,27 @@ public class EventsTest {
         assertEquals("bob", comments.get(1).getUsername());
     }
 
+    /**
+     * Tests if setting a non-empty list of events updates the adapter's item count correctly.
+     */
     @Test
     public void testSetEvents() {
         adapter.setEvents(mockEvents);
         assertEquals(2, adapter.getItemCount());
     }
 
+    /**
+     * Tests if setting an empty list of events results in item count = 0.
+     */
     @Test
     public void testEmptyEventList() {
         adapter.setEvents(new ArrayList<>());
         assertEquals(0, adapter.getItemCount());
     }
 
+    /**
+     * Tests if a new event has no comments by default.
+     */
     @Test
     public void testEmptyCommentsList() {
         Event event = new Event();
