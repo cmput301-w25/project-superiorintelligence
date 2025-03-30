@@ -73,14 +73,12 @@ public class us040201 {
 
     /**
      * Test that filtering recent week should not include my post before recent week
-     * @throws InterruptedException
      */
-
     @Test
-    public void filterRecentWeekInMyPostsShouldNotDisplayEventOutsideRecentWeek() throws InterruptedException {
+    public void filterRecentWeekInMyPostsShouldNotDisplayEventOutsideRecentWeek() {
         //Ensure that test is on myPosts tab
         onView(withId(R.id.tab_myposts)).perform(click());
-        Thread.sleep(5000);
+
         //Make sure added events are displayed
         onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
         onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
@@ -98,10 +96,9 @@ public class us040201 {
 
     /**
      * Test that filtering recent week should include my post during the recent week
-     * @throws InterruptedException
      */
     @Test
-    public void filterRecentWeekInMyPostsShouldDisplayEventDuringRecentWeek() throws InterruptedException {
+    public void filterRecentWeekInMyPostsShouldDisplayEventDuringRecentWeek(){
         //Ensure that test is on myPosts tab
         onView(withId(R.id.tab_myposts)).perform(click());
 
@@ -124,7 +121,7 @@ public class us040201 {
     /**
      * Add events that needed in the testing to the database
      * Log in to start the test
-     * @throws InterruptedException
+     * @throws InterruptedException wait for database to update
      */
     @Before // run before every test
     public void setUp() throws InterruptedException {
@@ -137,7 +134,7 @@ public class us040201 {
 
     /**
      * Log in to the homepage using testUser3
-     * @throws InterruptedException
+     * @throws InterruptedException wait to load user and post data
      */
     public void logIn() throws InterruptedException {
         onView(withId(R.id.login_button_login_page)).perform(click());
@@ -150,6 +147,10 @@ public class us040201 {
 
     /**
      * Add user to database with name, user, password
+     * @param username      username of user's account
+     * @param name          name of the user
+     * @param rawPassword   raw password to be hashed
+     * @throws InterruptedException wait for latch to release when adding user to database
      */
     private void seedUserDB(String username, String name, String rawPassword) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
@@ -169,7 +170,7 @@ public class us040201 {
 
     /**
      * Add my posts to database with date before recent week and during recent week
-     * @throws InterruptedException
+     * @throws InterruptedException   wait for latch to be released when adding events to database
      */
     public void seedMyPostDB() throws InterruptedException {
         Database db = new Database();
