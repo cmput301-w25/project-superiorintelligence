@@ -21,15 +21,26 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * Instrumented UI tests for LoginPageActivity using Espresso.
+ * This test suite verifies the behavior of username and password field validations.
+ */
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 public class TestLoginPageActivity {
 
+    /**
+     * Launches the LoginPageActivity before each test case.
+     */
     @Before
     public void launchActivity() {
         ActivityScenario.launch(LoginPageActivity.class);
     }
 
+    /**
+     * Verifies that an error is shown when the username field is empty
+     * and the login button is pressed.
+     */
     @Test
     public void validateUsername_showsErrorWhenEmpty() {
         onView(withId(R.id.login_username)).perform(clearText());
@@ -40,6 +51,10 @@ public class TestLoginPageActivity {
                 .check(matches(withErrorText("Username cannot be empty")));
     }
 
+    /**
+     * Verifies that an error is shown when the password field is empty
+     * and the login button is pressed.
+     */
     @Test
     public void validatePassword_showsErrorWhenEmpty() {
         onView(withId(R.id.login_username)).perform(typeText("testuser"));
@@ -50,16 +65,25 @@ public class TestLoginPageActivity {
                 .check(matches(withErrorText("Password cannot be empty")));
     }
 
+    /**
+     * Verifies that no error is shown when both username and password
+     * fields are filled correctly and the login button is pressed.
+     */
     @Test
     public void validateFields_noErrorWhenBothValid() {
         onView(withId(R.id.login_username)).perform(typeText("testuser"));
         onView(withId(R.id.login_password)).perform(typeText("mypassword"));
         onView(withId(R.id.login_button)).perform(click());
 
-        // If no error and login proceeds, test passes. Optional: add intent check.
+        // If no error and login proceeds, test passes. Optional: add intent verification.
     }
 
-    // Custom matcher to check EditText error messages
+    /**
+     * Custom Espresso matcher for checking EditText's error text.
+     *
+     * @param expectedError The expected error string.
+     * @return A Matcher that checks if an EditText has the specified error message.
+     */
     public static Matcher<View> withErrorText(final String expectedError) {
         return new TypeSafeMatcher<View>() {
             @Override
