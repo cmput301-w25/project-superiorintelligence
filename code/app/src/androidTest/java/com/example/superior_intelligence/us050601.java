@@ -1,23 +1,19 @@
 package com.example.superior_intelligence;
 /**
- * Test filtering show 3 most recent posts from followed posts
+ * Test filtering followed posts by mood explanation's text
  */
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
-import static androidx.test.espresso.action.ViewActions.scrollTo;
-import static androidx.test.espresso.action.ViewActions.swipeUp;
 import static androidx.test.espresso.action.ViewActions.typeText;
+import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
-import static org.junit.Assert.assertEquals;
-
 import android.util.Log;
 
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.espresso.assertion.ViewAssertions;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
@@ -47,7 +43,7 @@ import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
 @RunWith(JUnit4.class)
-public class us050301 {
+public class us050601 {
     // Start at HomeActivity
     @Rule
     public ActivityScenarioRule<MainActivity> scenario = new
@@ -56,137 +52,85 @@ public class us050301 {
 
 
     /**
-     * Test filtering show 3 most recent posts should only display 3 posts
-     * when there are more than 3 followed posts
-     * @throws InterruptedException
+     * Filter followed posts by text should show post when the phrase entered matches mood reason
+     * @throws InterruptedException after keyword is enter, wait for firebase to load event(s)
      */
     @Test
-    public void filter3RecentFollowedPostsDisplayOnly3Post() throws InterruptedException {
-        // add more events to database
-        addMoreEvent("moreTest1", "Test extra yesterday 1", -1);
-        addMoreEvent("moreTest2", "Test extra yesterday 2", -2);
-        logIn();
-
-        //Ensure that test is on followed tab
-        onView(withId(R.id.tab_followed)).perform(click());
-
-        //Ensure correct number of added events
-        onView(withId(R.id.recycler_view))
-                .check((view, noViewFoundException) -> {
-                    RecyclerView recyclerView = (RecyclerView) view;
-                    int itemCount = recyclerView.getAdapter().getItemCount();
-                    assertEquals("RecyclerView should have exactly 4 items", 4, itemCount);
-                });
-
-
-        //click on menu button to select filter
-        onView(withId(R.id.menu_button)).perform(click());
-        onView(withId(R.id.three_recent_option)).perform(click());
-
-        //Check if only 3 posts are displayed
-        onView(withId(R.id.recycler_view))
-                .check((view, noViewFoundException) -> {
-                    RecyclerView recyclerView = (RecyclerView) view;
-                    int itemCount = recyclerView.getAdapter().getItemCount();
-                    assertEquals("RecyclerView should have exactly 3 items", 3, itemCount);
-                });
-
+    public void filterFollowedPostsByTextShouldShowPostWithMatchedPhrase() throws InterruptedException {
+        checkEventsPresent();
+        // click filter button and choose filter by text to enter keyword
+        enterKeyword("text hello");
+        // check that the post with matching mood reason is displayed
+        onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
+        // check that post without the matching mood reason is not displayed
+        onView(withText("Test during recent week")).check(doesNotExist());
     }
 
     /**
-     * Test filtering show 3 most recent posts should display all followed posts
-     * when there are less than 3 followed posts
-     * @throws InterruptedException
+     * Filter followed posts by text should show posts when a word entered is contained in the mood reason
+     * @throws InterruptedException after keyword is enter, wait for firebase to load event(s)
      */
     @Test
-    public void filter3RecentFollowedPostsDisplayAllPostsWhenFollowedPostsLessThan3Posts() throws InterruptedException {
-        logIn();
-
-        //Ensure that test is on followed tab
-        onView(withId(R.id.tab_followed)).perform(click());
-        Thread.sleep(1000);
-
-        //Make sure added events are displayed
-        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
+    public void filterFollowedPostsByTextShouldShowPostThatContainWord() throws InterruptedException {
+        checkEventsPresent();
+        // click filter button and choose filter by text to enter keyword
+        enterKeyword("text");
+        // check that the post with matching mood reason is displayed
         onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
-
-        //click on menu button to select filter
-        onView(withId(R.id.menu_button)).perform(click());
-        onView(withId(R.id.three_recent_option)).perform(click());
-
-        //Check if the same events are displayed
-        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
-        onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
+        // check that post without the matching mood reason is not displayed
+        onView(withText("Test during recent week")).check(doesNotExist());
     }
 
     /**
-     * Test filtering show 3 most recent posts should only display
-     * the three most recent posts
-     * @throws InterruptedException
+     * Filter followed posts by text should show posts when partial word entered is contained in the mood reason
+     * @throws InterruptedException after keyword is enter, wait for firebase to load event(s)
      */
     @Test
-    public void filter3RecentFollowedPostsDisplayRecentPosts() throws InterruptedException {
-        // add more events to the database
-        addMoreEvent("moreTest1", "Test extra yesterday 1", -1);
-        addMoreEvent("moreTest2", "Test extra yesterday 2", -2);
-        logIn();
-
-
-        //Ensure that test is on followed tab
-        onView(withId(R.id.tab_followed)).perform(click());
-        Thread.sleep(1000);
-
-        //Make sure added events are displayed
-        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
-        onView(withText("Test extra yesterday 1")).check(ViewAssertions.matches(isDisplayed()));
-        onView(withId(R.id.recycler_view)).perform(swipeUp());
-        onView(withText("Test extra yesterday 2")).check(ViewAssertions.matches(isDisplayed()));
-        onView(withId(R.id.recycler_view)).perform(swipeUp());
+    public void filterFollowedPostsByTextShouldShowPostThatContainPartialWord() throws InterruptedException {
+        checkEventsPresent();
+        // click filter button and choose filter by text to enter keyword
+        enterKeyword("hell");
+        // check that the post with matching mood reason is displayed
         onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
-
-        //click on menu button to select filter
-        onView(withId(R.id.menu_button)).perform(click());
-        onView(withId(R.id.three_recent_option)).perform(click());
-
-        //Check if the three recent posts are displayed
         onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
-        onView(withText("Test extra yesterday 1")).check(ViewAssertions.matches(isDisplayed()));
-        onView(withId(R.id.recycler_view)).perform(swipeUp());
-        onView(withText("Test extra yesterday 2")).check(ViewAssertions.matches(isDisplayed()));
-        onView(withId(R.id.recycler_view)).perform(swipeUp());
     }
 
     /**
-     * Test filtering show 3 most recent posts should not show the non recent posts
-     * that were posted before the recent 3
+     * Filter followed posts by text should show all posts when empty keyword is inputted
+     * @throws InterruptedException after keyword is enter, wait for firebase to load event(s)
      */
     @Test
-    public void filter3RecentFollowedPostsShouldNotDisplayNonRecentPosts() throws InterruptedException {
-        // add more events to database
-        addMoreEvent("moreTest1", "Test extra yesterday 1", -1);
-        addMoreEvent("moreTest2", "Test extra yesterday 2", -2);
-        logIn();
-
-        //Ensure that test is on followed tab
-        onView(withId(R.id.tab_followed)).perform(click());
-        Thread.sleep(1000);
-
-        //Make sure added events are displayed
-        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
-        onView(withText("Test extra yesterday 1")).check(ViewAssertions.matches(isDisplayed()));
-        onView(withId(R.id.recycler_view)).perform(swipeUp());
-        onView(withText("Test extra yesterday 2")).check(ViewAssertions.matches(isDisplayed()));
-        onView(withId(R.id.recycler_view)).perform(swipeUp());
+    public void filterFollowedPostsByTextShouldShowAllPostWithEmptyText() throws InterruptedException {
+        checkEventsPresent();
+        // click filter button and choose filter by text to enter keyword
+        enterKeyword("");
+        // check that the post with matching mood reason is displayed
         onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
+        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
+    }
 
-        //click on menu button to select filter
+    /**
+     * Initialize filtering mood event by entering text to find-
+     * mood event(s) that contains specified text in the mood reason
+     * @param keyword   keyword text/phrase that will be entered
+     * @throws InterruptedException after keyword is enter, wait for firebase to load event(s)
+     */
+    public void enterKeyword(String keyword) throws InterruptedException {
+        onView(withId(R.id.tab_followed)).perform(click());
         onView(withId(R.id.menu_button)).perform(click());
-        onView(withId(R.id.three_recent_option)).perform(click());
-        onView(withId(R.id.recycler_view)).perform(swipeUp());
+        onView(withId(R.id.text_filter_option)).perform(click());
+        onView(withId(R.id.dialog_filter_edit_text)).perform(typeText(keyword));
+        onView(withText("FILTER")).perform(click());
+        Thread.sleep(2000);
+    }
 
-        // make sure non recent event outside of the 3 recent ones are not displayed
-        onView(withText("Test last year")).check(ViewAssertions.doesNotExist());
 
+    /**
+     * Check that seeded events are present before filtering
+     */
+    public void checkEventsPresent(){
+        onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
+        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
     }
 
     /**
@@ -197,6 +141,10 @@ public class us050301 {
     public void setUp() throws InterruptedException {
         seedUserDB();
         seedPostDB();
+        logIn();
+        onView(withId(R.id.tab_followed)).perform(click());
+        Thread.sleep(3000);
+
     }
 
 
@@ -206,7 +154,6 @@ public class us050301 {
      */
     public void logIn() throws InterruptedException {
         onView(withId(R.id.login_button_login_page)).perform(click());
-
 
         onView(withId(R.id.login_username)).perform(typeText("testUser")).perform(closeSoftKeyboard());
         onView(withId(R.id.login_password)).perform(typeText("TestPass")).perform(closeSoftKeyboard());
@@ -226,7 +173,7 @@ public class us050301 {
 
 
         followUser(username, username2, success -> {
-            Log.d("FollowDebug", "followedUser successfully follow testUser");
+            Log.d("FollowDebug", "followedUser successfully followed by testUser");
         });
 
 
@@ -255,6 +202,7 @@ public class us050301 {
         latch.await();
     }
 
+
     /**
      * Set followingUser to follow followedUser
      * @param followingUser     user that is following the other user
@@ -275,11 +223,11 @@ public class us050301 {
 
     /**
      * Add posts to database with current date and last year date
-     * @throws InterruptedException wait for event to be added to database
+     * @throws InterruptedException wait for all the events to add to database
      */
     public void seedPostDB() throws InterruptedException {
-        Event event = new Event("TestBeforeRecWk", "Test last year", "12 MAR 2024, 12:04", "#CC0099", "", 0, true, false, "Surprise", "", "", "followedUser", null, null, true);
-        Event event2 = new Event("TestDuringRecWk", "Test during recent week", null, "#FF6347", "", 0, true, false, "Anger", "", "", "followedUser", null, null, true);
+        Event event = new Event("TestBeforeRecWk", "Test last year", "12 MAR 2024, 12:04", "#CC0099", "", 0, true, false, "Surprise", "text hello", "", "followedUser", null, null, true);
+        Event event2 = new Event("TestDuringRecWk", "Test during recent week", null, "#FF6347", "", 0, true, false, "Anger", "shell on the beach", "", "followedUser", null, null, true);
 
 
         // current date to ensure test will work regardless of the time
@@ -294,8 +242,8 @@ public class us050301 {
 
     /**
      * Add an event to database
-     * @param event     event of an Event class containing id, title, date, etc.
-     * @throws InterruptedException     wait for latch to release when attempt to add event to firestore
+     * @param event mood event to be added to firestore
+     * @throws InterruptedException wait for latch to release when add event to firestore
      */
     public void seedPost(Event event) throws InterruptedException {
         Database db = new Database();
@@ -311,29 +259,6 @@ public class us050301 {
                     latch.countDown(); // Release the lock even on failure
                 });
         latch.await();
-    }
-
-
-    /**
-     * Add an event to database with specified number of day(s) from current date
-     * @param eventID           id of an event
-     * @param eventTitle        title of a mood event
-     * @param subtractDay       day to subtract from current date (-1 for yesterday etc.)
-     * @throws InterruptedException wait for result of adding event to firestore
-     */
-    public void addMoreEvent(String eventID, String eventTitle, int subtractDay) throws InterruptedException {
-        Event event = new Event(eventID, eventTitle, null, "#FF6347", "", 0, true, false, "Anger", "", "", "followedUser", null, null, true);
-        // current date to ensure test will work regardless of the time
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_YEAR, subtractDay); // Subtract one day
-
-
-        String yesterdayDate = new SimpleDateFormat("dd MMM yyyy, HH:mm",
-                Locale.getDefault()).format(calendar.getTime());
-
-
-        event.setDate(yesterdayDate);
-        seedPost(event);
     }
 
     /**
@@ -376,5 +301,4 @@ public class us050301 {
         int portNumber = 8080;
         FirebaseFirestore.getInstance().useEmulator(androidLocalhost, portNumber);
     }
-
 }
