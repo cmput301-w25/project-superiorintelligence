@@ -15,7 +15,7 @@ import java.util.Collections;
 /**
  * Unit tests for profile-related logic like follow status, button updates, verification.
  */
-public class ProfilesTest {
+public class TestProfiles {
 
     private Userbase mockUserbase;
     private Button mockButton;

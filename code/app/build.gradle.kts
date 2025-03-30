@@ -49,6 +49,7 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation ("org.mockito:mockito-android:5.11.0")
+    testImplementation("org.robolectric:robolectric:4.11.1")
     implementation("com.google.firebase:firebase-firestore:24.4.2")
     implementation("com.google.firebase:firebase-auth:21.1.0")
     implementation("com.google.firebase:firebase-storage:20.3.0")
