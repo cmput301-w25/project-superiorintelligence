@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import android.content.Intent;
-import android.widget.Toast;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,7 +12,7 @@ import org.mockito.Mockito;
 /**
  * Unit tests for helper methods in MoodCreateAndEditActivity.
  */
-public class TestMoodCreateAndEditActivity {
+public class MoodCreateAndEditActivityTest {
 
     private MoodCreateAndEditActivity activity;
 

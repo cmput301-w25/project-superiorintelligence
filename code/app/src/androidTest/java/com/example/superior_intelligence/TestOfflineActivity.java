@@ -9,8 +9,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
-import com.google.firebase.firestore.MemoryCacheSettings;
-import com.google.firebase.firestore.PersistentCacheSettings;
 import com.google.firebase.firestore.Source;
 
 import org.junit.Before;
@@ -27,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Test add/edit/delete mood event when app is disconnected from the network
  */
 @RunWith(AndroidJUnit4.class)
-public class TestOfflineActivity {
+public class OfflineActivityTest {
     // Code is taken from Firestore website and Chatgpt
     private FirebaseFirestore db;
 

@@ -24,11 +24,9 @@ import androidx.test.rule.ActivityTestRule;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import org.hamcrest.Matcher;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,7 +34,6 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,7 +44,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 
 
 @RunWith(AndroidJUnit4.class)
-public class TestNotification {
+public class NotificationTest {
 
     static {
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
