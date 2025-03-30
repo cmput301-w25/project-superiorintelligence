@@ -382,7 +382,8 @@ public class HomeActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this, R.style.DialogTheme);
         builder.setTitle("Enter search phrase");
 
-        final EditText input = new EditText(HomeActivity.this);
+        EditText input = new EditText(HomeActivity.this);
+        input.setId(R.id.dialog_filter_edit_text);
         builder.setView(input);
 
         builder.setPositiveButton("Filter", (dialog, which) -> {
