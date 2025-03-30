@@ -11,16 +11,17 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class OtherUserProfileActivity extends AppCompatActivity {
-    private TextView profileName, profileUsername;
-    private String username;
-    private String currentUser;
-    private Userbase userbase;
-    private Button followRequestButton;
+    TextView profileName;
+    TextView profileUsername;
+    String username;
+    String currentUser;
+    Userbase userbase;
+    Button followRequestButton;
+    FollowManager.FollowStatus followStatus = FollowManager.FollowStatus.NOT_FOLLOWING;
 
-    private enum FollowStatus {
+    enum FollowStatus {
         NOT_FOLLOWING, REQUEST_SENT, FOLLOWING
     }
-    private FollowStatus followStatus = FollowStatus.NOT_FOLLOWING; // Default
 
     @Override
     protected void onResume() {
@@ -62,7 +63,7 @@ public class OtherUserProfileActivity extends AppCompatActivity {
     /**
      * Loads the profile details of the selected user using Userbase.
      */
-    private void loadUserProfile() {
+    void loadUserProfile() {
         if (username == null) {
             Log.e("OtherUserProfileActivity", "Username is null, cannot load profile.");
             return;
@@ -80,59 +81,25 @@ public class OtherUserProfileActivity extends AppCompatActivity {
     }
 
     private void checkFollowStatus() {
-        if (username == null || currentUser == null) {
-            Log.e("OtherUserProfileActivity", "Username or current user is null");
-        }
-        userbase.getUserFollowing(currentUser, followingList -> {
-            if (followingList.contains(username)) {
-                followStatus = FollowStatus.FOLLOWING;
-            } else {
-                userbase.checkFollowRequest(currentUser, username, isRequestSent -> {
-                    followStatus = isRequestSent ? FollowStatus.REQUEST_SENT : FollowStatus.NOT_FOLLOWING;
-                    updateFollowButton();
-                });
-            }
-            updateFollowButton();
+        FollowManager.checkFollowStatus(currentUser, username, userbase, status -> {
+            followStatus = status;
+            FollowManager.updateFollowButton(followRequestButton, status);
         });
     }
 
-    private void updateFollowButton() {
-        switch (followStatus) {
-            case FOLLOWING:
-                followRequestButton.setText("Unfollow");
-                followRequestButton.setEnabled(true);
-                break;
-            case REQUEST_SENT:
-                followRequestButton.setText("Pending Request");
-                followRequestButton.setEnabled(false);
-                break;
-            case NOT_FOLLOWING:
-                followRequestButton.setText("Follow");
-                followRequestButton.setEnabled(true);
-                break;
-        }
-    }
 
     private void handleFollowButtonClick() {
-        if (followStatus == FollowStatus.NOT_FOLLOWING) {
-            userbase.sendFollowRequest(currentUser, username, success -> {
-                if (success) {
-                    followStatus = FollowStatus.REQUEST_SENT;
-                    updateFollowButton();
-                    userbase.addNotification(username,currentUser + " wants to follow your mood events.");
-                } else {
-                    Toast.makeText(this, "Failed to send request", Toast.LENGTH_SHORT).show();
-                }
-            });
-        } else if (followStatus == FollowStatus.FOLLOWING) {
+        if (followStatus == null) return;
+
+        if (followStatus == FollowManager.FollowStatus.FOLLOWING) {
             userbase.unfollowUser(currentUser, username, success -> {
-                if (success) {
-                    followStatus = FollowStatus.NOT_FOLLOWING;
-                    updateFollowButton();
-                    Toast.makeText(this, "Unfollowed " + username, Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "Failed to unfollow", Toast.LENGTH_SHORT).show();
-                }
+                followStatus = FollowManager.FollowStatus.NOT_FOLLOWING;
+                FollowManager.updateFollowButton(followRequestButton, followStatus);
+            });
+        } else if (followStatus == FollowManager.FollowStatus.NOT_FOLLOWING) {
+            userbase.sendFollowRequest(currentUser, username, success -> {
+                followStatus = FollowManager.FollowStatus.REQUEST_SENT;
+                FollowManager.updateFollowButton(followRequestButton, followStatus);
             });
         }
     }
