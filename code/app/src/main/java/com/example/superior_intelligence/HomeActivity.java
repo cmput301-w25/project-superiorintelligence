@@ -48,12 +48,12 @@ public class HomeActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private EventAdapter adapter;
-    private Database database;
+    Database database;
 
     // Separate lists for each tab
     private List<Event> exploreEvents = new ArrayList<>();
     private List<Event> followedEvents = new ArrayList<>();
-    private List<Event> myPostsEvents = new ArrayList<>();
+    List<Event> myPostsEvents = new ArrayList<>();
 
     private TextView tabExplore, tabFollowed, tabMyPosts, tabMap;
 
@@ -268,22 +268,12 @@ public class HomeActivity extends AppCompatActivity {
     /**
      * Handle incoming event to add or update.
      */
-    private void handleIncomingEvent() {
+    void handleIncomingEvent() {
         Intent intent = getIntent();
 
         Event newEvent = (Event) intent.getSerializableExtra("newEvent");
         if (newEvent != null && newEvent.isMyPost()) {
-            boolean found = false;
-            for (int i = 0; i < myPostsEvents.size(); i++) {
-                if (myPostsEvents.get(i).getID().equals(newEvent.getID())) {
-                    myPostsEvents.set(i, newEvent);
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                myPostsEvents.add(newEvent);
-            }
+            HomeManager.upsertEvent(myPostsEvents, newEvent);
         }
 
         String selectedTab = intent.getStringExtra("selectedTab");
@@ -302,7 +292,7 @@ public class HomeActivity extends AppCompatActivity {
 
         String deletedEventId = intent.getStringExtra("deletedEventId");
         if (deletedEventId != null) {
-            myPostsEvents.removeIf(event -> event.getID().equals(deletedEventId));
+            HomeManager.removeEventById(myPostsEvents, deletedEventId);
         }
     }
 
@@ -310,7 +300,7 @@ public class HomeActivity extends AppCompatActivity {
      * Load events from Firestore and update UI.
      * And edited to force sort
      */
-    private void loadAllEvents(Runnable afterLoad) {
+    void loadAllEvents(Runnable afterLoad) {
         User currentUser = User.getInstance();
 
         if (currentUser == null) {
@@ -418,29 +408,7 @@ public class HomeActivity extends AppCompatActivity {
 
         if (sourceList == null) return;
 
-        String lowerKeyword = keyword.toLowerCase();
-        List<Event> exactMatches = new ArrayList<>();
-        List<Event> partialMatches = new ArrayList<>();
-
-        for (Event e : sourceList) {
-            String reason = e.getMoodExplanation() != null ? e.getMoodExplanation().toLowerCase() : "";
-
-            if (reason.matches(".*\\b" + Pattern.quote(lowerKeyword) + "\\b.*")) {
-                exactMatches.add(e);
-            } else if (reason.contains(lowerKeyword)) {
-                partialMatches.add(e);
-            }
-        }
-
-
-        // Sort both lists by date descending
-        Comparator<Event> dateDescComparator = (e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp());
-
-        exactMatches.sort(dateDescComparator);
-        partialMatches.sort(dateDescComparator);
-
-        List<Event> filteredList = new ArrayList<>(exactMatches);
-        filteredList.addAll(partialMatches);
+        List<Event> filteredList = HomeManager.filterByReason(keyword, sourceList);
 
         adapter.setEvents(filteredList);
         filterApplied();
@@ -483,37 +451,8 @@ public class HomeActivity extends AppCompatActivity {
      * @return recentWeekEvents list of posts from last 7 days sorted desc
      */
     private void recentWeek(List<Event> posts) throws ParseException {
-        /*Stackoverflow:
-        https://stackoverflow.com/questions/16982056/how-to-get-the-date-7-days-earlier-date-from-current-date-in-java
-         */
-
-        List<Event> recentWeekEvents = new ArrayList<>();
-
-        // get Calendar instance
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date());
-        Date currentDate = cal.getTime();
-        // substract 7 days
-        // If we give 7 there it will give 8 days back
-        cal.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH)-6);
-        // convert to date
-        Date recentWeekDate = cal.getTime();
-
-        for (Event e: posts) {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMM yyyy, HH:mm");
-            Date eventDate = simpleDateFormat.parse(e.getDate());
-
-            // if event date is not before the recent week and after current date
-            if (!eventDate.before(recentWeekDate) && !eventDate.after(currentDate)) {
-                recentWeekEvents.add(e);
-            }
-        }
-
-        // Sort both lists by date descending
-        Comparator<Event> dateDescComparator = (e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp());
-        recentWeekEvents.sort(dateDescComparator);
-
-        adapter.setEvents(recentWeekEvents);
+        List<Event> filteredList = HomeManager.filterRecentWeek(posts);
+        adapter.setEvents(filteredList);
         filterApplied();
     }
 
@@ -572,17 +511,7 @@ public class HomeActivity extends AppCompatActivity {
             return;
         }
 
-        List<Event> filteredList = new ArrayList<>();
-        for (Event event : allPosts) {
-            // Ensure the event's mood matches one of the chosen moods
-            if (chosenMoods.contains(event.getMood())) {
-                filteredList.add(event);
-            }
-        }
-
-        // Sort filtered events by timestamp descending
-        filteredList.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
-
+        List<Event> filteredList = HomeManager.filterByMood(chosenMoods, allPosts);
         adapter.setEvents(filteredList);
         filterApplied();
     }
@@ -595,18 +524,8 @@ public class HomeActivity extends AppCompatActivity {
             Toast.makeText(this, "No posts to filter", Toast.LENGTH_SHORT).show();
             return;
         }
-        List<Event> followedPosts = followedEvents;
-        List<Event> recentThree = new ArrayList<Event>();
-
-        int i = 0;
-        for (Event e: followedPosts){
-            recentThree.add(e);
-            i++;
-            if (i >= 3){
-                adapter.setEvents(recentThree);
-                return;
-            }
-        }
+        List<Event> recentThree = HomeManager.recentThree(followedEvents);
+        adapter.setEvents(recentThree);
     }
 
     private void refreshNotificationIcon(ImageButton notificationButton) {
@@ -624,5 +543,4 @@ public class HomeActivity extends AppCompatActivity {
     private void filterApplied(){
         Toast.makeText(this, "Filter applied", Toast.LENGTH_SHORT).show();
     }
-
 }
