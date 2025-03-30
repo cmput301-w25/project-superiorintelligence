@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
-public class us050101_us050102 {
+public class us050101_us050102_us050202 {
 
     // 1) TELL JUnit NOT to auto-start the Activity: launchActivity=false
     @Rule
@@ -136,7 +136,7 @@ public class us050101_us050102 {
         onView(withText("userB wants to follow you."))
                 .check(matches(isDisplayed()));
 
-        SystemClock.sleep(2000);
+        SystemClock.sleep(4000);
     }
 
     /**
