@@ -6,6 +6,11 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+/**
+ * Unit test for create user activity
+ * checks user db
+ */
+
 public class CreateUserTest {
 
     @Test
