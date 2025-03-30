@@ -22,7 +22,7 @@ public class LoginPageActivity extends AppCompatActivity {
     EditText loginPassword;
     Button loginButton;
     Button signUpButton;
-    private Userbase userbase = Userbase.getInstance();
+    private Userbase userbase;
     private ProgressBar loadingIndicator;
 
     @Override
@@ -108,6 +108,7 @@ public class LoginPageActivity extends AppCompatActivity {
      * Otherwise, shows an error.
      */
     public void checkUser() {
+        userbase = Userbase.getInstance();
         String userUsername = loginUsername.getText().toString().trim();
         String userPassword = loginPassword.getText().toString().trim();
         loadingIndicator.setVisibility(View.VISIBLE);
