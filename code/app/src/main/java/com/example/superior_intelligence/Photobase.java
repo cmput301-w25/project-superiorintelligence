@@ -22,12 +22,22 @@ import java.util.Locale;
 import java.util.Map;
 
 public class Photobase {
+    private static Photobase instance;
     private final FirebaseFirestore db;
     private final Context context;
 
     public Photobase(@NonNull Context context) {
         this.db = FirebaseFirestore.getInstance();
         this.context = context;
+    }
+
+    public Photobase(@NonNull Context context, @NonNull FirebaseFirestore firestore) {
+        this.db = firestore;
+        this.context = context;
+    }
+
+    public static void setInstanceForTesting(FirebaseFirestore firestore, Context context) {
+        instance = new Photobase(context, firestore); // Optional singleton pattern
     }
 
     // Callback interface for loading images
@@ -91,8 +101,8 @@ public class Photobase {
             callback.onUploadFailed("Image size too large");
             return;
         }
-        String convertedImg = Base64.encodeToString(byteArray, Base64.DEFAULT);
-
+        //String convertedImg = Base64.encodeToString(byteArray, Base64.DEFAULT);
+        String convertedImg = encodeToBase64(byteArray);
         // Get current date for record
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
@@ -110,6 +120,12 @@ public class Photobase {
                 .addOnFailureListener(e -> callback.onUploadFailed("Upload failed: " + e.getMessage()));
     }
 
+
+    // Converts byte array to Base64 string (split out for mocking)
+    public String encodeToBase64(byte[] byteArray) {
+        return java.util.Base64.getEncoder().encodeToString(byteArray);
+    }
+
     /**
      * Converts a Base64 string to a Bitmap.
      * @param base64Str The Base64 string.
@@ -120,7 +136,8 @@ public class Photobase {
             byte[] decodedBytes = Base64.decode(base64Str, Base64.DEFAULT);
             return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
         } catch (Exception e) {
-            Log.e("ImageRepository", "Error decoding Base64", e);
+            //Log.e("ImageRepository", "Error decoding Base64", e);
+            System.err.println("Error decoding Base64 " + e.getMessage());
             return null;
         }
     }
@@ -138,8 +155,9 @@ public class Photobase {
             Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
             inputStream.close();
             return bitmap;
-        } catch (IOException e) {
-            Log.e("ImageRepository", "Error converting URI to bitmap", e);
+        } catch (IOException | RuntimeException e) {
+            //Log.e("ImageRepository", "Error converting URI to bitmap", e);
+            System.err.println("Error converting URI to bitmap: " + e.getMessage());
             return null;
         }
     }
