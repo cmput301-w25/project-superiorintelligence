@@ -1,6 +1,5 @@
 package com.example.superior_intelligence;
 
-import com.example.superior_intelligence.Userbase;
 import com.google.firebase.auth.FirebaseAuth;
 
 import android.content.Intent;
@@ -16,6 +15,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
+/**
+ * Activity handling user login functionality
+ */
 public class LoginPageActivity extends AppCompatActivity {
 
     EditText loginUsername;
@@ -25,6 +27,13 @@ public class LoginPageActivity extends AppCompatActivity {
     private Userbase userbase;
     private ProgressBar loadingIndicator;
 
+    /**
+     * Initializes the activity, sets up UI components and event handlers.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after
+     *                           previously being shut down then this Bundle
+     *                           contains the data it most recently supplied.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,8 +81,10 @@ public class LoginPageActivity extends AppCompatActivity {
     }
 
     /**
-     * Validates that the username field is not empty.
-     * @return true if valid, false otherwise.
+     * Validates the username field.
+     * Checks if the username field is empty and displays an error if it is.
+     *
+     * @return true if username is valid (not empty), false otherwise
      */
     public Boolean validateUsername() {
         String val = loginUsername.getText().toString();

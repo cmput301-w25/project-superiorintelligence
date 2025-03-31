@@ -9,7 +9,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
@@ -30,18 +29,17 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Activity for creating/editing mood events with title, emotion, situation, explanation, photo, and location.
+ */
 public class MoodCreateAndEditActivity extends AppCompatActivity implements PostStatusFragment.PostStatusDialogListener{
 
     // Unique ID for Mood Event
@@ -107,6 +105,9 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
                 }
             });
 
+    /**
+     * Initializes activity and sets up UI components for mood event creation/editing.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -248,7 +249,10 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
     }
 
     /**
-     * Handles location permission result.
+     * Handles location permission request result.
+     * @param requestCode Request code
+     * @param permissions Requested permissions
+     * @param grantResults Grant results
      */
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -266,7 +270,8 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
     }
 
     /**
-     * Sets up the emotion spinner.
+     * Sets up emotion spinner with mood options.
+     * Includes selection listener.
      */
     private void setupEmotionSpinner() {
         ArrayList<String> emotions = new ArrayList<>();
@@ -308,7 +313,8 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
     }
 
     /**
-     * Sets up the situation spinner.
+     * Sets up situation spinner with context options.
+     * Includes selection listener.
      */
     private void setupSituationSpinner() {
         ArrayList<String> situations = new ArrayList<>();
@@ -348,7 +354,8 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
     }
 
     /**
-     * Called when Confirm button is clicked. Validates input, then creates the event.
+     * Validates inputs and initiates event creation/update.
+     * Shows errors for invalid inputs.
      */
     void handleConfirmClick() {
         if (!isEmotionSelected) {
@@ -457,7 +464,10 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
         });
     }
     /**
-     * Create the Event object when editing an existing event.
+     * Creates updated Event object with edited fields.
+     * @param existingId Original event ID
+     * @param eventDate Original event date
+     * @return Updated Event object
      */
     Event createUpdatedEvent(String existingId, String eventDate) { // Accept date from caller
 
@@ -484,7 +494,9 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
 
 
     /**
-     * Checks that explanation is at most 200 characters
+     * Validates explanation length.
+     * @param explanation User's explanation text
+     * @return true if valid (≤200 chars), false otherwise
      */
     boolean isValidExplanation(String explanation) {
         if (explanation.length() > 200) {

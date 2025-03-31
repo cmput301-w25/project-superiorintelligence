@@ -29,8 +29,9 @@ public class Event implements Serializable {
     private Double lat;
     private List<Comment> comments;
     private boolean public_status;
+    private long timestamp;
     /**
-     * Empty constructor required for Firestore
+     * Empty constructor requid for Firestore
      */
     public Event() {
         this.comments = new ArrayList<>();
@@ -164,13 +165,19 @@ public class Event implements Serializable {
         return isMyPost;
     }
 
+
     /**
      * gets the timestamp of the mood event from what is stored in firebase.
-     * returns the time stamp as a long int.
+     * @return current timestamp as long int
      */
-    private long timestamp;
     public long getTimestamp() { return timestamp;}
+
+    /**
+     * set the timestamp to the specific time
+     * @param timestamp timestamp to be set
+     */
     public void setTimestamp(long timestamp) {this.timestamp = timestamp;}
+
 
     public Double getLat() {
         return lat;
@@ -302,30 +309,65 @@ public class Event implements Serializable {
         this.postUser = postUser;
     }
 
+    /**
+     * Sets the latitude of the event location.
+     *
+     * @param lat The latitude value.
+     */
     public void setLat(Double lat) {
         this.lat = lat;
     }
 
+    /**
+     * Sets the longitude of the event location.
+     *
+     * @param lng The longitude value.
+     */
     public void setLng(Double lng) {
         this.lng = lng;
     }
 
-    public void setID(String id){
+    /**
+     * Sets the unique identifier for the event.
+     *
+     * @param id The event ID.
+     */
+    public void setID(String id) {
         this.id = id;
     }
 
-    public String getID(){
+    /**
+     * Retrieves the unique identifier of the event.
+     *
+     * @return The event ID.
+     */
+    public String getID() {
         return this.id;
     }
 
+    /**
+     * Retrieves the list of comments associated with the event.
+     *
+     * @return A list of comments.
+     */
     public List<Comment> getComments() {
         return comments;
     }
 
+    /**
+     * Sets the comments for the event.
+     *
+     * @param comments The list of comments to associate with the event.
+     */
     public void setComments(List<Comment> comments) {
         this.comments = comments;
     }
 
+    /**
+     * Adds a new comment to the event.
+     *
+     * @param comment The comment to be added.
+     */
     public void addComment(Comment comment) {
         if (this.comments == null) {
             this.comments = new ArrayList<>();
@@ -333,10 +375,20 @@ public class Event implements Serializable {
         this.comments.add(comment);
     }
 
+    /**
+     * Sets the event's public status.
+     *
+     * @param public_status {@code true} if the event is public, {@code false} otherwise.
+     */
     public void setPublic_status(boolean public_status) {
         this.public_status = public_status;
     }
 
+    /**
+     * Checks if the event is public.
+     *
+     * @return {@code true} if the event is public, {@code false} otherwise.
+     */
     public boolean isPublic_status() {
         return public_status;
     }

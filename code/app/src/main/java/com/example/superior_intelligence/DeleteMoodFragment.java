@@ -1,29 +1,38 @@
-/**
- * This fragment is a dialog pop up to confirm if user wants to delete the event
- */
 package com.example.superior_intelligence;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Movie;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
+/**
+ * A DialogFragment that provides a confirmation dialog for deleting a mood entry.
+ * It notifies the attached listener when the user confirms deletion.
+ */
 public class DeleteMoodFragment extends DialogFragment {
 
-    interface DeleteDialogListener{
+    /**
+     * Interface to handle the delete confirmation response.
+     */
+    interface DeleteDialogListener {
+        /**
+         * Called when the user selects an option in the delete dialog.
+         * @param delete_status true if the user confirmed deletion, false otherwise.
+         */
         void delete(boolean delete_status);
     }
     private DeleteDialogListener listener;
 
+    /**
+     * Attaches the fragment to the hosting activity and ensures it implements the listener.
+     * @param context the context of the hosting activity.
+     */
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
@@ -35,6 +44,11 @@ public class DeleteMoodFragment extends DialogFragment {
         }
     }
 
+    /**
+     * Creates the delete confirmation dialog.
+     * @param savedInstanceState the previously saved state of the fragment, if any.
+     * @return a new AlertDialog instance with delete confirmation options.
+     */
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {

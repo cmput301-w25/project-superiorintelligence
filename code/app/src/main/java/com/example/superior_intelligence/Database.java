@@ -13,17 +13,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Singleton class for managing database operations with Firebase Firestore.
+ * Handles saving, updating, loading, and deleting events and comments.
+ */
 public class Database {
     private static Database instance;
     private final FirebaseFirestore db;
     private final CollectionReference myPostsRef;
 
-
+    /**
+     * Constructor to initialize Firestore and the MyPosts collection reference.
+     */
     public Database() {
         db = FirebaseFirestore.getInstance();
         myPostsRef = db.collection("MyPosts");
     }
 
+    /**
+     * Returns the singleton instance of Database.
+     * @return the single Database instance
+     */
     public static Database getInstance() {
         if (instance == null) {
             instance = new Database();
@@ -33,6 +43,8 @@ public class Database {
 
     /**
      * Saves a new Event object to Firestore.
+     * @param event the event to save
+     * @param callback callback to indicate success or failure
      */
     public void saveEventToFirebase(@NonNull Event event, @NonNull OnEventSavedCallback callback) {
         // Ensure event has an ID (UUID)
@@ -64,6 +76,8 @@ public class Database {
 
     /**
      * Updates an existing Event in Firestore.
+     * @param event the event to update
+     * @param callback callback to indicate success or failure
      */
     public void updateEvent(@NonNull Event event, @NonNull OnEventUpdateListener callback) {
         try {
@@ -87,8 +101,9 @@ public class Database {
     }
 
     /**
-     * Loads all events from Firestore, separating them into explore/followed/myPosts
-     * based on the current logged in user.
+     * Loads all events from Firestore, categorizing them into explore, followed, and myPosts lists.
+     * @param currentUser the currently logged-in user
+     * @param callback callback to handle loaded events
      */
     public void loadEventsFromFirebase(@NonNull User currentUser, @NonNull OnEventsLoadedCallback callback) {
 
@@ -201,6 +216,11 @@ public class Database {
                 });
     }
 
+    /**
+     * Saves a comment to an event in Firestore.
+     * @param postId the ID of the event
+     * @param comment the comment to save
+     */
     public void saveCommentToEvent(String postId, Comment comment) {
         DocumentReference postRef = myPostsRef.document(postId);
 
@@ -233,7 +253,9 @@ public class Database {
 
 
     /**
-     * Delete Event from Firestore
+     * Deletes an event from Firestore.
+     * @param eventID the ID of the event to delete
+     * @param callback callback to indicate success or failure
      */
     public void deleteEvent(String eventID, OnEventDeletedCallback callback) {
         myPostsRef.document(eventID).delete()
@@ -247,31 +269,30 @@ public class Database {
                 });
     }
 
-    /**
-     * Callback for saving events.
-     */
+    /**Callback for saving events.*/
     public interface OnEventSavedCallback {
         void onEventSaved(boolean success);
     }
 
-    /**
-     * Callback for updating events.
-     */
+    /**Callback for updating events.*/
     public interface OnEventUpdateListener {
         void onEventUpdated(boolean success);
     }
 
-    /**
-     * Callback for loading events and splitting them into lists.
-     */
+    /** Callback for loading events and splitting them into lists.*/
     public interface OnEventsLoadedCallback {
         void onEventsLoaded(List<Event> myPosts, List<Event> explore, List<Event> followed);
     }
 
+    /**
+     * Gets the reference to the "MyPosts" collection.
+     * @return the Firestore collection reference
+     */
     public CollectionReference getMyPostsRef() {
         return myPostsRef;
     }
 
+    /** Callback interface for event deletion. */
     public interface OnEventDeletedCallback {
         void onEventDeleted(boolean success);
     }

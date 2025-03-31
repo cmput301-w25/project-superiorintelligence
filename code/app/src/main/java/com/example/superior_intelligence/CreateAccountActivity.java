@@ -9,8 +9,13 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import com.example.superior_intelligence.Userbase;
 
+/**
+ * Activity for creating a new user account.
+ * This activity provides the UI for the user to input their name, username, and password
+ * to create an account. It performs validation on the input fields, checks if the username
+ * already exists, and then creates the new user by hashing the password and storing the user data.
+ */
 public class CreateAccountActivity extends AppCompatActivity {
 
     EditText signupName, signupUsername, signupPassword;
@@ -58,7 +63,10 @@ public class CreateAccountActivity extends AppCompatActivity {
     }
 
     /**
-     * Uses the Userbase to check if the username already exists.
+     * Checks if the given username already exists in the database.
+     *
+     * @param name The name of the user.
+     * @param username The username chosen by the user.
      */
     private void checkUsernameExists(final String name, final String username) {
         userbase.checkUserExists(username, (exists, existingName, existingUsername, ignoredPassword) -> {
@@ -72,7 +80,10 @@ public class CreateAccountActivity extends AppCompatActivity {
     }
 
     /**
-     * Creates a new user using the userbase.
+     * Creates a new user account.
+     *
+     * @param name The name of the user.
+     * @param username The username chosen by the user.
      */
     private void createUser(final String name, final String username) {
         // Retrieve the password from the EditText and hash it using SHA-256.

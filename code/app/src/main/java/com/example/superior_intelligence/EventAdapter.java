@@ -24,12 +24,20 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     private List<Event> currentList = new ArrayList<>();
     private Context context;
 
+    /**
+     * Interface for handling event detail view clicks.
+     */
     public interface ViewDetailsListener {
         void onViewDetails(Event event);
     }
 
     private ViewDetailsListener viewDetailsListener;
 
+    /**
+     * Constructor for the EventAdapter.
+     * @param context the application context
+     * @param listener the listener for event detail clicks
+     */
     public EventAdapter(@NonNull Context context, ViewDetailsListener listener) {
         this.context = context;
         this.viewDetailsListener = listener;
@@ -39,6 +47,10 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
 
     }
 
+    /**
+     * Sets a new list of events and updates the RecyclerView.
+     * @param newList the new list of events
+     */
     public void setEvents(List<Event> newList) {
         this.currentList = newList; // Directly set the list
         notifyDataSetChanged();
@@ -127,12 +139,19 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         return currentList.size();
     }
 
+    /**
+     * ViewHolder class representing a single event item in the RecyclerView.
+     */
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // Declare all required views here
         TextView eventTitle, eventDate;
         CardView eventOverlay;
         ImageView eventEmoticon, eventImage, commentIcon, publicIcon, privateIcon;
 
+        /**
+         * Constructs the ViewHolder and initializes its views.
+         * @param itemView the view representing a single item
+         */
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             // Initialize all views here

@@ -12,12 +12,21 @@ import com.google.android.material.tabs.TabLayout;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Activity for displaying and managing follow request notifications.
+ * Handles both incoming requests (requests to current user) and pending requests (requests made by current user).
+ * Uses a tab layout to switch between notification types.
+ */
 public class NotificationActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private NotificationAdapter adapter;
     private List<String> notificationsList = new ArrayList<>();
     private boolean isViewingIncomingRequests = true;
 
+    /**
+     * Initializes the activity and sets up the notification views and tabs.
+     * @param savedInstanceState If non-null, contains saved state from previous instance
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

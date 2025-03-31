@@ -1,15 +1,18 @@
 package com.example.superior_intelligence;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+/**
+ * Activity for viewing and interacting with another user's profile.
+ * Allows the current user to view profile details and manage follow status
+ * (follow/unfollow/send request) for the viewed user.
+ */
 public class OtherUserProfileActivity extends AppCompatActivity {
     TextView profileName;
     TextView profileUsername;
@@ -19,16 +22,19 @@ public class OtherUserProfileActivity extends AppCompatActivity {
     Button followRequestButton;
     FollowManager.FollowStatus followStatus = FollowManager.FollowStatus.NOT_FOLLOWING;
 
-    enum FollowStatus {
-        NOT_FOLLOWING, REQUEST_SENT, FOLLOWING
-    }
-
+    /**
+     * Checks and updates follow status when activity resumes.
+     */
     @Override
     protected void onResume() {
         super.onResume();
         checkFollowStatus();
     }
 
+    /**
+     * Initializes the activity and sets up profile view components.
+     * @param savedInstanceState Saved instance state or null
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,6 +86,10 @@ public class OtherUserProfileActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Checks the current follow relationship status between users.
+     * Updates UI button state based on follow status.
+     */
     private void checkFollowStatus() {
         FollowManager.checkFollowStatus(currentUser, username, userbase, status -> {
             followStatus = status;
@@ -88,6 +98,10 @@ public class OtherUserProfileActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Handles follow button click actions based on current follow status.
+     * update UI status
+     */
     private void handleFollowButtonClick() {
         if (followStatus == null) return;
 

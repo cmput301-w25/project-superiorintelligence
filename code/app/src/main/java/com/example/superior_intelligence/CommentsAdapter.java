@@ -9,6 +9,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Adapter class for displaying a list of comments in a RecyclerView.
+ * Handles the creation and binding of ViewHolder instances to display comment data.
+ */
 public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.CommentViewHolder> {
 
     private final List<Comment> comments;
@@ -64,6 +68,11 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
     public static class CommentViewHolder extends RecyclerView.ViewHolder {
         TextView commentText, commentUser, commentDate;
 
+        /**
+         * Constructs a ViewHolder for a comment item.
+         * Initializes the TextViews for username, date, and comment text.
+         * @param itemView the view representing the comment item
+         */
         public CommentViewHolder(@NonNull View itemView) {
             super(itemView);
             commentUser = itemView.findViewById(R.id.comment_user);

@@ -1,9 +1,3 @@
-/**
- * completes story: us 03.02.01
- * see link: https://github.com/orgs/cmput301-w25/projects/9?pane=issue&itemId=102361986&issue=cmput301-w25%7Cproject-superiorintelligence%7C197
- * user is able to search up other users based on their username which is stored in firestore
- */
-
 package com.example.superior_intelligence;
 
 import android.os.Bundle;
@@ -20,6 +14,9 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Activity for searching and browsing user profiles.
+ */
 public class SearchUsersActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
@@ -29,6 +26,10 @@ public class SearchUsersActivity extends AppCompatActivity {
     private EditText searchEditText;
     private String currentUsername;
 
+    /**
+     * Initializes the activity and sets up user interface components.
+     * @param savedInstanceState Saved instance state or null
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,6 +88,10 @@ public class SearchUsersActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Loads all users from Firestore, excluding the current user.
+     * Updates the RecyclerView when complete.
+     */
     private void loadAllUsers() {
         userList.clear();
         db.collection("users")
@@ -104,30 +109,11 @@ public class SearchUsersActivity extends AppCompatActivity {
                 });
     }
 
-    //the commented out code displays only the user with the exact same username as searched
-    // the one below shows all users with the given letter sequence
-
-//    private void searchUsers(String username) {
-//        userList.clear();
-//        db.collection("users")
-//                .whereEqualTo("username", username)
-//                .get()
-//                .addOnCompleteListener(task -> {
-//                    if (task.isSuccessful()) {
-//                        for (QueryDocumentSnapshot document : task.getResult()) {
-//                            HelperClass user = document.toObject(HelperClass.class);
-//                            if (!user.getUsername().equals(currentUsername)) {
-//                                userList.add(user);
-//                            }
-//                        }
-//                        userAdapter.notifyDataSetChanged();
-//                    }
-//                });
-//    }
-
-    // search users based on username,
-    // implemented so it will pick all users that start with the given letter search
-    // so for example ba will find barbs, but ar will not
+    /**
+     * Searches for users whose usernames start with the given query.
+     * Uses Firestore prefix matching for efficient searching.
+     * @param searchQuery The prefix to search for (case-sensitive)
+     */
     private void searchUsers(String searchQuery) {
         userList.clear();
         // Use orderBy with startAt and endAt for prefix matching

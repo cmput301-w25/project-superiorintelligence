@@ -13,6 +13,12 @@ import java.util.Map;
  */
 public class Mapper {
 
+    /**
+     * Converts an Event object to a Map representation suitable for database storage.
+     * The resulting Map contains all significant fields of the Event object
+     * @param event The Event object to convert
+     * @return A Map containing all event properties, or empty Map if event is null
+     */
     public static Map<String, Object> eventToMap(Event event) {
         Map<String, Object> eventData = new HashMap<>();
         eventData.put("id", event.getID()); // Include event ID
@@ -33,6 +39,14 @@ public class Mapper {
         return eventData;
     }
 
+    /**
+     * Converts a Firestore DocumentSnapshot to an Event object.
+     * Handles type conversion and null checks for all event fields. Supports multiple
+     * date formats (String or Timestamp). Returns null if conversion fails.
+     * @param document The Firestore document to convert
+     * @return The reconstructed Event object, or null if conversion failed
+     * @throws Exception if document parsing encounters unexpected data types
+     */
     public static Event docToEvent(DocumentSnapshot document) {
         try {
             String id = document.getString("id");

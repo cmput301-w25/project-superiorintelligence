@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.util.Base64;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -21,32 +20,46 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Manages photo storage and retrieval in Firestore.
+ * Handles uploading images to Firestore and loading them back, with callback interfaces
+ * for asynchronous operations. Supports dependency injection for testing.
+ */
 public class Photobase {
     private static Photobase instance;
     private final FirebaseFirestore db;
     private final Context context;
 
+    /**
+     * Constructs a Photobase instance with default Firestore.
+     * @param context The application context
+     */
     public Photobase(@NonNull Context context) {
         this.db = FirebaseFirestore.getInstance();
         this.context = context;
     }
 
+    /**
+     * Constructs a Photobase instance with custom Firestore (for testing).
+     * @param context The application context
+     * @param firestore The Firestore instance to use
+     */
     public Photobase(@NonNull Context context, @NonNull FirebaseFirestore firestore) {
         this.db = firestore;
         this.context = context;
     }
 
-    public static void setInstanceForTesting(FirebaseFirestore firestore, Context context) {
-        instance = new Photobase(context, firestore); // Optional singleton pattern
-    }
-
-    // Callback interface for loading images
+    /**
+     * Callback interface for image loading operations.
+     */
     public interface ImageLoadCallback {
         void onImageLoaded(Bitmap bitmap);
         void onImageLoadFailed(String error);
     }
 
-    // Callback interface for uploading images
+    /**
+     * Callback interface for image upload operations.
+     */
     public interface UploadCallback {
         void onUploadComplete(String documentID);
         void onUploadFailed(String error);

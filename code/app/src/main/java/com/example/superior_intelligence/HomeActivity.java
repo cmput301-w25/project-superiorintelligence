@@ -2,19 +2,14 @@ package com.example.superior_intelligence;
 
 import android.content.Intent;
 import android.graphics.Color;
-import android.health.connect.LocalTimeRangeFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.PopupWindow;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,23 +22,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.type.DateTime;
 
+/**
+ * Homepage of the app after logging in, the intermediate class that/
+ * handle switching tab, notification, and filtering posts, searching profile, follow/deny follow
+ */
 public class HomeActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
@@ -83,6 +71,9 @@ public class HomeActivity extends AppCompatActivity {
                 }
             });
 
+    /**
+     * On the HomeActivity start, get instance of current user firebase
+     */
     @Override
     protected void onStart() {
         super.onStart();
@@ -101,6 +92,10 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Main function, handle filter button, current tabs
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -253,6 +248,9 @@ public class HomeActivity extends AppCompatActivity {
         loadAllEvents(this::handleIncomingEvent);
     }
 
+    /**
+     * Load events and refresh notification button
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -262,7 +260,6 @@ public class HomeActivity extends AppCompatActivity {
         ImageButton notificationButton = findViewById(R.id.notification_button);
         refreshNotificationIcon(notificationButton);
     }
-
 
 
     /**
@@ -337,6 +334,8 @@ public class HomeActivity extends AppCompatActivity {
 
     /**
      * Switch tabs and update UI.
+     * @param targetList
+     * @param selectedTabView
      */
     private void switchTab(List<Event> targetList, TextView selectedTabView) {
         currentTab = selectedTabView.getText().toString().toLowerCase();
@@ -368,6 +367,9 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Show dialog for user to enter text for filtering by mood reason
+     */
     private void showFilterTextDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this, R.style.DialogTheme);
         builder.setTitle("Enter search phrase");
@@ -389,6 +391,11 @@ public class HomeActivity extends AppCompatActivity {
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.BLACK);
 
     }
+
+    /**
+     * Filter events with mood reason that match the keyword
+     * @param keyword
+     */
     private void filterEventsByReason(String keyword) {
         if (keyword.isEmpty()) {
             if ("myposts".equals(currentTab)) {
@@ -412,36 +419,6 @@ public class HomeActivity extends AppCompatActivity {
 
         adapter.setEvents(filteredList);
         filterApplied();
-    }
-
-    /**
-     * Saves a new event to Firestore under the "MyPosts" collection.
-     * @param event event to be saved to the firebase
-     */
-    private void saveEventToFirebase(Event event) {
-        database.saveEventToFirebase(event, success -> {
-            if (success) {
-                Log.d("HomeActivity", "Event saved successfully");
-            } else {
-                Log.e("HomeActivity", "Error saving event");
-            }
-        });
-    }
-
-    /**
-     * Update event in Firestore using Database.java
-     * @param event event to be updated on the firebase
-     */
-    private void updateEventInFirebase(Event event) {
-        database.updateEvent(event, success -> {
-            if (success) {
-                Log.d("HomeActivity", "Event updated successfully");
-                Toast.makeText(this, "Event updated successfully!", Toast.LENGTH_SHORT).show();
-            } else {
-                Log.e("HomeActivity", "Error updating event");
-                Toast.makeText(this, "Failed to update event!", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     /**
@@ -528,6 +505,10 @@ public class HomeActivity extends AppCompatActivity {
         adapter.setEvents(recentThree);
     }
 
+    /**
+     * Refresh incoming follow requests to change notification icon to indicate incoming requests
+     * @param notificationButton
+     */
     private void refreshNotificationIcon(ImageButton notificationButton) {
         String currentUsername = User.getInstance().getUsername();
 
@@ -540,6 +521,9 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Show toast when the filter is applied
+     */
     private void filterApplied(){
         Toast.makeText(this, "Filter applied", Toast.LENGTH_SHORT).show();
     }
