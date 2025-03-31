@@ -89,5 +89,5 @@ This project is an Android application - Moodgram that allows users to post, tra
 
 - Wiki Link: https://github.com/cmput301-w25/project-superiorintelligence/wiki
 - Scrum Board: https://github.com/orgs/cmput301-w25/projects/9/views/1
-- UI Mockups: https://www.figma.com/design/z9UpBTN89pwlM8j0zzyK5y/Superior-Intelligence-Library?node-id=3455-3731&m=dev&t=rBHOXs34T6u7PLyJ-1
+- UI Mockups: https://github.com/cmput301-w25/project-superiorintelligence/wiki/Final-UI-Mockup
 - UML: https://github.com/cmput301-w25/project-superiorintelligence/wiki/Project-Final-UML
