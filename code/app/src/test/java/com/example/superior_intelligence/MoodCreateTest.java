@@ -10,6 +10,10 @@ import java.util.List;
 
 public class MoodCreateTest {
 
+    /**
+     * Creates a sample Event object with preset values.
+     * Used as a reusable mock for testing.
+     */
     private Event mockEvent() {
         return new Event(
                 "event123",
@@ -30,12 +34,20 @@ public class MoodCreateTest {
         );
     }
 
+    /**
+     * Returns a list containing one mock event.
+     * Used as a base for list-related tests.
+     */
     private List<Event> mockEventList() {
         List<Event> eventList = new ArrayList<>();
         eventList.add(mockEvent());
         return eventList;
     }
 
+    /**
+     * Tests adding a new event to the list increases the size
+     * and the new event is present afterward.
+     */
     @Test
     public void testAddEvent() {
         List<Event> eventList = mockEventList();
@@ -65,6 +77,9 @@ public class MoodCreateTest {
         assertTrue(eventList.contains(secondEvent));
     }
 
+    /**
+     * Tests that adding a duplicate event with the same ID throws an IllegalArgumentException.
+     */
     @Test
     public void testDuplicateEventIdThrowsException() {
         List<Event> eventList = mockEventList();
@@ -80,6 +95,9 @@ public class MoodCreateTest {
         });
     }
 
+    /**
+     * Checks that all the properties of the mock event are set correctly.
+     */
     @Test
     public void testEventProperties() {
         Event event = mockEvent();
