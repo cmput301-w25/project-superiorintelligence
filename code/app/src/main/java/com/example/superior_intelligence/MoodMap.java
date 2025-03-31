@@ -19,8 +19,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch; // Added import for CountDownLatch
 
 /**
  * MoodMap activity that displays mood events on a map.
@@ -45,12 +46,18 @@ import java.util.Map;
 public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final String TAG = "MoodMap";
-    private GoogleMap googleMap;
+    public GoogleMap googleMap;
     private FirebaseFirestore db;
 
     // Filter CheckBoxes
     private CheckBox cbConfusion, cbAnger, cbFear,
             cbDisgust, cbHappy, cbSad, cbShame, cbSurprise, cbMyPosts;
+
+    // Added for testing: List to store markers.
+    private List<Marker> markers = new ArrayList<>();
+
+    // Added for test synchronization: Latch to signal when markers are loaded.
+    public CountDownLatch markersLatch; // Public so tests can set it
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,7 +118,7 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
     /**
      * Main filter logic:
      * 1) If "My Posts" is checked, show ALL events from the current user.
-     * 2) Otherwise, show ONLY the single most recent event from each followed user,
+     * 2) Otherwise, show ONLY the single most recent event for each followed user,
      *    within 5 km of the current map center.
      */
     private void applyFilters() {
@@ -119,6 +126,8 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
             return;
         }
         googleMap.clear();
+        // Clear our markers list as well.
+        markers.clear();
 
         // Get the current user from your app's singleton
         User currentUser = User.getInstance();
@@ -211,12 +220,21 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
                             for (DocumentSnapshot doc : latestByUser.values()) {
                                 placeMarkerIfWithinRange(doc, currentLocation);
                             }
+
+                            // Signal that markers are loaded
+                            if (markersLatch != null) {
+                                markersLatch.countDown();
+                            }
                         })
                         .addOnFailureListener(e -> {
                             Toast.makeText(MoodMap.this,
                                     "Error loading events: " + e.getMessage(),
                                     Toast.LENGTH_SHORT).show();
                             Log.e(TAG, "Query failed: ", e);
+                            // Signal even on failure to prevent test deadlock
+                            if (markersLatch != null) {
+                                markersLatch.countDown();
+                            }
                         });
             });
         }
@@ -266,6 +284,8 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
         Marker marker = googleMap.addMarker(options);
         if (marker != null) {
             marker.setTag(doc);
+            // Add marker to our list for testing
+            markers.add(marker);
         }
     }
 
@@ -324,7 +344,13 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
                         Marker marker = googleMap.addMarker(options);
                         if (marker != null) {
                             marker.setTag(doc);
+                            // Add marker to our list for testing
+                            markers.add(marker);
                         }
+                    }
+                    // Signal that markers are loaded
+                    if (markersLatch != null) {
+                        markersLatch.countDown();
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -332,6 +358,10 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
                             "Error loading events: " + e.getMessage(),
                             Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "Query failed: ", e);
+                    // Signal even on failure to prevent test deadlock
+                    if (markersLatch != null) {
+                        markersLatch.countDown();
+                    }
                 });
     }
 
@@ -438,4 +468,10 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
         return distanceInKilometers(lat1, lon1, lat2, lon2) <= maxDistanceKm;
     }
 
+    /**
+     * Test hook: Returns the list of markers currently displayed on the map.
+     */
+    public List<Marker> getMarkers() {
+        return markers;
+    }
 }

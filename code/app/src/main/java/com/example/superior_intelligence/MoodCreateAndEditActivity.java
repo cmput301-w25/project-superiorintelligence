@@ -86,6 +86,15 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
     private Double lat = 0.0;
     private Double lng = 0.0;
 
+    public double getLat() {
+        return lat;
+    }
+
+    public double getLng() {
+        return lng;
+    }
+
+
     // PhotoActivity launcher for receiving the uploaded imageDocID
     private final ActivityResultLauncher<Intent> photoActivityLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
