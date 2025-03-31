@@ -5,27 +5,21 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
-import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.ByteArrayOutputStream;
@@ -33,6 +27,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Activity for viewing and editing user profile information.
+ * Manages profile display, name editing, and photo uploads, with synchronization
+ * between SharedPreferences and Firestore.
+ */
 public class ProfileActivity extends AppCompatActivity {
 
     private static final String TAG = "ProfileActivity";
@@ -59,6 +58,10 @@ public class ProfileActivity extends AppCompatActivity {
                 }
             });
 
+    /**
+     * Initializes the activity and sets up profile display.
+     * @param savedInstanceState Saved instance state or null
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,7 +122,8 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Loads profile photo from Firestore if not present in SharedPreferences.
+     * Loads profile photo from Firestore if not available locally.
+     * @param username The username to load photo for
      */
     private void loadProfilePhotoFromFirestore(String username) {
         if (username == null || username.isEmpty()) return;
@@ -138,7 +142,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Displays a dialog offering options to either change name or change profile photo.
+     * Shows dialog with options to edit name or photo.
      */
     private void showEditOptionsDialog() {
         String[] options = {"Change Name", "Change Photo"};
@@ -155,7 +159,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows an AlertDialog with an EditText to update the user's full name.
+     * Shows dialog for editing the user's name.
      */
     private void showEditNameDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -187,7 +191,8 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Loads the profile photo from a Base64-encoded string.
+     * Loads profile photo from Base64 encoded string.
+     * @param encodedImage The Base64 encoded image string
      */
     private void loadProfilePhotoFromBase64(String encodedImage) {
         try {
@@ -200,8 +205,8 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Uploads the profile image by compressing and encoding it as Base64,
-     * then stores it in the Firestore "profile_photo" collection.
+     * Uploads and stores profile photo to Firestore.
+     * @param imageUri URI of the selected image
      */
     private void uploadProfileImage(Uri imageUri) {
         String username = prefs.getString("username", null);
@@ -234,7 +239,8 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates the user's full name in the Firestore "users" collection.
+     * Updates user's name in Firestore.
+     * @param newName The new name to update
      */
     private void updateUserNameInFirestore(String newName) {
         String username = prefs.getString("username", null);
