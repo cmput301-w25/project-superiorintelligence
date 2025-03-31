@@ -1,20 +1,20 @@
 package com.example.superior_intelligence;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.health.connect.LocalTimeRangeFilter;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.PopupWindow;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,21 +28,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
+
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.type.DateTime;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -211,6 +207,8 @@ public class HomeActivity extends AppCompatActivity {
         CardView profileImage = findViewById(R.id.profile_image);
         profileImage.setOnClickListener(v -> startActivity(new Intent(HomeActivity.this, ProfileActivity.class)));
 
+        loadProfilePhotoForHome(profileImage);
+
         ImageButton notificationButton = findViewById(R.id.notification_button);
         ActivityResultLauncher<Intent> notificationLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -375,6 +373,7 @@ public class HomeActivity extends AppCompatActivity {
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.BLACK);
 
     }
+
     private void filterEventsByReason(String keyword) {
         if (keyword.isEmpty()) {
             if ("myposts".equals(currentTab)) {
@@ -408,10 +407,8 @@ public class HomeActivity extends AppCompatActivity {
             }
         }
 
-
         // Sort both lists by date descending
         Comparator<Event> dateDescComparator = (e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp());
-
         exactMatches.sort(dateDescComparator);
         partialMatches.sort(dateDescComparator);
 
@@ -574,12 +571,57 @@ public class HomeActivity extends AppCompatActivity {
             return;
         }
         List<Event> followedPosts = followedEvents;
-        List<Event> recentThree = new ArrayList<Event>();
-        for (int i = 0; i < 3; i++){
+        List<Event> recentThree = new ArrayList<>();
+        for (int i = 0; i < 3 && i < followedPosts.size(); i++){
             recentThree.add(followedPosts.get(i));
         }
         adapter.setEvents(recentThree);
     }
 
 
+    /**
+     * Loads the profile photo into the HomeActivity's profile view.
+     * It first attempts to load from SharedPreferences; if not available, it fetches from Firestore.
+     *
+     * Updated so the decoded bitmap is placed in the inner ImageView (R.id.profile_image_png)
+     * instead of the CardView background.
+     */
+    private void loadProfilePhotoForHome(CardView profileImage) {
+        SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String username = prefs.getString("username", "Default Username");
+        String encodedPhoto = prefs.getString("photo", null);
+
+        // Find the inner ImageView from the CardView
+        ImageView profileImageView = profileImage.findViewById(R.id.profile_image_png);
+
+        if (encodedPhoto != null) {
+            try {
+                byte[] imageBytes = Base64.decode(encodedPhoto, Base64.DEFAULT);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                profileImageView.setImageBitmap(bitmap);
+            } catch (Exception e) {
+                Log.e("HomeActivity", "Failed to decode profile image.", e);
+            }
+        } else {
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            db.collection("profile_photo").document(username)
+                    .get()
+                    .addOnSuccessListener(doc -> {
+                        if (doc.exists()) {
+                            String photo = doc.getString("photo");
+                            if (photo != null && !photo.isEmpty()) {
+                                prefs.edit().putString("photo", photo).apply();
+                                try {
+                                    byte[] imageBytes = Base64.decode(photo, Base64.DEFAULT);
+                                    Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                                    profileImageView.setImageBitmap(bitmap);
+                                } catch (Exception e) {
+                                    Log.e("HomeActivity", "Failed to decode profile image.", e);
+                                }
+                            }
+                        }
+                    })
+                    .addOnFailureListener(e -> Log.e("HomeActivity", "Failed to load profile photo from Firestore", e));
+        }
+    }
 }
