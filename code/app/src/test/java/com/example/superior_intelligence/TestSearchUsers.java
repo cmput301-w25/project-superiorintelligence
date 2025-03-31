@@ -11,16 +11,16 @@ import java.util.List;
 
 public class TestSearchUsers {
 
-    private List<HelperClass> mockUsers;
+    private List<UserHelper> mockUsers;
 
     @Before
     public void setUp() {
         mockUsers = new ArrayList<>();
-        mockUsers.add(new HelperClass("Alice", "alice"));
-        mockUsers.add(new HelperClass("Bob", "bob"));
-        mockUsers.add(new HelperClass("Paul", "paul"));
-        mockUsers.add(new HelperClass("Pam", "pamela"));
-        mockUsers.add(new HelperClass("Susan", "susan"));
+        mockUsers.add(new UserHelper("Alice", "alice"));
+        mockUsers.add(new UserHelper("Bob", "bob"));
+        mockUsers.add(new UserHelper("Paul", "paul"));
+        mockUsers.add(new UserHelper("Pam", "pamela"));
+        mockUsers.add(new UserHelper("Susan", "susan"));
     }
 
     /**
@@ -28,7 +28,7 @@ public class TestSearchUsers {
      */
     @Test
     public void searchPrefix_returnsUsersMatchingPrefix_only() {
-        List<HelperClass> results = SearchUserManager.searchPrefix("pa", mockUsers, "bob");
+        List<UserHelper> results = SearchUserManager.searchPrefix("pa", mockUsers, "bob");
 
         assertEquals(2, results.size());
         assertTrue(results.stream().anyMatch(user -> user.getUsername().equals("paul")));
@@ -40,7 +40,7 @@ public class TestSearchUsers {
      */
     @Test
     public void searchPrefix_excludesCurrentUserFromResults() {
-        List<HelperClass> results = SearchUserManager.searchPrefix("bo", mockUsers, "bob");
+        List<UserHelper> results = SearchUserManager.searchPrefix("bo", mockUsers, "bob");
 
         assertEquals(0, results.size()); // "bob" should be excluded
     }
@@ -50,7 +50,7 @@ public class TestSearchUsers {
      */
     @Test
     public void searchPrefix_returnsEmptyListWhenNoMatches() {
-        List<HelperClass> results = SearchUserManager.searchPrefix("xyz", mockUsers, "bob");
+        List<UserHelper> results = SearchUserManager.searchPrefix("xyz", mockUsers, "bob");
 
         assertTrue(results.isEmpty());
     }
@@ -60,7 +60,7 @@ public class TestSearchUsers {
      */
     @Test
     public void searchPrefix_returnsCorrectResultsIfCurrentUserAbsent() {
-        List<HelperClass> results = SearchUserManager.searchPrefix("pa", mockUsers, "notinthelist");
+        List<UserHelper> results = SearchUserManager.searchPrefix("pa", mockUsers, "notinthelist");
 
         assertEquals(2, results.size());
         assertTrue(results.stream().anyMatch(user -> user.getUsername().equals("paul")));

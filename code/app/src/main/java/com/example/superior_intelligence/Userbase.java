@@ -65,7 +65,7 @@ public class Userbase {
     // Updated createUser method to accept a password and store it.
     public void createUser(String name, String username, String password, UserCreationCallback callback) {
         // Use the HelperClass constructor that includes password.
-        HelperClass userData = new HelperClass(name, username, password);
+        UserHelper userData = new UserHelper(name, username, password);
         db.collection("users")
                 .document(username)
                 .set(userData)

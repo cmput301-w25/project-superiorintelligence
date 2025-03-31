@@ -24,7 +24,7 @@ public class SearchUsersActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private UserAdapter userAdapter;
-    private List<HelperClass> userList;
+    private List<UserHelper> userList;
     private FirebaseFirestore db;
     private EditText searchEditText;
     private String currentUsername;
@@ -94,7 +94,7 @@ public class SearchUsersActivity extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            HelperClass user = document.toObject(HelperClass.class);
+                            UserHelper user = document.toObject(UserHelper.class);
                             if (!user.getUsername().equals(currentUsername)) {
                                 userList.add(user);
                             }
@@ -139,7 +139,7 @@ public class SearchUsersActivity extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            HelperClass user = document.toObject(HelperClass.class);
+                            UserHelper user = document.toObject(UserHelper.class);
                             if (!user.getUsername().equals(currentUsername)) {
                                 userList.add(user);
                             }
