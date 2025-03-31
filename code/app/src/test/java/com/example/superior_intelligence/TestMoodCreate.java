@@ -8,7 +8,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MoodCreateTest {
+public class TestMoodCreate {
 
     private Event mockEvent() {
         return new Event(

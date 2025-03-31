@@ -10,7 +10,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MoodEditTest {
+public class TestMoodEdit {
 
     private Event mockOriginalEvent() {
         return new Event(

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class NotificationTest {
+public class TestNotification {
 
     @Mock
     private Userbase mockUserbase;

@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
-public class HomeTest {
+public class TestHome {
 
     private List<Event> mockEvents;
 
