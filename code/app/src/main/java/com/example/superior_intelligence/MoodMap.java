@@ -48,6 +48,8 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
     private static final String TAG = "MoodMap";
     public GoogleMap googleMap;
     private FirebaseFirestore db;
+    public static boolean testMode = false;
+    public static FirebaseFirestore injectedFirestore = null;
 
     // Filter CheckBoxes
     private CheckBox cbConfusion, cbAnger, cbFear,
@@ -101,15 +103,15 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
         LatLng edmonton = new LatLng(53.5461, -113.4938);
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(edmonton, 11.5f));
 
-        // Load markers immediately
-        applyFilters();
+        // Load markers unless suppressed in test
+        if (!testMode) {
+            applyFilters();
+        }
 
-        // Show event details on marker click
         googleMap.setOnMarkerClickListener(marker -> {
             Object tag = marker.getTag();
             if (tag instanceof DocumentSnapshot) {
-                DocumentSnapshot docSnap = (DocumentSnapshot) tag;
-                showEventDialog(docSnap);
+                showEventDialog((DocumentSnapshot) tag);
             }
             return true;
         });
@@ -121,7 +123,7 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
      * 2) Otherwise, show ONLY the single most recent event for each followed user,
      *    within 5 km of the current map center.
      */
-    private void applyFilters() {
+    public void applyFilters() {
         if (googleMap == null) {
             return;
         }
