@@ -2,8 +2,6 @@ package com.example.superior_intelligence;
 
 import android.widget.Button;
 
-import java.util.List;
-
 /**
  * A helper class that manages follow status between users and updates the follow button UI.
  * Used when viewing someone else's profile to check if you're following them,
