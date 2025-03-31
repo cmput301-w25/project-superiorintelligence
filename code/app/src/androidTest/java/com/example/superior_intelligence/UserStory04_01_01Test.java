@@ -137,22 +137,22 @@ public class UserStory04_01_01Test {
         public RecyclerViewMatcher(int recyclerViewId) {this.recyclerViewId = recyclerViewId;}
         public static RecyclerViewMatcher withRecyclerView(final int recyclerViewId) {return new RecyclerViewMatcher(recyclerViewId);}
         public org.hamcrest.Matcher<View> atPositionOnView(final int position, final int targetViewId) {return new org.hamcrest.TypeSafeMatcher<View>() {
-                View childView;
-                @Override
-                public void describeTo(org.hamcrest.Description description) {description.appendText("has view id " + targetViewId + " at position " + position);}
-                @Override
-                protected boolean matchesSafely(View view)
+            View childView;
+            @Override
+            public void describeTo(org.hamcrest.Description description) {description.appendText("has view id " + targetViewId + " at position " + position);}
+            @Override
+            protected boolean matchesSafely(View view)
+            {
+                if (childView ==null)
                 {
-                    if (childView ==null)
-                    {
-                        androidx.recyclerview.widget.RecyclerView recyclerView =view.getRootView().findViewById(recyclerViewId);
-                        if (recyclerView != null && recyclerView.getId() == recyclerViewId)
-                        {   androidx.recyclerview.widget.RecyclerView.ViewHolder viewHolder =recyclerView.findViewHolderForAdapterPosition(position);
-                            if (viewHolder == null)
-                            {return false;}
-                            childView = viewHolder.itemView.findViewById(targetViewId);
-                        } else {return false;}}
-                    return view == childView;}};
+                    androidx.recyclerview.widget.RecyclerView recyclerView =view.getRootView().findViewById(recyclerViewId);
+                    if (recyclerView != null && recyclerView.getId() == recyclerViewId)
+                    {   androidx.recyclerview.widget.RecyclerView.ViewHolder viewHolder =recyclerView.findViewHolderForAdapterPosition(position);
+                        if (viewHolder == null)
+                        {return false;}
+                        childView = viewHolder.itemView.findViewById(targetViewId);
+                    } else {return false;}}
+                return view == childView;}};
         }
     }
     public class RecyclerViewItemCountAssertion implements androidx.test.espresso.ViewAssertion
