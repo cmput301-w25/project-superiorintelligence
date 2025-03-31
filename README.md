@@ -81,9 +81,21 @@ This project is an Android application - Moodgram that allows users to post, tra
 
 ## Setup Instructions
 
-1. [Step 1]
-2. [Step 2]
-3. [Step 3]
+## Sign Up
+1. Open the app and tap the **Sign Up** button.
+2. Enter your unique username and any required details.
+3. Complete the registration process by following the on-screen instructions.
+
+## Log In
+1. Open the app and tap the **Log In** button.
+2. Enter your username and password.
+3. Tap **Log In** to access your account.
+
+## Profile Setup
+1. Once logged in, navigate to your **Profile**.
+2. Tap **Edit Profile** to add or update your personal information and profile picture.
+3. Save your changes and start using the app features!
+
 
 ## Documentation
 
