@@ -389,7 +389,7 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
     /**
      * Returns the drawable resource ID for the given mood string, or -1 if unrecognized.
      */
-    private int getMoodMarkerIcon(String mood) {
+    public static int getMoodMarkerIcon(String mood) {
         if (mood == null) {
             return -1;
         }
@@ -414,4 +414,28 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
                 return -1;
         }
     }
+
+    /**
+     * Calculates the distance between two coordinates using the Haversine formula.
+     * @return distance in kilometers
+     */
+    public static float distanceInKilometers(double lat1, double lon1, double lat2, double lon2) {
+        final int EARTH_RADIUS_KM = 6371; // Approximate radius of Earth in km
+
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return (float) (EARTH_RADIUS_KM * c);
+    }
+
+    public static boolean isWithinRange(double lat1, double lon1, double lat2, double lon2, float maxDistanceKm) {
+        return distanceInKilometers(lat1, lon1, lat2, lon2) <= maxDistanceKm;
+    }
+
 }

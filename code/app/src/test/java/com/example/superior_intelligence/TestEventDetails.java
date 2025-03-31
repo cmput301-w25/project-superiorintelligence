@@ -11,7 +11,7 @@ import org.mockito.Mockito;
 
 import java.util.*;
 
-public class EventDetailsTest {
+public class TestEventDetails {
 
     private Event mockEvent;
     private Database mockDb;

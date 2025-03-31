@@ -8,7 +8,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MoodCreateTest {
+public class TestMoodCreate {
 
     /**
      * Creates a sample Event object with preset values.
