@@ -12,7 +12,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UserbaseTest {
+public class UniqueUsernameTest {
 
     private Userbase userbase;
 
