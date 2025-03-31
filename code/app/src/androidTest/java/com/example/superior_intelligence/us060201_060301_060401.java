@@ -41,6 +41,12 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+
+/**
+ * UI test class for verifying the behavior of the MoodMap activity.
+ * This class tests whether mood markers for the current user and followed users
+ * are displayed correctly on the map.
+ */
 @RunWith(AndroidJUnit4.class)
 public class us060201_060301_060401 {
 
@@ -54,6 +60,12 @@ public class us060201_060301_060401 {
     private QuerySnapshot mockSnapshotMyPosts;
     private QuerySnapshot mockSnapshotFollowed;
 
+    /**
+     * Sets up the test environment by initializing mock Firestore instances
+     * and replacing the Userbase instance with a test double.
+     *
+     * @throws Exception if an error occurs while setting up reflection for Userbase
+     */
     @Before
     public void setUp() throws Exception {
         User.getInstance().setUsername("testUser");
@@ -85,12 +97,20 @@ public class us060201_060301_060401 {
         });
     }
 
+    /**
+     * Cleans up the test environment by resetting MoodMap test configurations.
+     */
     @After
     public void tearDown() {
         MoodMap.testMode = false;
         MoodMap.injectedFirestore = null;
     }
 
+    /**
+     * Tests if markers for the current user's posts are correctly displayed on the map.
+     *
+     * @throws InterruptedException if the thread is interrupted while waiting for markers to load
+     */
     @Test
     public void testMyPostsMarkersDisplayed() throws InterruptedException {
         MoodMap.testMode = true;
@@ -121,6 +141,10 @@ public class us060201_060301_060401 {
         }
     }
 
+    /**
+     * Tests if markers for followed users' posts are correctly displayed on the map.
+     *  @throws InterruptedException if the thread is interrupted while waiting for markers to load
+     */
     @Test
     public void testFollowedUsersMarkersDisplayed() throws InterruptedException {
         MoodMap.testMode = true;
@@ -151,6 +175,10 @@ public class us060201_060301_060401 {
         }
     }
 
+    /**
+     * Tests if recent events from followed users are within a 5 km range of the map center.
+     *  @throws InterruptedException if the thread is interrupted while waiting for markers to load
+     */
     @Test
     public void testRecentFollowedUsersEventsWithinRange() throws InterruptedException {
         MoodMap.testMode = true;
@@ -190,6 +218,11 @@ public class us060201_060301_060401 {
         }
     }
 
+    /**
+     * Mocks Firestore documents for the current user's posts.
+     *
+     * @return a list of mocked Firestore documents representing the current user's posts
+     */
     private List<DocumentSnapshot> createMockDocumentsForCurrentUser() {
         List<DocumentSnapshot> docs = new ArrayList<>();
         for (int i = 1; i <= 3; i++) {
@@ -204,6 +237,12 @@ public class us060201_060301_060401 {
         return docs;
     }
 
+
+    /**
+     * Mocks Firestore documents for followed users' posts.
+     *
+     * @return a list of mocked Firestore documents representing followed users' posts
+     */
     private List<DocumentSnapshot> createMockDocumentsForFollowedUsers() {
         List<DocumentSnapshot> docs = new ArrayList<>();
 
@@ -226,7 +265,16 @@ public class us060201_060301_060401 {
         return docs;
     }
 
+    /**
+     * Test double for Userbase that provides a fixed list of followed users.
+     */
     public static class TestUserbase extends Userbase {
+        /**
+         * Provides a fixed list of followed users for testing purposes.
+         *
+         * @param username the username of the current user
+         * @param callback the callback to receive the list of followed users
+         */
         @Override
         public void getUserFollowing(String username, UserListCallback callback) {
             callback.onUserListRetrieved(Arrays.asList("followed1", "followed2"));
