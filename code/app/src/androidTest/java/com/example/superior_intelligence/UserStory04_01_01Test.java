@@ -1,6 +1,10 @@
 package com.example.superior_intelligence;
 
 import static androidx.test.espresso.Espresso.onView;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Date;
 import java.util.Locale;
 import java.util.UUID;
@@ -11,7 +15,9 @@ import android.content.Intent;
 import android.os.SystemClock;
 import com.google.firebase.firestore.FirebaseFirestore;
 import static org.hamcrest.Matchers.is;
+import android.util.Log;
 import android.view.View;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import java.text.SimpleDateFormat;
@@ -41,6 +47,9 @@ public class UserStory04_01_01Test {
     private String eventId1;
     private String eventId2;
     private String eventIdOther;
+    @BeforeClass
+    public static void setupEmulator(){FirebaseFirestore.getInstance().useEmulator("10.0.2.2", 8080);}
+
     @Before
     public void setUp() throws InterruptedException
     {
@@ -98,10 +107,22 @@ public class UserStory04_01_01Test {
         onView(RecyclerViewMatcher.withRecyclerView(R.id.recycler_view).atPositionOnView(0, R.id.event_title)).check(matches(withText("Event 2")));
         onView(RecyclerViewMatcher.withRecyclerView(R.id.recycler_view).atPositionOnView(1, R.id.event_title)).check(matches(withText("Event 1")));}
     @After
-    public void tearDown() throws InterruptedException
-    {   deleteEvent(eventId1);
-        deleteEvent(eventId2);
-        deleteEvent(eventIdOther);
+    public void tearDown() {
+        String projectId="moodgram";
+        URL url=null;
+        try {url =new URL("http://10.0.2.2:8080/emulator/v1/projects/" +projectId +"/databases/(default)/documents");}
+        catch(MalformedURLException exception){
+            Log.e("URL Error",exception.getMessage());}
+        HttpURLConnection urlConnection = null;
+        try{urlConnection =(HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("DELETE");
+            int response =urlConnection.getResponseCode();
+            Log.i("Response Code", "Response Code: " +response);}
+        catch(IOException exception){Log.e("IO Error",exception.getMessage());}
+        finally
+        {
+            if (urlConnection !=null){urlConnection.disconnect();}
+        }
     }
 
     private void deleteEvent(String docId) throws InterruptedException
@@ -116,22 +137,22 @@ public class UserStory04_01_01Test {
         public RecyclerViewMatcher(int recyclerViewId) {this.recyclerViewId = recyclerViewId;}
         public static RecyclerViewMatcher withRecyclerView(final int recyclerViewId) {return new RecyclerViewMatcher(recyclerViewId);}
         public org.hamcrest.Matcher<View> atPositionOnView(final int position, final int targetViewId) {return new org.hamcrest.TypeSafeMatcher<View>() {
-                View childView;
-                @Override
-                public void describeTo(org.hamcrest.Description description) {description.appendText("has view id " + targetViewId + " at position " + position);}
-                @Override
-                protected boolean matchesSafely(View view)
+            View childView;
+            @Override
+            public void describeTo(org.hamcrest.Description description) {description.appendText("has view id " + targetViewId + " at position " + position);}
+            @Override
+            protected boolean matchesSafely(View view)
+            {
+                if (childView ==null)
                 {
-                    if (childView ==null)
-                    {
-                        androidx.recyclerview.widget.RecyclerView recyclerView =view.getRootView().findViewById(recyclerViewId);
-                        if (recyclerView != null && recyclerView.getId() == recyclerViewId)
-                        {   androidx.recyclerview.widget.RecyclerView.ViewHolder viewHolder =recyclerView.findViewHolderForAdapterPosition(position);
-                            if (viewHolder == null)
-                            {return false;}
-                            childView = viewHolder.itemView.findViewById(targetViewId);
-                        } else {return false;}}
-                    return view == childView;}};
+                    androidx.recyclerview.widget.RecyclerView recyclerView =view.getRootView().findViewById(recyclerViewId);
+                    if (recyclerView != null && recyclerView.getId() == recyclerViewId)
+                    {   androidx.recyclerview.widget.RecyclerView.ViewHolder viewHolder =recyclerView.findViewHolderForAdapterPosition(position);
+                        if (viewHolder == null)
+                        {return false;}
+                        childView = viewHolder.itemView.findViewById(targetViewId);
+                    } else {return false;}}
+                return view == childView;}};
         }
     }
     public class RecyclerViewItemCountAssertion implements androidx.test.espresso.ViewAssertion
