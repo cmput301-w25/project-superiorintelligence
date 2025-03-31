@@ -33,7 +33,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * Activity for displaying details of an event.
+ * Supports viewing, editing, deleting, and commenting on an event.
+ */
 public class EventDetailsActivity extends AppCompatActivity implements DeleteMoodFragment.DeleteDialogListener, PostStatusFragment.PostStatusDialogListener{
 
     private TextView eventTitle, eventMood, selectedMood, eventReason, eventSituation, eventDate, eventUser;
@@ -53,6 +56,11 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
     private List<Comment> commentsList = new ArrayList<>();
     private String currentUser;
 
+    /**
+     * Called when the activity is first created.
+     *
+     * @param savedInstanceState The saved state of the activity.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -132,6 +140,10 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
         }
     }
 
+    /**
+     * Called when the activity enters the started state.
+     * Handles back navigation on newer Android versions.
+     */
     @Override
     protected void onStart() {
         super.onStart();
@@ -150,6 +162,10 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
         }
     }
 
+    /**
+     * Handles the back press event.
+     * Preserves the tab selection and filter state.
+     */
     @Override
     public void onBackPressed() {
         Intent returnIntent = new Intent();
@@ -311,6 +327,11 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
         }
     }
 
+    /**
+     * Loads comments for the event from Firestore.
+     *
+     * @param postId The ID of the event post.
+     */
     private void loadCommentsFromFirestore(String postId) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference postRef = db.collection("MyPosts").document(postId);
@@ -344,7 +365,9 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
 
 
     /**
-     * Delete mood from database when user click confirm delete
+     * Handles event deletion confirmation.
+     *
+     * @param delete_status true if the user confirmed deletion.
      */
     @Override
     public void delete(boolean delete_status) {
@@ -366,6 +389,11 @@ public class EventDetailsActivity extends AppCompatActivity implements DeleteMoo
         }
     }
 
+    /**
+     * Updates the event's public status.
+     *
+     * @param post_status The new public status of the event.
+     */
     @Override
     public void public_status(boolean post_status) {
         if (currentEvent.isPublic_status() != post_status){
