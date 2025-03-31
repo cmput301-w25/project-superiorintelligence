@@ -17,6 +17,9 @@ public class MapperTest {
 
     private Event mockEvent;
 
+    /**
+     * Sets up a mock Event object before each test for use in event-to-map conversion.
+     */
     @Before
     public void setUp() {
         mockEvent = new Event(
@@ -38,6 +41,10 @@ public class MapperTest {
         );
     }
 
+    /**
+     * Makes sure that eventToMap() converts an Event into a Map
+     * with the right values for every field.
+     */
     @Test
     public void testEventToMap() {
         Map<String, Object> result = Mapper.eventToMap(mockEvent);
@@ -59,7 +66,10 @@ public class MapperTest {
         assertTrue((Boolean) result.get("public_status"));
     }
 
-
+    /**
+     * Checks that docToEvent() builds a proper Event object from a mocked Firestore document.
+     * This test includes a Timestamp date to make sure formatting works too.
+     */
     @Test
     public void testDocToEvent() {
         DocumentSnapshot mockSnapshot = Mockito.mock(DocumentSnapshot.class);

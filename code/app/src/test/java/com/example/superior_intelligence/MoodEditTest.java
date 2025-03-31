@@ -12,6 +12,9 @@ import java.util.List;
 
 public class MoodEditTest {
 
+    /**
+     * Returns a mock Event that represents the original (pre-edited) state.
+     */
     private Event mockOriginalEvent() {
         return new Event(
                 "edit123",
@@ -32,6 +35,9 @@ public class MoodEditTest {
         );
     }
 
+    /**
+     * Returns a mock Event that simulates the updated version of the original event.
+     */
     private Event mockUpdatedEvent() {
         return new Event(
                 "edit123",
@@ -52,12 +58,18 @@ public class MoodEditTest {
         );
     }
 
+    /**
+     * Returns a list with one editable mock event inside.
+     */
     private List<Event> mockEventListWithEditable() {
         List<Event> events = new ArrayList<>();
         events.add(mockOriginalEvent());
         return events;
     }
 
+    /**
+     * Tests that editing an existing event by ID correctly replaces it in the list.
+     */
     @Test
     public void testEditEventReplacesOldOne() {
         List<Event> eventList = mockEventListWithEditable();
@@ -81,6 +93,9 @@ public class MoodEditTest {
         assertEquals(false, eventList.get(0).isPublic_status());
     }
 
+    /**
+     * Tests that trying to edit an event with a non-matching ID throws an exception.
+     */
     @Test
     public void testEditFailsIfIdMismatch() {
         List<Event> events = mockEventListWithEditable();
@@ -115,6 +130,9 @@ public class MoodEditTest {
         });
     }
 
+    /**
+     * Confirms that the original event and updated event differ in all the important fields.
+     */
     @Test
     public void testOriginalAndEditedEventsDiffer() {
         Event original = mockOriginalEvent();
