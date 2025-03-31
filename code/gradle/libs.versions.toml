@@ -15,6 +15,7 @@ playServicesMaps = "19.1.0"
 pluginAnnotation = "10.13.3"
 playServicesLocation = "21.3.0"
 espressoIdlingResource = "3.6.1"
+espressoContrib = "3.6.1"
 
 [libraries]
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
@@ -32,6 +33,7 @@ play-services-maps = { group = "com.google.android.gms", name = "play-services-m
 plugin-annotation = { module = "com.mapbox.maps:plugin-annotation", version.ref = "pluginAnnotation" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 espresso-idling-resource = { group = "androidx.test.espresso", name = "espresso-idling-resource", version.ref = "espressoIdlingResource" }
+espresso-contrib = { group = "androidx.test.espresso", name = "espresso-contrib", version.ref = "espressoContrib" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
