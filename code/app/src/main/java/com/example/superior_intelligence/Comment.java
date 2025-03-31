@@ -2,6 +2,10 @@ package com.example.superior_intelligence;
 
 import java.io.Serializable;
 
+/**
+ * Represents a user comment with a username, text content, and timestamp.
+ * Implements Serializable for data persistence and Comparable for sorting by timestamp.
+ */
 public class Comment implements Serializable, Comparable<Comment>  {
 
     private String username;
@@ -75,6 +79,11 @@ public class Comment implements Serializable, Comparable<Comment>  {
         this.time = time;
     }
 
+    /**
+     * Checks if two Comment objects are equal based on username, text, and timestamp.
+     * @param o the object to compare with
+     * @return true if the objects are equal, false otherwise
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -83,6 +92,10 @@ public class Comment implements Serializable, Comparable<Comment>  {
         return username.equals(c.username) && text.equals(c.text) && time.equals(c.time);
     }
 
+    /**
+     * Generates a hash code for the Comment object based on username, text, and timestamp.
+     * @return the hash code of the Comment object
+     */
     @Override
     public int compareTo(Comment other) {
         return this.time.compareTo(other.time); // For now, compare as strings (dd/MM/yy H:mm)
