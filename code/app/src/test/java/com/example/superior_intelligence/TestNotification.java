@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class NotificationTest {
+public class TestNotification {
 
     @Mock
     private Userbase mockUserbase;
@@ -25,11 +25,17 @@ public class NotificationTest {
     private String requester = "alice";
     private String requested = "bob";
 
+    /**
+     * Initializes mocks before each test.
+     */
     @Before
     public void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
+    /**
+     * Tests that sending a follow request succeeds and triggers the callback with true.
+     */
     @Test
     public void testSendFollowRequest_addsRequestSuccessfully() {
         doAnswer(invocation -> {
@@ -43,6 +49,9 @@ public class NotificationTest {
         verify(mockUserbase).sendFollowRequest(eq(requester), eq(requested), any(Userbase.FollowRequestActionCallback.class));
     }
 
+    /**
+     * Tests that a failed follow request triggers the callback with false.
+     */
     @Test
     public void testSendFollowRequest_failure() {
         doAnswer(invocation -> {
@@ -54,6 +63,9 @@ public class NotificationTest {
         mockUserbase.sendFollowRequest(requester, requested, success -> assertFalse(success));
     }
 
+    /**
+     * Tests that a failed follow request acceptance triggers the callback with false.
+     */
     @Test
     public void testAcceptFollowRequest_failure() {
         doAnswer(invocation -> {
@@ -65,6 +77,9 @@ public class NotificationTest {
         mockUserbase.acceptFollowRequest(requester, requested, success -> assertFalse(success));
     }
 
+    /**
+     * Tests that accepting a follow request successfully triggers the callback with true.
+     */
     @Test
     public void testAcceptFollowRequest_succeeds() {
         doAnswer(invocation -> {
@@ -78,6 +93,9 @@ public class NotificationTest {
         verify(mockUserbase).acceptFollowRequest(eq(requester), eq(requested), any(Userbase.FollowActionCallback.class));
     }
 
+    /**
+     * Tests that fetching incoming follow requests returns a populated list.
+     */
     @Test
     public void testGetIncomingFollowRequests_returnsList() {
         doAnswer(invocation -> {
@@ -95,6 +113,9 @@ public class NotificationTest {
         verify(mockUserbase).getIncomingFollowRequests(eq("bob"), any(Userbase.FollowRequestListCallback.class));
     }
 
+    /**
+     * Tests that fetching incoming follow requests can return an empty list safely.
+     */
     @Test
     public void testGetIncomingFollowRequests_returnsEmptyList() {
         doAnswer(invocation -> {
@@ -109,6 +130,9 @@ public class NotificationTest {
         });
     }
 
+    /**
+     * Tests that NotificationAdapter returns the correct item count with a populated list.
+     */
     @Test
     public void testNotificationAdapter_getItemCount() {
         List<String> mockData = Arrays.asList("alice wants to follow you", "bob wants to follow you");
@@ -116,6 +140,9 @@ public class NotificationTest {
         assertEquals(2, adapter.getItemCount());
     }
 
+    /**
+     * Tests that NotificationAdapter returns 0 items when initialized with an empty list.
+     */
     @Test
     public void testNotificationAdapter_emptyList() {
         List<String> mockData = Arrays.asList();
@@ -123,6 +150,9 @@ public class NotificationTest {
         assertEquals(0, adapter.getItemCount());
     }
 
+    /**
+     * Tests that NotificationAdapter handles a list with a null username safely.
+     */
     @Test
     public void testNotificationAdapter_handlesNullUsername() {
         List<String> mockData = Arrays.asList((String) null);
@@ -130,6 +160,9 @@ public class NotificationTest {
         assertEquals(1, adapter.getItemCount());
     }
 
+    /**
+     * Tests that NotificationAdapter supports duplicate usernames in the list.
+     */
     @Test
     public void testNotificationAdapter_duplicateUsernames() {
         List<String> mockData = Arrays.asList("alice", "alice");

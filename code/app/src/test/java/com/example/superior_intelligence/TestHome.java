@@ -11,10 +11,13 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
-public class HomeTest {
+public class TestHome {
 
     private List<Event> mockEvents;
 
+    /**
+     * Sets up a mock event list with various moods and dates for testing.
+     */
     @Before
     public void setUp() {
         mockEvents = new ArrayList<>();
@@ -43,6 +46,9 @@ public class HomeTest {
         mockEvents.add(event3);
     }
 
+    /**
+     * Tests filtering by a keyword in the mood explanation.
+     */
     @Test
     public void testFilterByReason() {
         List<Event> result = HomeManager.filterByReason("car", mockEvents);
@@ -54,14 +60,20 @@ public class HomeTest {
     }
 
 
+    /**
+     * Tests filtering with a keyword that doesn't exist in any explanation.
+     */
     @Test
     public void testFilterByReason_noMatchReturnsEmpty() {
         List<Event> result = HomeManager.filterByReason("thiswordisnotreal", mockEvents);
         assertEquals(0, result.size());
     }
 
+    /**
+     * Tests filtering by emotional state, matching only "Anger".
+     */
     @Test
-    public void testFilterByMood_shameOnly() {
+    public void testFilterByMood() {
         List<String> moodList = Arrays.asList("Anger");
 
         List<Event> result = HomeManager.filterByMood(moodList, mockEvents);
@@ -72,8 +84,11 @@ public class HomeTest {
         }
     }
 
+    /**
+     * Tests filtering to only events from the last 7 days.
+     */
     @Test
-    public void testFilterRecentWeek_onlyEventsFromLast7Days() {
+    public void testFilterRecentWeek() {
         List<Event> result = HomeManager.filterRecentWeek(mockEvents);
 
         assertEquals(2, result.size());
@@ -82,21 +97,20 @@ public class HomeTest {
         }
     }
 
+    /**
+     * Tests sorting and retrieving the three most recent events.
+     */
     @Test
-    public void testRecentThree_returnsLatestEvents() {
+    public void testRecentThree() {
         List<Event> result = HomeManager.recentThree(mockEvents);
 
         assertEquals(3, result.size());
         assertEquals(mockEvents.get(0), result.get(0)); // newest event first
     }
 
-    // Helper to get formatted date string "dd MMM yyyy, HH:mm"
-    private String getDateOffsetFromToday(int daysOffset) {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_MONTH, daysOffset);
-        return new java.text.SimpleDateFormat("dd MMM yyyy, HH:mm").format(cal.getTime());
-    }
-
+    /**
+     * Tests that a new event is added to the list if it does not already exist.
+     */
     @Test
     public void testUpsertEvent_addsNewEventIfNotFound() {
         List<Event> events = new ArrayList<>();
@@ -113,6 +127,9 @@ public class HomeTest {
         assertTrue(events.contains(newEvent));
     }
 
+    /**
+     * Tests that an existing event is updated in the list if the ID matches.
+     */
     @Test
     public void testUpsertEvent_updatesExistingEvent() {
         Event existing = new Event();
@@ -132,6 +149,9 @@ public class HomeTest {
         assertEquals("Updated reason", events.get(0).getMoodExplanation());
     }
 
+    /**
+     * Tests removing an event by its ID from the list.
+     */
     @Test
     public void testRemoveEventById_removesMatchingEvent() {
         Event e1 = new Event();
@@ -148,5 +168,16 @@ public class HomeTest {
 
         assertEquals(1, events.size());
         assertEquals("def456", events.get(0).getID());
+    }
+
+    /**
+     * Helper method to generate a date string offset by a number of days from today.
+     * @param daysOffset Number of days to offset (negative = past, positive = future).
+     * @return Formatted date string in "dd MMM yyyy, HH:mm" format.
+     */
+    private String getDateOffsetFromToday(int daysOffset) {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_MONTH, daysOffset);
+        return new java.text.SimpleDateFormat("dd MMM yyyy, HH:mm").format(cal.getTime());
     }
 }

@@ -41,21 +41,16 @@ import java.util.Map;
  * - If "My Posts" is checked, shows ALL of the current user's events.
  * - Otherwise, shows ONLY the single most recent event for each followed user,
  *   filtered to within 5 km from the current map center.
- *
- * NOTE: A test hook (getMarkers) has been added for UI testing purposes.
  */
 public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final String TAG = "MoodMap";
-    public GoogleMap googleMap;
+    private GoogleMap googleMap;
     private FirebaseFirestore db;
 
     // Filter CheckBoxes
     private CheckBox cbConfusion, cbAnger, cbFear,
             cbDisgust, cbHappy, cbSad, cbShame, cbSurprise, cbMyPosts;
-
-    // List to store markers for testing purposes.
-    private List<Marker> markers = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,16 +111,14 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
     /**
      * Main filter logic:
      * 1) If "My Posts" is checked, show ALL events from the current user.
-     * 2) Otherwise, show ONLY the single most recent event for each followed user,
+     * 2) Otherwise, show ONLY the single most recent event from each followed user,
      *    within 5 km of the current map center.
      */
     private void applyFilters() {
         if (googleMap == null) {
             return;
         }
-        // Clear previous markers from the map and test hook list.
         googleMap.clear();
-        markers.clear();
 
         // Get the current user from your app's singleton
         User currentUser = User.getInstance();
@@ -168,7 +161,7 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
             // Show ALL of my events
             Query myQuery = baseQuery.whereEqualTo("postUser", currentUsername);
             Log.d(TAG, "Showing all events by user: " + currentUsername);
-            // Reuse the executeQuery method to place all markers
+            // We can reuse the existing "executeQuery" method to place all markers
             executeQuery(myQuery, currentLocation);
 
         } else {
@@ -184,12 +177,12 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
                 // Build a query for all events by followed users
                 Query followedQuery = finalBaseQuery.whereIn("postUser", followedUsers);
 
-                // Fetch events and group by user, picking only the most recent
+                // Now fetch those events and group by user, picking only the most recent
                 followedQuery.get()
                         .addOnSuccessListener(snap -> {
                             Log.d(TAG, "Documents found: " + snap.size());
 
-                            // Store only the single doc with the largest timestamp per user
+                            // We'll store only the single doc with the largest timestamp per user
                             Map<String, DocumentSnapshot> latestByUser = new HashMap<>();
 
                             for (DocumentSnapshot doc : snap.getDocuments()) {
@@ -213,7 +206,8 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
                                 }
                             }
 
-                            // Place a marker for each user if it's within 5 km of currentLocation
+                            // Now place a marker only for the single doc per user
+                            // if it's within 5 km of currentLocation
                             for (DocumentSnapshot doc : latestByUser.values()) {
                                 placeMarkerIfWithinRange(doc, currentLocation);
                             }
@@ -230,7 +224,7 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
 
     /**
      * Places a marker for the given doc if it's within 5 km of the given location.
-     * This is used for the "single most recent event" approach.
+     * This is used for the "single most recent event" approach in the else branch.
      */
     private void placeMarkerIfWithinRange(DocumentSnapshot doc, LatLng currentLocation) {
         Double lat = doc.getDouble("lat");
@@ -250,7 +244,7 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
             return;
         }
 
-        // If within 5 km, create marker
+        // If we reach here, doc is within 5 km
         LatLng position = new LatLng(lat, lng);
         String mood = doc.getString("mood");
         String user = doc.getString("postUser");
@@ -272,13 +266,12 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
         Marker marker = googleMap.addMarker(options);
         if (marker != null) {
             marker.setTag(doc);
-            markers.add(marker); // Save marker for testing
         }
     }
 
     /**
      * Executes the Firestore query and processes the results (including a 5 km distance filter).
-     * This method places ALL documents that match the query (used in the "my posts" scenario).
+     * This method places ALL docs that match the query (for "my posts" scenario).
      */
     private void executeQuery(Query query, LatLng currentLocation) {
         query.get()
@@ -331,7 +324,6 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
                         Marker marker = googleMap.addMarker(options);
                         if (marker != null) {
                             marker.setTag(doc);
-                            markers.add(marker); // Save marker for testing
                         }
                     }
                 })
@@ -397,7 +389,7 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
     /**
      * Returns the drawable resource ID for the given mood string, or -1 if unrecognized.
      */
-    private int getMoodMarkerIcon(String mood) {
+    public static int getMoodMarkerIcon(String mood) {
         if (mood == null) {
             return -1;
         }
@@ -424,10 +416,26 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
     }
 
     /**
-     * Test hook: Returns the list of markers currently displayed on the map.
-     * This is used by UI tests to verify that the correct markers are displayed.
+     * Calculates the distance between two coordinates using the Haversine formula.
+     * @return distance in kilometers
      */
-    public List<Marker> getMarkers() {
-        return markers;
+    public static float distanceInKilometers(double lat1, double lon1, double lat2, double lon2) {
+        final int EARTH_RADIUS_KM = 6371; // Approximate radius of Earth in km
+
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return (float) (EARTH_RADIUS_KM * c);
     }
+
+    public static boolean isWithinRange(double lat1, double lon1, double lat2, double lon2, float maxDistanceKm) {
+        return distanceInKilometers(lat1, lon1, lat2, lon2) <= maxDistanceKm;
+    }
+
 }

@@ -10,10 +10,9 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Map;
 
-public class MapperTest {
+public class TestMapper {
 
     private Event mockEvent;
 
