@@ -8,14 +8,27 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Userbase class that handles user-related operations, such as user creation,
+ * checking if a user exists, following and unfollowing users, managing follow requests,
+ * and sending notifications. This class interacts with Firestore to store and retrieve user data.
+ */
 public class Userbase {
     private final FirebaseFirestore db;
     private static Userbase instance;
 
+    /**
+     * Initializes the Userbase instance with Firestore.
+     */
     public Userbase() {
         db = FirebaseFirestore.getInstance();
     }
 
+    /**
+     * Gets the singleton instance of the Userbase.
+     *
+     * @return The singleton instance of Userbase.
+     */
     public static Userbase getInstance() {
         if (instance == null) {
             instance = new Userbase();
@@ -23,7 +36,12 @@ public class Userbase {
         return instance;
     }
 
-    // Updated to include the password from Firestore.
+    /**
+     * Checks if a user exists in Firestore.
+     *
+     * @param username The username to check.
+     * @param callback The callback to handle the result.
+     */
     public void checkUserExists(String username, UserCheckCallback callback) {
         db.collection("users")
                 .document(username)
@@ -42,6 +60,12 @@ public class Userbase {
                 });
     }
 
+    /**
+     * Retrieves user details from Firestore.
+     *
+     * @param username The username to fetch details for.
+     * @param callback The callback to handle the result.
+     */
     public void getUserDetails(String username, UserDetailsCallback callback) {
         if (username == null || username.isEmpty()) {
             callback.onUserDetailsFetched(false, null, null);
@@ -62,7 +86,15 @@ public class Userbase {
                 .addOnFailureListener(e -> callback.onUserDetailsFetched(false, null, null));
     }
 
-    // Updated createUser method to accept a password and store it.
+
+    /**
+     * Creates a new user in Firestore with the provided details.
+     *
+     * @param name     The name of the user.
+     * @param username The username of the user.
+     * @param password The password of the user.
+     * @param callback The callback to handle the result.
+     */
     public void createUser(String name, String username, String password, UserCreationCallback callback) {
         // Use the HelperClass constructor that includes password.
         UserHelper userData = new UserHelper(name, username, password);
@@ -85,6 +117,13 @@ public class Userbase {
                 .addOnFailureListener(e -> callback.onUserCreated(false));
     }
 
+    /**
+     * Unfollows a user.
+     *
+     * @param currentUser The user performing the unfollow action.
+     * @param targetUser  The user to unfollow.
+     * @param callback    The callback to handle the result.
+     */
     public void unfollowUser(String currentUser, String targetUser, FollowActionCallback callback) {
         db.collection("users").document(currentUser)
                 .update("following", FieldValue.arrayRemove(targetUser))
@@ -97,6 +136,13 @@ public class Userbase {
                 .addOnFailureListener(e -> callback.onFollowAction(false));
     }
 
+    /**
+     * Checks if one user is following another.
+     *
+     * @param currentUser The user performing the check.
+     * @param targetUser  The user to check if they are followed.
+     * @param callback    The callback to handle the result.
+     */
     public void checkFollowStatus(String currentUser, String targetUser, FollowCheckCallback callback) {
         Log.d("FollowDebug", "Checking if " + currentUser + " follows " + targetUser);
         db.collection("users")
@@ -116,6 +162,13 @@ public class Userbase {
                 .addOnFailureListener(e -> callback.onFollowChecked(false));
     }
 
+    /**
+     * Checks if a follow request already exists between two users.
+     *
+     * @param requester The user who sent the follow request.
+     * @param requested The user who received the follow request.
+     * @param callback  The callback to handle the result.
+     */
     public void checkFollowRequest(String requester, String requested, FollowRequestCheckCallback callback) {
         db.collection("follow_requests")
                 .whereEqualTo("requester", requester)
@@ -125,6 +178,13 @@ public class Userbase {
                 .addOnFailureListener(e -> callback.onFollowRequestChecked(false));
     }
 
+    /**
+     * Sends a follow request from one user to another.
+     *
+     * @param requester The user sending the follow request.
+     * @param requested The user receiving the follow request.
+     * @param callback  The callback to handle the result.
+     */
     public void sendFollowRequest(String requester, String requested, FollowRequestActionCallback callback) {
         Log.d("FollowDebug", "Attempting to send follow request: " + requester + " -> " + requested);
 
@@ -153,6 +213,12 @@ public class Userbase {
         });
     }
 
+    /**
+     * Retrieves a list of incoming follow requests for a user.
+     *
+     * @param username The user receiving the follow requests.
+     * @param callback The callback to handle the result.
+     */
     public void getIncomingFollowRequests(String username, FollowRequestListCallback callback) {
         db.collection("follow_requests")
                 .whereEqualTo("requested", username)
@@ -171,6 +237,12 @@ public class Userbase {
                 .addOnFailureListener(e -> callback.onFollowRequestsFetched(new ArrayList<>()));
     }
 
+    /**
+     * Retrieves a list of pending follow requests sent by a user.
+     *
+     * @param requesterUsername The user who sent the follow requests.
+     * @param callback          The callback to handle the result.
+     */
     public void getPendingFollowRequests(String requesterUsername, FollowRequestListCallback callback) {
         db.collection("follow_requests")
                 .whereEqualTo("requester", requesterUsername)
@@ -189,6 +261,12 @@ public class Userbase {
                 .addOnFailureListener(e -> callback.onFollowRequestsFetched(new ArrayList<>()));
     }
 
+    /**
+     * Removes a specific follow request from Firestore.
+     *
+     * @param requester The user who sent the request.
+     * @param requested The user who received the request.
+     */
     public void removeFollowRequest(String requester, String requested) {
         db.collection("follow_requests")
                 .whereEqualTo("requester", requester)
@@ -201,6 +279,12 @@ public class Userbase {
                 });
     }
 
+    /**
+     * Retrieves the list of users that a given user is following.
+     *
+     * @param username The user whose following list is to be fetched.
+     * @param callback The callback to handle the result.
+     */
     public void getUserFollowing(String username, UserListCallback callback) {
         Log.d("FollowDebug", "Fetching following list for " + username);
         db.collection("users").document(username)
@@ -221,6 +305,13 @@ public class Userbase {
                 });
     }
 
+    /**
+     * Accepts a follow request, adding the requester to the requested user's followers and the requested user to the requester's following list.
+     *
+     * @param requester The user who sent the follow request.
+     * @param requested The user who received the follow request.
+     * @param callback  The callback to handle the result.
+     */
     public void acceptFollowRequest(String requester, String requested, FollowActionCallback callback) {
         Log.d("FollowDebug", "Accepting follow request: " + requester + " wants to follow " + requested);
 
@@ -256,18 +347,12 @@ public class Userbase {
                 .addOnFailureListener(e -> callback.onFollowAction(false));
     }
 
-    public void addNotification(String recipientUsername, String message) {
-        HashMap<String, Object> notificationData = new HashMap<>();
-        notificationData.put("recipient", recipientUsername);
-        notificationData.put("message", message);
-        notificationData.put("timestamp", System.currentTimeMillis());
-
-        db.collection("notifications")
-                .add(notificationData)
-                .addOnSuccessListener(documentReference -> Log.d("Userbase", "Notification added"))
-                .addOnFailureListener(e -> Log.e("Userbase", "Failed to add notification", e));
-    }
-
+    /**
+     * Removes a notification for a user.
+     *
+     * @param requester The user who sent the follow request.
+     * @param requested The user who received the follow request.
+     */
     public void removeNotification(String requester, String requested) {
         Log.d("FollowDebug", "Removing notification for " + requested + " about " + requester + "'s request.");
         db.collection("notifications")
@@ -284,46 +369,65 @@ public class Userbase {
                 .addOnFailureListener(e -> Log.e("FollowDebug", "Failed to find notifications for " + requested, e));
     }
 
-    // Callback interface for checking user status.
-    // Updated to include the password as the fourth parameter.
+    /**
+     * Callback interface for checking user existence.
+     */
     public interface UserCheckCallback {
         void onUserChecked(boolean exists, String name, String username, String password);
     }
 
-    // Callback interface for fetching user details.
+    /**
+     * Callback interface for fetching user details.
+     */
     public interface UserDetailsCallback {
         void onUserDetailsFetched(boolean exists, String username, String name);
     }
 
-    // Callback interface for creating a user.
+    /**
+     * Callback interface for creating a user.
+     */
     public interface UserCreationCallback {
         void onUserCreated(boolean success);
     }
 
-    // Callback interface for checking following status.
+    /**
+     * Callback interface for checking following status.
+     */
     public interface FollowCheckCallback {
         void onFollowChecked(boolean isFollowing);
     }
 
-    // Callback interface for following another user.
+    /**
+     * Callback interface for following another user.
+     */
     public interface FollowActionCallback {
         void onFollowAction(boolean success);
     }
 
-    // Callback interface for checking if a follow request exists.
+    /**
+     * Callback interface for checking if a follow request exists.
+     */
     public interface FollowRequestCheckCallback {
         void onFollowRequestChecked(boolean requestExists);
     }
 
-    // Callback interface for handling follow request actions.
+    /**
+     * Callback interface for handling follow request actions.
+     */
     public interface FollowRequestActionCallback {
         void onFollowRequestAction(boolean success);
     }
 
+    /**
+     * Callback interface for fetching a list of follow requests.
+     */
     public interface FollowRequestListCallback {
         void onFollowRequestsFetched(List<String> requests);
     }
 
+    /**
+     * Callback interface for retrieving a list of users.
+     */
     public interface UserListCallback {
         void onUserListRetrieved(List<String> users);
     }
