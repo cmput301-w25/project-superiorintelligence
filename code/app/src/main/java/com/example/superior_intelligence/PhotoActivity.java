@@ -9,7 +9,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.util.Base64;
+
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -25,20 +25,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
+/**
+ * Activity for capturing, selecting, and uploading photos for mood events.
+ * Handles both camera capture and gallery selection, with image size validation.
+ * Uploads selected images to Firestore and returns the document ID to the calling activity.
+ */
 public class PhotoActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 100;
     private Uri photoUri;
@@ -108,6 +108,9 @@ public class PhotoActivity extends AppCompatActivity {
 
     /**
      * Handles permission request results.
+     * @param requestCode The request code
+     * @param permissions The requested permissions
+     * @param grantResults The grant results
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
