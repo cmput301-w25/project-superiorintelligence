@@ -41,9 +41,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Test class for MoodMap activity, verifying marker display functionality.
- */
 @RunWith(AndroidJUnit4.class)
 public class us060201_060301_060401 {
 
@@ -57,22 +54,15 @@ public class us060201_060301_060401 {
     private QuerySnapshot mockSnapshotMyPosts;
     private QuerySnapshot mockSnapshotFollowed;
 
-    /**
-     * Sets up the test environment before each test method.
-     * Initializes the User singleton, Userbase singleton, and mocks for Firestore.
-     */
     @Before
     public void setUp() throws Exception {
-        // Set up the current user
         User.getInstance().setUsername("testUser");
 
-        // Set up the TestUserbase singleton
-        TestUserbase testUserbase = new TestUserbase();
+        // Replace Userbase with test double
         Field instanceField = Userbase.class.getDeclaredField("instance");
         instanceField.setAccessible(true);
-        instanceField.set(null, testUserbase);
+        instanceField.set(null, new TestUserbase());
 
-        // Initialize Firestore mocks
         mockFirestore = mock(FirebaseFirestore.class);
         mockMyPostsCollection = mock(CollectionReference.class);
         mockQueryMyPosts = mock(Query.class);
@@ -80,170 +70,113 @@ public class us060201_060301_060401 {
         mockSnapshotMyPosts = mock(QuerySnapshot.class);
         mockSnapshotFollowed = mock(QuerySnapshot.class);
 
-        // Configure mock Firestore behavior
         when(mockFirestore.collection("MyPosts")).thenReturn(mockMyPostsCollection);
 
-        // Mock query for current user's posts
-        when(mockMyPostsCollection.whereEqualTo("postUser", "testUser"))
-                .thenReturn(mockQueryMyPosts);
+        when(mockMyPostsCollection.whereEqualTo("postUser", "testUser")).thenReturn(mockQueryMyPosts);
         when(mockQueryMyPosts.get()).thenAnswer(invocation -> {
-            List<DocumentSnapshot> docs = createMockDocumentsForCurrentUser();
-            when(mockSnapshotMyPosts.getDocuments()).thenReturn(docs);
+            when(mockSnapshotMyPosts.getDocuments()).thenReturn(createMockDocumentsForCurrentUser());
             return Tasks.forResult(mockSnapshotMyPosts);
         });
 
-        // Mock query for followed users' posts
-        when(mockMyPostsCollection.whereIn(eq("postUser"), anyList()))
-                .thenReturn(mockQueryFollowed);
+        when(mockMyPostsCollection.whereIn(eq("postUser"), anyList())).thenReturn(mockQueryFollowed);
         when(mockQueryFollowed.get()).thenAnswer(invocation -> {
-            List<DocumentSnapshot> docs = createMockDocumentsForFollowedUsers();
-            when(mockSnapshotFollowed.getDocuments()).thenReturn(docs);
+            when(mockSnapshotFollowed.getDocuments()).thenReturn(createMockDocumentsForFollowedUsers());
             return Tasks.forResult(mockSnapshotFollowed);
         });
     }
 
-    /**
-     * Cleans up after each test method (if necessary).
-     */
     @After
     public void tearDown() {
-        // Add cleanup logic here if needed
+        MoodMap.testMode = false;
+        MoodMap.injectedFirestore = null;
     }
 
-    /**
-     * Tests that markers for the current user's posts are displayed correctly.
-     */
     @Test
     public void testMyPostsMarkersDisplayed() throws InterruptedException {
+        MoodMap.testMode = true;
+        MoodMap.injectedFirestore = mockFirestore;
+
         MoodMap activity = activityRule.launchActivity(new Intent());
         final CountDownLatch latch = new CountDownLatch(1);
+
         activity.runOnUiThread(() -> {
-            try {
-                // Inject mock Firestore
-                Field dbField = MoodMap.class.getDeclaredField("db");
-                dbField.setAccessible(true);
-                dbField.set(activity, mockFirestore);
-
-                // Explicitly set "My Posts" checkbox to checked
-                CheckBox cbMyPosts = activity.findViewById(R.id.cb_myposts);
-                cbMyPosts.setChecked(true);
-
-                // Set the latch for synchronization
-                activity.markersLatch = latch;
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to inject mock or set checkbox", e);
-            }
+            CheckBox cbMyPosts = activity.findViewById(R.id.cb_myposts);
+            cbMyPosts.setChecked(true);
+            activity.markersLatch = latch;
+            activity.googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(53.5461, -113.4938), 11.5f));
+            activity.applyFilters();
         });
 
-        // Apply filters
-        onView(withId(R.id.btn_apply_filters)).perform(click());
+        assertTrue("Marker loading timed out", latch.await(5, TimeUnit.SECONDS));
 
-        // Wait for markers to load with a 5-second timeout
-        boolean completed = latch.await(5, TimeUnit.SECONDS);
-        assertTrue("Marker loading timed out", completed);
-
-        // Retrieve markers on the main thread
         final List<Marker> markers = new ArrayList<>();
         activity.runOnUiThread(() -> markers.addAll(activity.getMarkers()));
 
-        // Verify markers
         assertEquals("Expected 3 markers for current user's posts", 3, markers.size());
         String currentUser = User.getInstance().getUsername();
         for (Marker marker : markers) {
-            assertEquals("Marker title should be current user", currentUser, marker.getTitle());
-            assertTrue("Marker snippet should contain 'Mood:'", marker.getSnippet().contains("Mood:"));
+            assertEquals(currentUser, marker.getTitle());
+            assertTrue(marker.getSnippet().contains("Mood:"));
         }
     }
 
-    /**
-     * Tests that markers for followed users' posts are displayed correctly.
-     */
     @Test
     public void testFollowedUsersMarkersDisplayed() throws InterruptedException {
+        MoodMap.testMode = true;
+        MoodMap.injectedFirestore = mockFirestore;
+
         MoodMap activity = activityRule.launchActivity(new Intent());
         final CountDownLatch latch = new CountDownLatch(1);
+
         activity.runOnUiThread(() -> {
-            try {
-                // Inject mock Firestore
-                Field dbField = MoodMap.class.getDeclaredField("db");
-                dbField.setAccessible(true);
-                dbField.set(activity, mockFirestore);
-
-                // Ensure "My Posts" checkbox is unchecked
-                CheckBox cbMyPosts = activity.findViewById(R.id.cb_myposts);
-                cbMyPosts.setChecked(false);
-
-                // Set the latch for synchronization
-                activity.markersLatch = latch;
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to inject mock or set checkbox", e);
-            }
+            CheckBox cbMyPosts = activity.findViewById(R.id.cb_myposts);
+            cbMyPosts.setChecked(false);
+            activity.markersLatch = latch;
+            activity.googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(53.5461, -113.4938), 11.5f));
+            activity.applyFilters();
         });
 
-        // Apply filters
-        onView(withId(R.id.btn_apply_filters)).perform(click());
+        assertTrue("Marker loading timed out", latch.await(5, TimeUnit.SECONDS));
 
-        // Wait for markers to load with a 5-second timeout
-        boolean completed = latch.await(5, TimeUnit.SECONDS);
-        assertTrue("Marker loading timed out", completed);
-
-        // Retrieve markers on the main thread
         final List<Marker> markers = new ArrayList<>();
         activity.runOnUiThread(() -> markers.addAll(activity.getMarkers()));
 
-        // Verify markers
         assertEquals("Expected 2 markers for followed users", 2, markers.size());
         String currentUser = User.getInstance().getUsername();
         for (Marker marker : markers) {
-            assertNotEquals("Marker title should not be the current user", currentUser, marker.getTitle());
-            assertTrue("Marker snippet should contain 'Mood:'", marker.getSnippet().contains("Mood:"));
+            assertNotEquals(currentUser, marker.getTitle());
+            assertTrue(marker.getSnippet().contains("Mood:"));
         }
     }
 
-    /**
-     * Tests that markers for recent followed users' events within 5 km are displayed correctly.
-     */
     @Test
     public void testRecentFollowedUsersEventsWithinRange() throws InterruptedException {
+        MoodMap.testMode = true;
+        MoodMap.injectedFirestore = mockFirestore;
+
         MoodMap activity = activityRule.launchActivity(new Intent());
         final CountDownLatch latch = new CountDownLatch(1);
+
         activity.runOnUiThread(() -> {
-            try {
-                // Inject mock Firestore
-                Field dbField = MoodMap.class.getDeclaredField("db");
-                dbField.setAccessible(true);
-                dbField.set(activity, mockFirestore);
+            CheckBox cbMyPosts = activity.findViewById(R.id.cb_myposts);
+            cbMyPosts.setChecked(false);
+            activity.markersLatch = latch;
 
-                // Ensure "My Posts" checkbox is unchecked
-                CheckBox cbMyPosts = activity.findViewById(R.id.cb_myposts);
-                cbMyPosts.setChecked(false);
-
-                // Set the latch for synchronization
-                activity.markersLatch = latch;
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to inject mock or set checkbox", e);
-            }
-        });
-
-        // Move camera to test location on the main thread
-        activity.runOnUiThread(() -> {
+            // Center map on Edmonton
             LatLng testCenter = new LatLng(53.5461, -113.4938);
             activity.googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(testCenter, 11.5f));
+
+            activity.applyFilters();
         });
 
-        // Apply filters
-        onView(withId(R.id.btn_apply_filters)).perform(click());
+        assertTrue("Marker loading timed out", latch.await(5, TimeUnit.SECONDS));
 
-        // Wait for markers to load with a 5-second timeout
-        boolean completed = latch.await(5, TimeUnit.SECONDS);
-        assertTrue("Marker loading timed out", completed);
-
-        // Retrieve markers on the main thread
         final List<Marker> markers = new ArrayList<>();
         activity.runOnUiThread(() -> markers.addAll(activity.getMarkers()));
 
-        // Verify markers
-        assertEquals("Expected 2 markers for recent followed user events within range", 2, markers.size());
+        assertEquals("Expected 2 markers within range", 2, markers.size());
 
         Location testCenterLoc = new Location("");
         testCenterLoc.setLatitude(53.5461);
@@ -257,10 +190,6 @@ public class us060201_060301_060401 {
         }
     }
 
-    /**
-     * Creates mock documents for the current user's posts.
-     * Returns 3 documents with incremental coordinates and timestamps.
-     */
     private List<DocumentSnapshot> createMockDocumentsForCurrentUser() {
         List<DocumentSnapshot> docs = new ArrayList<>();
         for (int i = 1; i <= 3; i++) {
@@ -275,35 +204,28 @@ public class us060201_060301_060401 {
         return docs;
     }
 
-    /**
-     * Creates mock documents for followed users' posts.
-     * Returns 2 documents, one for each followed user.
-     */
     private List<DocumentSnapshot> createMockDocumentsForFollowedUsers() {
         List<DocumentSnapshot> docs = new ArrayList<>();
 
         DocumentSnapshot doc1 = mock(DocumentSnapshot.class);
         when(doc1.getString("postUser")).thenReturn("followed1");
         when(doc1.getString("mood")).thenReturn("Anger");
-        when(doc1.getDouble("lat")).thenReturn(53.5461 + 0.002);
-        when(doc1.getDouble("lng")).thenReturn(-113.4938 + 0.002);
+        when(doc1.getDouble("lat")).thenReturn(53.5481);
+        when(doc1.getDouble("lng")).thenReturn(-113.4918);
         when(doc1.getLong("timestamp")).thenReturn(2000L);
         docs.add(doc1);
 
         DocumentSnapshot doc2 = mock(DocumentSnapshot.class);
         when(doc2.getString("postUser")).thenReturn("followed2");
         when(doc2.getString("mood")).thenReturn("Sadness");
-        when(doc2.getDouble("lat")).thenReturn(53.5461 + 0.003);
-        when(doc2.getDouble("lng")).thenReturn(-113.4938 + 0.003);
+        when(doc2.getDouble("lat")).thenReturn(53.5491);
+        when(doc2.getDouble("lng")).thenReturn(-113.4908);
         when(doc2.getLong("timestamp")).thenReturn(3000L);
         docs.add(doc2);
 
         return docs;
     }
 
-    /**
-     * Test implementation of Userbase that returns a fixed list of followed users.
-     */
     public static class TestUserbase extends Userbase {
         @Override
         public void getUserFollowing(String username, UserListCallback callback) {
