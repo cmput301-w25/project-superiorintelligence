@@ -3,7 +3,7 @@ package com.example.superior_intelligence;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HelperClass {
+public class UserHelper {
 
     private String name;
     private String username;
@@ -12,11 +12,11 @@ public class HelperClass {
     private List<String> following;
 
     // Empty constructor for Firestore serialization (required).
-    public HelperClass() {
+    public UserHelper() {
     }
 
     // Constructor without password (if needed in some parts of your code).
-    public HelperClass(String name, String username) {
+    public UserHelper(String name, String username) {
         this.name = name;
         this.username = username;
         this.password = ""; // default empty password or handle it differently
@@ -25,7 +25,7 @@ public class HelperClass {
     }
 
     // Full constructor including password.
-    public HelperClass(String name, String username, String password) {
+    public UserHelper(String name, String username, String password) {
         this.name = name;
         this.username = username;
         this.password = password;
