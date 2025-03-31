@@ -1,4 +1,7 @@
 package com.example.superior_intelligence;
+/**
+ * Test filtering by emotional state for followed posts
+ */
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
@@ -9,12 +12,10 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
-import android.content.Intent;
 import android.util.Log;
 
 import androidx.test.espresso.assertion.ViewAssertions;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
-import androidx.test.rule.ActivityTestRule;
 
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FieldValue;
@@ -41,69 +42,99 @@ import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
 @RunWith(JUnit4.class)
-public class us050401 {
-
-    private String loggedInUserName;
+public class us050501 {
 
     // Start at HomeActivity
     @Rule
     public ActivityScenarioRule<MainActivity> scenario = new
             ActivityScenarioRule<MainActivity>(MainActivity.class);
+
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     /**
-     * Test that filtering recent week should not include followed post before recent week
-     * @throws InterruptedException
+     * Test filtering followed post should show followed posts-
+     * with one selected emotional state
+     * @throws InterruptedException wait for event to load when filter is applied
      */
-
     @Test
-    public void filterRecentWeekInFollowedShouldNotDisplayEventOutsideRecentWeek() throws InterruptedException {
-        //Ensure that test is on myPosts tab
-        onView(withId(R.id.tab_followed)).perform(click());
-        Thread.sleep(5000);
-        //Make sure added events are displayed
-        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
-        onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
+    public void filterFollowedPostShouldShowPostsMatchingOneSelectedEmotionalState() throws InterruptedException {
+        checkEventsPresent();
 
-        //click on menu button to select filter
-        onView(withId(R.id.menu_button)).perform(click());
+        openEmotionalStateDialog();
+        selectEmotionalState("Anger");
+        onView(withText("FILTER")).perform(click());
+        //Wait for event to load
+        Thread.sleep(1000);
 
-        //click on filter to see last 7 days post
-        onView(withId(R.id.recent_week_option)).perform(click());
+        //check matching emotional state should be displayed
+        onView(withText("Test angry")).check(ViewAssertions.matches(isDisplayed()));
 
-        //test that created last year should not appear
-        onView(withText("Test last year")).check(doesNotExist());
-
+        //check non-matching emotional state should not be displayed
+        onView(withText("Test surprise")).check(doesNotExist());
     }
 
     /**
-     * Test that filtering recent week should include followed during the recent week
-     * @throws InterruptedException
+     * Test filtering followed post should show followed posts-
+     * with two selected emotional state
+     * @throws InterruptedException wait for events to load after filter is applied
      */
     @Test
-    public void filterRecentWeekInFollowedShouldDisplayEventDuringRecentWeek() throws InterruptedException {
-        //Ensure that test is on myPosts tab
-        onView(withId(R.id.tab_followed)).perform(click());
+    public void filterFollowedPostShouldShowPostsMatchingTwoSelectedEmotionalState() throws InterruptedException {
+        checkEventsPresent();
 
-        //Make sure added events are displayed
-        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
-        onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
+        openEmotionalStateDialog();
+        selectEmotionalState("Anger");
+        selectEmotionalState("Surprise");
+        onView(withText("FILTER")).perform(click());
+        //Wait for event to load
+        Thread.sleep(1000);
 
-        //click on menu button to select filter
-        onView(withId(R.id.menu_button)).perform(click());
+        //check matching emotional state should be displayed
+        onView(withText("Test angry")).check(ViewAssertions.matches(isDisplayed()));
+        onView(withText("Test surprise")).check(ViewAssertions.matches(isDisplayed()));
+    }
+    /**
+     * Test filtering followed post should remain the same when no emotional state is selected
+     * but the filter button is clicked
+     * @throws InterruptedException wait for dialog to load
+     */
+    @Test
+    public void filterFollowedPostShouldShowNoDifferenceWhenNoEmotionalStateIsSelected() throws InterruptedException {
+        checkEventsPresent();
 
-        //click on filter to see last 7 days post
-        onView(withId(R.id.recent_week_option)).perform(click());
+        openEmotionalStateDialog();
+        selectEmotionalState("Anger");
+        selectEmotionalState("Surprise");
+        onView(withText("FILTER")).perform(click());
 
-        //test that created last year should not appear
-        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
-
+        //the same events should be displayed
+        checkEventsPresent();
+    }
+    /**
+     * Select emotional state on the check box
+     * @param emotionalState    Emotional state of the mood
+     */
+    public void selectEmotionalState(String emotionalState){
+        onView(withText(emotionalState)).perform(click());
     }
 
+    /**
+     * Click on filter menu and select filter by emotional state option to open the dialog
+     * @throws InterruptedException wait for dialog to load
+     */
+    public void openEmotionalStateDialog() throws InterruptedException {
+        // enter followed tab
+        onView(withId(R.id.tab_followed)).perform(click());
+
+        // click filter menu and open filter by emotional state dialog
+        onView(withId(R.id.menu_button)).perform(click());
+        onView(withId(R.id.emotional_state_option)).perform(click());
+        Thread.sleep(1000);
+    }
 
     /**
      * Add base events and users that are needed in the testing to the database
-     * @throws InterruptedException
+     * @throws InterruptedException wait for firebase latch and user and data users to load
      */
     @Before // run before every test
     public void setUp() throws InterruptedException {
@@ -112,23 +143,34 @@ public class us050401 {
         logIn();
     }
 
+    /**
+     * Check that seeded events are present
+     */
+    public void checkEventsPresent(){
+        onView(withText("Test angry")).check(ViewAssertions.matches(isDisplayed()));
+        onView(withText("Test surprise")).check(ViewAssertions.matches(isDisplayed()));
+    }
 
     /**
      * Log in to enter homepage using testUser who is following followedUser
-     * @throws InterruptedException
+     * Switch to followed tab
+     * @throws InterruptedException     wait for all user and post data to load
      */
     public void logIn() throws InterruptedException {
         onView(withId(R.id.login_button_login_page)).perform(click());
-
 
         onView(withId(R.id.login_username)).perform(typeText("testUser")).perform(closeSoftKeyboard());
         onView(withId(R.id.login_password)).perform(typeText("TestPass")).perform(closeSoftKeyboard());
         onView(withId(R.id.login_button)).perform(click());
         Thread.sleep(5000);
+
+        onView(withId(R.id.tab_followed)).perform(click());
+        Thread.sleep(3000);
     }
 
     /**
      * Set up user and its following in the database
+     * @throws  InterruptedException wait for latch to unlock when following other user in database
      */
     private void seedUserDB() throws InterruptedException {
         String username = "testUser", name = "Test User", rawPassword = "TestPass";
@@ -146,10 +188,10 @@ public class us050401 {
 
     /**
      * Add a user to the database
-     * @param username
-     * @param name
-     * @param rawPassword
-     * @throws InterruptedException
+     * @param username      unique username of the user
+     * @param name          name of the user
+     * @param rawPassword   raw password of the account to be hashed
+     * @throws InterruptedException     wait for latch to be released when user is added to firebase
      */
     public void seedUser(String username, String name, String rawPassword) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
@@ -167,7 +209,15 @@ public class us050401 {
         latch.await();
     }
 
+    /**
+     * Set in the database for following user to follow followedUser
+     * @param followingUser     user who is requesting to follow
+     * @param followedUser      user who is being followed
+     * @param callback          for success/failure listener
+     * @throws InterruptedException wait for following process to complete in database
+     */
     public void followUser(String followingUser, String followedUser, Userbase.FollowActionCallback callback) throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1); // Synchronization mechanism
         db.collection("users").document(followingUser)
                 .update("following", FieldValue.arrayUnion(followedUser))
                 .addOnSuccessListener(aVoid -> {
@@ -177,15 +227,16 @@ public class us050401 {
                             .addOnFailureListener(e -> callback.onFollowAction(false));
                 })
                 .addOnFailureListener(e -> callback.onFollowAction(false));
+        latch.await();
     }
 
     /**
      * Add posts to database with current date and last year date
-     * @throws InterruptedException
+     * @throws InterruptedException wait for each post to be added successfully to database
      */
     public void seedPostDB() throws InterruptedException {
-        Event event = new Event("TestBeforeRecWk", "Test last year", "12 MAR 2024, 12:04", "#CC0099", "", 0, true, false, "Surprise", "", "", "followedUser", null, null, true);
-        Event event2 = new Event("TestDuringRecWk", "Test during recent week", null, "#FF6347", "", 0, true, false, "Anger", "", "", "followedUser", null, null, true);
+        Event event = new Event("TestSurprise", "Test surprise", "12 MAR 2024, 12:04", "#CC0099", "", 0, true, false, "Surprise", "", "", "followedUser", null, null, true);
+        Event event2 = new Event("TestAngry", "Test angry", null, "#FF6347", "", 0, true, false, "Anger", "", "", "followedUser", null, null, true);
 
 
         // current date to ensure test will work regardless of the time
@@ -200,8 +251,8 @@ public class us050401 {
 
     /**
      * Add an event to database
-     * @param event
-     * @throws InterruptedException
+     * @param event     event to be added to the database
+     * @throws InterruptedException wait for latch to release when adding event to firebase
      */
     public void seedPost(Event event) throws InterruptedException {
         Database db = new Database();
@@ -218,8 +269,6 @@ public class us050401 {
                 });
         latch.await();
     }
-
-
     /**
      * Remove any of the data that were added in the beginning of the test
      */
@@ -259,5 +308,4 @@ public class us050401 {
         int portNumber = 8080;
         FirebaseFirestore.getInstance().useEmulator(androidLocalhost, portNumber);
     }
-
 }

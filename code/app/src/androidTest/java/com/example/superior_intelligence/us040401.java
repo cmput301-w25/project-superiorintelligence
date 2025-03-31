@@ -1,40 +1,26 @@
 package com.example.superior_intelligence;
-/**
- * Test filtering recent week for my posts:
- */
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
 import static androidx.test.espresso.action.ViewActions.typeText;
 import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
-import static androidx.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
-import static androidx.test.espresso.matcher.ViewMatchers.withHint;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withInputType;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
-import static org.junit.Assert.assertTrue;
-import static java.util.Calendar.SECOND;
 import static java.util.regex.Pattern.matches;
 
-import android.graphics.Movie;
 import android.util.Log;
-import android.widget.DatePicker;
 
-import androidx.test.espresso.Espresso;
 import androidx.test.espresso.ViewAssertion;
 import androidx.test.espresso.assertion.ViewAssertions;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
-import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
-import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -48,85 +34,101 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 @RunWith(JUnit4.class)
-public class us040201 {
+public class us040401 {
 
     // Start at HomeActivity
     @Rule
     public ActivityScenarioRule<MainActivity> scenario = new
             ActivityScenarioRule<MainActivity>(MainActivity.class);
-
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+
     /**
-     * Test that filtering recent week should not include my post before recent week
+     * Filter my posts by text should show post when the phrase entered matches mood reason
+     * @throws InterruptedException after keyword is enter, wait for firebase to load event(s)
      */
     @Test
-    public void filterRecentWeekInMyPostsShouldNotDisplayEventOutsideRecentWeek() {
-        //Ensure that test is on myPosts tab
-        onView(withId(R.id.tab_myposts)).perform(click());
-
-        //Make sure added events are displayed
-        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
+    public void filterMyPostsByTextShouldShowPostWithMatchedPhrase() throws InterruptedException {
+        // click filter button and choose filter by text to enter keyword
+        enterKeyword("text hello");
+        // check that the post with matching mood reason is displayed
         onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
-
-        //click on menu button to select filter
-        onView(withId(R.id.menu_button)).perform(click());
-
-        //click on filter to see last 7 days post
-        onView(withId(R.id.recent_week_option)).perform(click());
-
-        //test that created last year should not appear
-        onView(withText("Test last year")).check(doesNotExist());
-
+        // check that post without the matching mood reason is not displayed
+        onView(withText("Test during recent week")).check(doesNotExist());
     }
 
     /**
-     * Test that filtering recent week should include my post during the recent week
+     * Filter my posts by text should show posts when a word entered is contained in the mood reason
+     * @throws InterruptedException after keyword is enter, wait for firebase to load event(s)
      */
     @Test
-    public void filterRecentWeekInMyPostsShouldDisplayEventDuringRecentWeek(){
-        //Ensure that test is on myPosts tab
-        onView(withId(R.id.tab_myposts)).perform(click());
-
-        //Make sure added events are displayed
-        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
+    public void filterMyPostsByTextShouldShowPostThatContainWord() throws InterruptedException {
+        // click filter button and choose filter by text to enter keyword
+        enterKeyword("text");
+        // check that the post with matching mood reason is displayed
         onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
-
-        //click on menu button to select filter
-        onView(withId(R.id.menu_button)).perform(click());
-
-        //click on filter to see last 7 days post
-        onView(withId(R.id.recent_week_option)).perform(click());
-
-        //test that created last year should not appear
-        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
-
+        // check that post without the matching mood reason is not displayed
+        onView(withText("Test during recent week")).check(doesNotExist());
     }
 
+    /**
+     * Filter my posts by text should show posts when partial word entered is contained in the mood reason
+     * @throws InterruptedException after keyword is enter, wait for firebase to load event(s)
+     */
+    @Test
+    public void filterMyPostsByTextShouldShowPostThatContainPartialWord() throws InterruptedException {
+        // click filter button and choose filter by text to enter keyword
+        enterKeyword("hell");
+        // check that the post with matching mood reason is displayed
+        onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
+        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
+    }
+
+    /**
+     * Filter my posts by text should show all posts when empty keyword is inputted
+     * @throws InterruptedException after keyword is enter, wait for firebase to load event(s)
+     */
+    @Test
+    public void filterMyPostsByTextShouldShowAllPostWithEmptyText() throws InterruptedException {
+        // click filter button and choose filter by text to enter keyword
+        enterKeyword("");
+        // check that the post with matching mood reason is displayed
+        onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
+        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
+    }
+
+    /**
+     * Initialize filtering mood event by entering text to find-
+     * mood event(s) that contains specified text in the mood reason
+     * @param keyword   keyword text/phrase that will be entered
+     * @throws InterruptedException after keyword is enter, wait for firebase to load event(s)
+     */
+    public void enterKeyword(String keyword) throws InterruptedException {
+        onView(withId(R.id.tab_myposts)).perform(click());
+        onView(withId(R.id.menu_button)).perform(click());
+        onView(withId(R.id.text_filter_option)).perform(click());
+        onView(withId(R.id.dialog_filter_edit_text)).perform(typeText(keyword));
+        onView(withText("FILTER")).perform(click());
+        Thread.sleep(5000);
+    }
 
     /**
      * Add events that needed in the testing to the database
      * Log in to start the test
-     * @throws InterruptedException wait for database to update
+     * @throws InterruptedException wait for posts and user to be added to firebase successfully
      */
     @Before // run before every test
     public void setUp() throws InterruptedException {
 
-        seedMyPostDB();
+        seedMyPost();
         seedUserDB("testUser", "Test User", "TestPass");
         logIn();
 
@@ -134,7 +136,7 @@ public class us040201 {
 
     /**
      * Log in to the homepage using testUser3
-     * @throws InterruptedException wait to load user and post data
+     * @throws InterruptedException wait for user and post data to load when logging in
      */
     public void logIn() throws InterruptedException {
         onView(withId(R.id.login_button_login_page)).perform(click());
@@ -147,10 +149,10 @@ public class us040201 {
 
     /**
      * Add user to database with name, user, password
-     * @param username      username of user's account
-     * @param name          name of the user
-     * @param rawPassword   raw password to be hashed
-     * @throws InterruptedException wait for latch to release when adding user to database
+     * @param username      username of the test user
+     * @param name          name of the test user
+     * @param rawPassword   raw password to be hashed and saved to firebase
+     * @throws InterruptedException wait until user is added to firebase successfully
      */
     private void seedUserDB(String username, String name, String rawPassword) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
@@ -169,21 +171,32 @@ public class us040201 {
     }
 
     /**
-     * Add my posts to database with date before recent week and during recent week
-     * @throws InterruptedException   wait for latch to be released when adding events to database
+     * Add my posts to database with one containing "text" in mood explanation
+     * and the other contains no mood explanation
+     * @throws InterruptedException wait until event is added to firebase successfully
      */
-    public void seedMyPostDB() throws InterruptedException {
-        Database db = new Database();
-        CollectionReference postsRef = db.getMyPostsRef();
-        CountDownLatch latch = new CountDownLatch(1); // Synchronization mechanism
-
-        Event event = new Event("TestBeforeRecWk", "Test last year", "12 MAR 2024, 12:04", "#CC0099", "", 0, false, true, "Surprise", "", "", "testUser", null, null, true);
-        Event event2 = new Event("TestDuringRecWk", "Test during recent week", null, "#FF6347", "", 0, false, true, "Anger", "", "", "testUser", null, null, true);
+    public void seedMyPost() throws InterruptedException {
+        Event event = new Event("TestBeforeRecWk", "Test last year", "12 MAR 2024, 12:04", "#CC0099", "", 0, false, true, "Surprise", "text hello", "", "testUser", null, null, true);
+        Event event2 = new Event("TestDuringRecWk", "Test during recent week", null, "#FF6347", "", 0, false, true, "Anger", "shell on the beach", "", "testUser", null, null, true);
 
         // current date to ensure test will work regardless of the time
         String eventDate = new SimpleDateFormat("dd MMM yyyy, HH:mm",
                 Locale.getDefault()).format(new Date());
         event2.setDate(eventDate);
+
+        seedPostDB(event);
+        seedPostDB(event2);
+    }
+
+    /**
+     * Add an event to database
+     * @param event Event to be added to firebase
+     * @throws InterruptedException wait until event is added to firebase successfully
+     */
+    public void seedPostDB(Event event) throws InterruptedException {
+        Database db = new Database();
+        CollectionReference postsRef = db.getMyPostsRef();
+        CountDownLatch latch = new CountDownLatch(1); // Synchronization mechanism
 
         postsRef.document(event.getID()).set(event)
                 .addOnSuccessListener(aVoid -> {
@@ -194,18 +207,8 @@ public class us040201 {
                     Log.e("Firestore", "Failed to add event", e);
                     latch.countDown(); // Release the lock even on failure
                 });
-        postsRef.document(event2.getID()).set(event2)
-                .addOnSuccessListener(aVoid -> {
-                    Log.d("Firestore", "Event successfully added");
-                    latch.countDown(); // Release the lock
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("Firestore", "Failed to add event", e);
-                    latch.countDown(); // Release the lock even on failure
-                });
         latch.await();
     }
-
 
     /**
      * Remove any of the data that were added in the beginning of the test
@@ -246,4 +249,5 @@ public class us040201 {
         int portNumber = 8080;
         FirebaseFirestore.getInstance().useEmulator(androidLocalhost, portNumber);
     }
+
 }

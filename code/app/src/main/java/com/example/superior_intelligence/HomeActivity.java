@@ -1,20 +1,20 @@
 package com.example.superior_intelligence;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.health.connect.LocalTimeRangeFilter;
 import android.os.Bundle;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.PopupWindow;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,28 +28,32 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
-
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.type.DateTime;
 
 public class HomeActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private EventAdapter adapter;
-    private Database database;
+    Database database;
 
     // Separate lists for each tab
     private List<Event> exploreEvents = new ArrayList<>();
     private List<Event> followedEvents = new ArrayList<>();
-    private List<Event> myPostsEvents = new ArrayList<>();
+    List<Event> myPostsEvents = new ArrayList<>();
 
     private TextView tabExplore, tabFollowed, tabMyPosts, tabMap;
 
@@ -145,6 +149,8 @@ public class HomeActivity extends AppCompatActivity {
             } else {
                 threeRecentPost.setOnClickListener(view -> {
                     filterRecentThree();
+                    filterApplied();
+                    popupWindow.dismiss();
                 });
             }
 
@@ -184,6 +190,7 @@ public class HomeActivity extends AppCompatActivity {
                 } else if ("explore".equals(currentTab)) {
                     adapter.setEvents(exploreEvents);
                 }
+                Toast.makeText(this, "Filter cleared", Toast.LENGTH_SHORT).show();
                 popupWindow.dismiss();
             });
 
@@ -207,17 +214,30 @@ public class HomeActivity extends AppCompatActivity {
         CardView profileImage = findViewById(R.id.profile_image);
         profileImage.setOnClickListener(v -> startActivity(new Intent(HomeActivity.this, ProfileActivity.class)));
 
-        loadProfilePhotoForHome(profileImage);
-
         ImageButton notificationButton = findViewById(R.id.notification_button);
+
+        refreshNotificationIcon(notificationButton);
+
+        String currentUsername = User.getInstance().getUsername();
+        Userbase.getInstance().getIncomingFollowRequests(currentUsername, requests -> {
+            if (!requests.isEmpty()) {
+                notificationButton.setImageResource(R.drawable.notification_icon_alert); // sky blue
+            } else {
+                notificationButton.setImageResource(R.drawable.notfication_icon_default); // white
+            }
+        });
+
         ActivityResultLauncher<Intent> notificationLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    if (result.getData() != null) {
                         Intent data = result.getData();
-                        setIntent(data); // Retain selectedTab and textFilter for handleIncomingEvent()
-                        handleIncomingEvent(); // Reapply tab and filter
+                        setIntent(data);
+                        handleIncomingEvent();
                     }
+
+                    // Always refresh icon on return
+                    refreshNotificationIcon(notificationButton);
                 }
         );
 
@@ -237,28 +257,23 @@ public class HomeActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         loadAllEvents(this::handleIncomingEvent);
+
+        // Refresh icon in case new requests came in while app was paused
+        ImageButton notificationButton = findViewById(R.id.notification_button);
+        refreshNotificationIcon(notificationButton);
     }
+
 
 
     /**
      * Handle incoming event to add or update.
      */
-    private void handleIncomingEvent() {
+    void handleIncomingEvent() {
         Intent intent = getIntent();
 
         Event newEvent = (Event) intent.getSerializableExtra("newEvent");
         if (newEvent != null && newEvent.isMyPost()) {
-            boolean found = false;
-            for (int i = 0; i < myPostsEvents.size(); i++) {
-                if (myPostsEvents.get(i).getID().equals(newEvent.getID())) {
-                    myPostsEvents.set(i, newEvent);
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                myPostsEvents.add(newEvent);
-            }
+            HomeManager.upsertEvent(myPostsEvents, newEvent);
         }
 
         String selectedTab = intent.getStringExtra("selectedTab");
@@ -277,7 +292,7 @@ public class HomeActivity extends AppCompatActivity {
 
         String deletedEventId = intent.getStringExtra("deletedEventId");
         if (deletedEventId != null) {
-            myPostsEvents.removeIf(event -> event.getID().equals(deletedEventId));
+            HomeManager.removeEventById(myPostsEvents, deletedEventId);
         }
     }
 
@@ -285,7 +300,7 @@ public class HomeActivity extends AppCompatActivity {
      * Load events from Firestore and update UI.
      * And edited to force sort
      */
-    private void loadAllEvents(Runnable afterLoad) {
+    void loadAllEvents(Runnable afterLoad) {
         User currentUser = User.getInstance();
 
         if (currentUser == null) {
@@ -357,7 +372,8 @@ public class HomeActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this, R.style.DialogTheme);
         builder.setTitle("Enter search phrase");
 
-        final EditText input = new EditText(HomeActivity.this);
+        EditText input = new EditText(HomeActivity.this);
+        input.setId(R.id.dialog_filter_edit_text);
         builder.setView(input);
 
         builder.setPositiveButton("Filter", (dialog, which) -> {
@@ -373,7 +389,6 @@ public class HomeActivity extends AppCompatActivity {
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.BLACK);
 
     }
-
     private void filterEventsByReason(String keyword) {
         if (keyword.isEmpty()) {
             if ("myposts".equals(currentTab)) {
@@ -393,29 +408,10 @@ public class HomeActivity extends AppCompatActivity {
 
         if (sourceList == null) return;
 
-        String lowerKeyword = keyword.toLowerCase();
-        List<Event> exactMatches = new ArrayList<>();
-        List<Event> partialMatches = new ArrayList<>();
-
-        for (Event e : sourceList) {
-            String reason = e.getMoodExplanation() != null ? e.getMoodExplanation().toLowerCase() : "";
-
-            if (reason.matches(".*\\b" + Pattern.quote(lowerKeyword) + "\\b.*")) {
-                exactMatches.add(e);
-            } else if (reason.contains(lowerKeyword)) {
-                partialMatches.add(e);
-            }
-        }
-
-        // Sort both lists by date descending
-        Comparator<Event> dateDescComparator = (e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp());
-        exactMatches.sort(dateDescComparator);
-        partialMatches.sort(dateDescComparator);
-
-        List<Event> filteredList = new ArrayList<>(exactMatches);
-        filteredList.addAll(partialMatches);
+        List<Event> filteredList = HomeManager.filterByReason(keyword, sourceList);
 
         adapter.setEvents(filteredList);
+        filterApplied();
     }
 
     /**
@@ -455,37 +451,9 @@ public class HomeActivity extends AppCompatActivity {
      * @return recentWeekEvents list of posts from last 7 days sorted desc
      */
     private void recentWeek(List<Event> posts) throws ParseException {
-        /*Stackoverflow:
-        https://stackoverflow.com/questions/16982056/how-to-get-the-date-7-days-earlier-date-from-current-date-in-java
-         */
-
-        List<Event> recentWeekEvents = new ArrayList<>();
-
-        // get Calendar instance
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date());
-        Date currentDate = cal.getTime();
-        // substract 7 days
-        // If we give 7 there it will give 8 days back
-        cal.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH)-6);
-        // convert to date
-        Date recentWeekDate = cal.getTime();
-
-        for (Event e: posts) {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMM yyyy, HH:mm");
-            Date eventDate = simpleDateFormat.parse(e.getDate());
-
-            // if event date is not before the recent week and after current date
-            if (!eventDate.before(recentWeekDate) && !eventDate.after(currentDate)) {
-                recentWeekEvents.add(e);
-            }
-        }
-
-        // Sort both lists by date descending
-        Comparator<Event> dateDescComparator = (e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp());
-        recentWeekEvents.sort(dateDescComparator);
-
-        adapter.setEvents(recentWeekEvents);
+        List<Event> filteredList = HomeManager.filterRecentWeek(posts);
+        adapter.setEvents(filteredList);
+        filterApplied();
     }
 
     // --- New Methods for Emotional State Filtering ---
@@ -543,23 +511,9 @@ public class HomeActivity extends AppCompatActivity {
             return;
         }
 
-        List<Event> filteredList = new ArrayList<>();
-        for (Event event : allPosts) {
-            // Ensure the event's mood matches one of the chosen moods
-            if (chosenMoods.contains(event.getMood())) {
-                filteredList.add(event);
-            }
-        }
-
-        // Sort filtered events by timestamp descending
-        filteredList.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
-
+        List<Event> filteredList = HomeManager.filterByMood(chosenMoods, allPosts);
         adapter.setEvents(filteredList);
-        if (allPosts == myPostsEvents){
-            switchTab(filteredList, tabMyPosts);
-        } else if (allPosts == followedEvents) {
-            switchTab(filteredList, tabFollowed);
-        }
+        filterApplied();
     }
 
     /**
@@ -570,58 +524,23 @@ public class HomeActivity extends AppCompatActivity {
             Toast.makeText(this, "No posts to filter", Toast.LENGTH_SHORT).show();
             return;
         }
-        List<Event> followedPosts = followedEvents;
-        List<Event> recentThree = new ArrayList<>();
-        for (int i = 0; i < 3 && i < followedPosts.size(); i++){
-            recentThree.add(followedPosts.get(i));
-        }
+        List<Event> recentThree = HomeManager.recentThree(followedEvents);
         adapter.setEvents(recentThree);
     }
 
+    private void refreshNotificationIcon(ImageButton notificationButton) {
+        String currentUsername = User.getInstance().getUsername();
 
-    /**
-     * Loads the profile photo into the HomeActivity's profile view.
-     * It first attempts to load from SharedPreferences; if not available, it fetches from Firestore.
-     *
-     * Updated so the decoded bitmap is placed in the inner ImageView (R.id.profile_image_png)
-     * instead of the CardView background.
-     */
-    private void loadProfilePhotoForHome(CardView profileImage) {
-        SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-        String username = prefs.getString("username", "Default Username");
-        String encodedPhoto = prefs.getString("photo", null);
-
-        // Find the inner ImageView from the CardView
-        ImageView profileImageView = profileImage.findViewById(R.id.profile_image_png);
-
-        if (encodedPhoto != null) {
-            try {
-                byte[] imageBytes = Base64.decode(encodedPhoto, Base64.DEFAULT);
-                Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-                profileImageView.setImageBitmap(bitmap);
-            } catch (Exception e) {
-                Log.e("HomeActivity", "Failed to decode profile image.", e);
+        Userbase.getInstance().getIncomingFollowRequests(currentUsername, requests -> {
+            if (!requests.isEmpty()) {
+                notificationButton.setImageResource(R.drawable.notification_icon_alert); // sky blue
+            } else {
+                notificationButton.setImageResource(R.drawable.notfication_icon_default); // white
             }
-        } else {
-            FirebaseFirestore db = FirebaseFirestore.getInstance();
-            db.collection("profile_photo").document(username)
-                    .get()
-                    .addOnSuccessListener(doc -> {
-                        if (doc.exists()) {
-                            String photo = doc.getString("photo");
-                            if (photo != null && !photo.isEmpty()) {
-                                prefs.edit().putString("photo", photo).apply();
-                                try {
-                                    byte[] imageBytes = Base64.decode(photo, Base64.DEFAULT);
-                                    Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-                                    profileImageView.setImageBitmap(bitmap);
-                                } catch (Exception e) {
-                                    Log.e("HomeActivity", "Failed to decode profile image.", e);
-                                }
-                            }
-                        }
-                    })
-                    .addOnFailureListener(e -> Log.e("HomeActivity", "Failed to load profile photo from Firestore", e));
-        }
+        });
+    }
+
+    private void filterApplied(){
+        Toast.makeText(this, "Filter applied", Toast.LENGTH_SHORT).show();
     }
 }

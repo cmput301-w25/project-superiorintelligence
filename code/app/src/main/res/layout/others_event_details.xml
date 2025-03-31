@@ -162,70 +162,80 @@
                 android:visibility="gone"
                 app:layout_constraintDimensionRatio="4:3"/>
 
-            <!-- Comments Section -->
-            <TextView
-                android:id="@+id/comments_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/comments"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/black"
-                android:layout_margin="16dp"
-                android:visibility="visible"/>
-
-            <!-- Placeholder for No Comments -->
-            <TextView
-                android:id="@+id/no_comments_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="No comments yet"
-                android:textSize="16sp"
-                android:textStyle="italic"
-                android:textColor="@color/black"
-                android:gravity="center"
-                android:layout_marginTop="8dp"
-                android:layout_marginStart="16dp"
-                android:visibility="gone" />
-
-            <!-- Comments List -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/comments_recycler_view"
-                android:layout_width="match_parent"
-                android:layout_height="340dp"
-                android:overScrollMode="always"
-                android:background="@android:color/white"
-                android:padding="8dp"
-                android:visibility="gone"/>
-
-            <!-- Comment Input Section -->
             <LinearLayout
+                android:id="@+id/comment_section_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="12dp"
-                android:background="@color/backgroundGreen">
+                android:orientation="vertical"
+                android:visibility="visible">
 
-                <EditText
-                    android:id="@+id/comment_input"
-                    android:layout_width="0dp"
+                <!-- Comments Section -->
+                <TextView
+                    android:id="@+id/comments_title"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="Write a comment..."
-                    android:textSize="16sp"
-                    android:background="@android:drawable/edit_text"
-                    android:padding="8dp"
-                    android:textColor="@color/black" />
+                    android:text="@string/comments"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    android:layout_margin="16dp"
+                    android:visibility="visible"/>
 
-                <ImageButton
-                    android:id="@+id/send_comment_button"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:clickable="true"
-                    android:contentDescription="send comment"
-                    android:src="@android:drawable/ic_menu_send"
-                    android:scaleType="centerCrop" />
+                <!-- Placeholder for No Comments -->
+                <TextView
+                    android:id="@+id/no_comments_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No comments yet"
+                    android:textSize="16sp"
+                    android:textStyle="italic"
+                    android:textColor="@color/black"
+                    android:gravity="center"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="16dp"
+                    android:visibility="gone" />
+
+                <!-- Comments List -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/comments_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxHeight="340dp"
+                    android:overScrollMode="always"
+                    android:background="@android:color/white"
+                    android:padding="8dp"
+                    android:nestedScrollingEnabled="true"
+                    android:visibility="gone"/>
+
+                <!-- Comment Input Section -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="12dp"
+                    android:background="@color/backgroundGreen">
+
+                    <EditText
+                        android:id="@+id/comment_input"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="Write a comment..."
+                        android:textSize="16sp"
+                        android:background="@android:drawable/edit_text"
+                        android:padding="8dp"
+                        android:textColor="@color/black" />
+
+                    <ImageButton
+                        android:id="@+id/send_comment_button"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:contentDescription="send comment"
+                        android:src="@android:drawable/ic_menu_send"
+                        android:scaleType="centerCrop" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

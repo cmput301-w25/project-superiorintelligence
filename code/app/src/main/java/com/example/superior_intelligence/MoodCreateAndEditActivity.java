@@ -49,7 +49,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
     private String eventDate;
 
     // Passing an event
-    private Event currentEvent;
+    Event currentEvent;
 
     // Title
     EditText headerTitle;
@@ -73,7 +73,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
 
     // Emoji
     private ImageButton emojiButton;
-    private CheckBox includeEmojiCheckbox;
+    CheckBox includeEmojiCheckbox;
 
     // Buttons
     private ImageButton backButton;
@@ -477,7 +477,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
     /**
      * Checks that explanation is at most 200 characters
      */
-    private boolean isValidExplanation(String explanation) {
+    boolean isValidExplanation(String explanation) {
         if (explanation.length() > 200) {
             return false;
         }
@@ -518,28 +518,7 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
      * Updates the emoji icon based on the chosen mood.
      */
     int updateEmojiIcon(String mood) {
-        int emojiResId;
-
-        if (mood.equalsIgnoreCase("anger")) {
-            emojiResId = R.drawable.angry_icon;
-        } else if (mood.equalsIgnoreCase("happiness")) {
-            emojiResId = R.drawable.happy_icon;
-        } else if (mood.equalsIgnoreCase("sadness")) {
-            emojiResId = R.drawable.sad_icon;
-        } else if (mood.equalsIgnoreCase("disgust")) {
-            emojiResId = R.drawable.disgust;
-        } else if (mood.equalsIgnoreCase("confusion")) {
-            emojiResId = R.drawable.confusion;
-        } else if (mood.equalsIgnoreCase("fear")) {
-            emojiResId = R.drawable.fear;
-        } else if (mood.equalsIgnoreCase("shame")) {
-            emojiResId = R.drawable.shame;
-        } else if (mood.equalsIgnoreCase("surprise")) {
-            emojiResId = R.drawable.surprise;
-        } else {
-            emojiResId = R.drawable.happy_icon; // Default icon
-        }
-
+        int emojiResId = EventManager.getEmojiResource(mood);
         emojiButton.setImageResource(emojiResId);
         return emojiResId;
     }
@@ -550,27 +529,8 @@ public class MoodCreateAndEditActivity extends AppCompatActivity implements Post
      * @param mood The emotion selected by the user (e.g., "anger", "happiness").
      * @return A hex color string that matches the mood (e.g., "#FF6347" for anger).
      */
-    private String getOverlayColorForMood(String mood) {
-        switch (mood.toLowerCase()) {
-            case "anger":
-                return "#FF6347"; // Tomato Red
-            case "happiness":
-                return "#FFD700"; // Yellow (current one)
-            case "sadness":
-                return "#87CEEB"; // Sky Blue
-            case "fear":
-                return "#778899"; // Slate Gray
-            case "shame":
-                return "#FFB6C1"; // Light Pink
-            case "confusion":
-                return "#CC0099"; // Purple
-            case "surprise":
-                return "#FFA500"; // Orange
-            case "disgust":
-                return "#98FB98"; // Pale Green
-            default:
-                return "#FFD700"; // Default to Yellow
-        }
+    String getOverlayColorForMood(String mood) {
+        return EventManager.getOverlayColorForMood(mood);
     }
 
     /**

@@ -1,4 +1,7 @@
 package com.example.superior_intelligence;
+/**
+ * Test filtering followed posts by mood explanation's text
+ */
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
@@ -9,12 +12,10 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
-import android.content.Intent;
 import android.util.Log;
 
 import androidx.test.espresso.assertion.ViewAssertions;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
-import androidx.test.rule.ActivityTestRule;
 
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FieldValue;
@@ -33,6 +34,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -41,85 +43,117 @@ import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
 @RunWith(JUnit4.class)
-public class us050401 {
-
-    private String loggedInUserName;
-
+public class us050601 {
     // Start at HomeActivity
     @Rule
     public ActivityScenarioRule<MainActivity> scenario = new
             ActivityScenarioRule<MainActivity>(MainActivity.class);
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+
     /**
-     * Test that filtering recent week should not include followed post before recent week
-     * @throws InterruptedException
+     * Filter followed posts by text should show post when the phrase entered matches mood reason
+     * @throws InterruptedException after keyword is enter, wait for firebase to load event(s)
      */
-
     @Test
-    public void filterRecentWeekInFollowedShouldNotDisplayEventOutsideRecentWeek() throws InterruptedException {
-        //Ensure that test is on myPosts tab
-        onView(withId(R.id.tab_followed)).perform(click());
-        Thread.sleep(5000);
-        //Make sure added events are displayed
-        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
+    public void filterFollowedPostsByTextShouldShowPostWithMatchedPhrase() throws InterruptedException {
+        checkEventsPresent();
+        // click filter button and choose filter by text to enter keyword
+        enterKeyword("text hello");
+        // check that the post with matching mood reason is displayed
         onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
-
-        //click on menu button to select filter
-        onView(withId(R.id.menu_button)).perform(click());
-
-        //click on filter to see last 7 days post
-        onView(withId(R.id.recent_week_option)).perform(click());
-
-        //test that created last year should not appear
-        onView(withText("Test last year")).check(doesNotExist());
-
+        // check that post without the matching mood reason is not displayed
+        onView(withText("Test during recent week")).check(doesNotExist());
     }
 
     /**
-     * Test that filtering recent week should include followed during the recent week
-     * @throws InterruptedException
+     * Filter followed posts by text should show posts when a word entered is contained in the mood reason
+     * @throws InterruptedException after keyword is enter, wait for firebase to load event(s)
      */
     @Test
-    public void filterRecentWeekInFollowedShouldDisplayEventDuringRecentWeek() throws InterruptedException {
-        //Ensure that test is on myPosts tab
-        onView(withId(R.id.tab_followed)).perform(click());
-
-        //Make sure added events are displayed
-        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
+    public void filterFollowedPostsByTextShouldShowPostThatContainWord() throws InterruptedException {
+        checkEventsPresent();
+        // click filter button and choose filter by text to enter keyword
+        enterKeyword("text");
+        // check that the post with matching mood reason is displayed
         onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
-
-        //click on menu button to select filter
-        onView(withId(R.id.menu_button)).perform(click());
-
-        //click on filter to see last 7 days post
-        onView(withId(R.id.recent_week_option)).perform(click());
-
-        //test that created last year should not appear
-        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
-
+        // check that post without the matching mood reason is not displayed
+        onView(withText("Test during recent week")).check(doesNotExist());
     }
 
+    /**
+     * Filter followed posts by text should show posts when partial word entered is contained in the mood reason
+     * @throws InterruptedException after keyword is enter, wait for firebase to load event(s)
+     */
+    @Test
+    public void filterFollowedPostsByTextShouldShowPostThatContainPartialWord() throws InterruptedException {
+        checkEventsPresent();
+        // click filter button and choose filter by text to enter keyword
+        enterKeyword("hell");
+        // check that the post with matching mood reason is displayed
+        onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
+        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
+    }
+
+    /**
+     * Filter followed posts by text should show all posts when empty keyword is inputted
+     * @throws InterruptedException after keyword is enter, wait for firebase to load event(s)
+     */
+    @Test
+    public void filterFollowedPostsByTextShouldShowAllPostWithEmptyText() throws InterruptedException {
+        checkEventsPresent();
+        // click filter button and choose filter by text to enter keyword
+        enterKeyword("");
+        // check that the post with matching mood reason is displayed
+        onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
+        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
+    }
+
+    /**
+     * Initialize filtering mood event by entering text to find-
+     * mood event(s) that contains specified text in the mood reason
+     * @param keyword   keyword text/phrase that will be entered
+     * @throws InterruptedException after keyword is enter, wait for firebase to load event(s)
+     */
+    public void enterKeyword(String keyword) throws InterruptedException {
+        onView(withId(R.id.tab_followed)).perform(click());
+        onView(withId(R.id.menu_button)).perform(click());
+        onView(withId(R.id.text_filter_option)).perform(click());
+        onView(withId(R.id.dialog_filter_edit_text)).perform(typeText(keyword));
+        onView(withText("FILTER")).perform(click());
+        Thread.sleep(2000);
+    }
+
+
+    /**
+     * Check that seeded events are present before filtering
+     */
+    public void checkEventsPresent(){
+        onView(withText("Test last year")).check(ViewAssertions.matches(isDisplayed()));
+        onView(withText("Test during recent week")).check(ViewAssertions.matches(isDisplayed()));
+    }
 
     /**
      * Add base events and users that are needed in the testing to the database
-     * @throws InterruptedException
+     * @throws InterruptedException wait for user and posts database to load in firestore and onto the tab
      */
     @Before // run before every test
     public void setUp() throws InterruptedException {
         seedUserDB();
         seedPostDB();
         logIn();
+        onView(withId(R.id.tab_followed)).perform(click());
+        Thread.sleep(3000);
+
     }
 
 
     /**
      * Log in to enter homepage using testUser who is following followedUser
-     * @throws InterruptedException
+     * @throws InterruptedException wait for all user and post data to load
      */
     public void logIn() throws InterruptedException {
         onView(withId(R.id.login_button_login_page)).perform(click());
-
 
         onView(withId(R.id.login_username)).perform(typeText("testUser")).perform(closeSoftKeyboard());
         onView(withId(R.id.login_password)).perform(typeText("TestPass")).perform(closeSoftKeyboard());
@@ -129,6 +163,7 @@ public class us050401 {
 
     /**
      * Set up user and its following in the database
+     * @throws InterruptedException attempt adding user to database
      */
     private void seedUserDB() throws InterruptedException {
         String username = "testUser", name = "Test User", rawPassword = "TestPass";
@@ -138,7 +173,7 @@ public class us050401 {
 
 
         followUser(username, username2, success -> {
-            Log.d("FollowDebug", "followedUser successfully follow testUser");
+            Log.d("FollowDebug", "followedUser successfully followed by testUser");
         });
 
 
@@ -146,10 +181,10 @@ public class us050401 {
 
     /**
      * Add a user to the database
-     * @param username
-     * @param name
-     * @param rawPassword
-     * @throws InterruptedException
+     * @param username          username of the account
+     * @param name              name of the user
+     * @param rawPassword       raw password to be hashed
+     * @throws InterruptedException wait for latch release when attemp to add user to database
      */
     public void seedUser(String username, String name, String rawPassword) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
@@ -167,7 +202,14 @@ public class us050401 {
         latch.await();
     }
 
-    public void followUser(String followingUser, String followedUser, Userbase.FollowActionCallback callback) throws InterruptedException {
+
+    /**
+     * Set followingUser to follow followedUser
+     * @param followingUser     user that is following the other user
+     * @param followedUser      user that is being followed
+     * @param callback          follow whether action is successful or not
+     */
+    public void followUser(String followingUser, String followedUser, Userbase.FollowActionCallback callback){
         db.collection("users").document(followingUser)
                 .update("following", FieldValue.arrayUnion(followedUser))
                 .addOnSuccessListener(aVoid -> {
@@ -181,11 +223,11 @@ public class us050401 {
 
     /**
      * Add posts to database with current date and last year date
-     * @throws InterruptedException
+     * @throws InterruptedException wait for all the events to add to database
      */
     public void seedPostDB() throws InterruptedException {
-        Event event = new Event("TestBeforeRecWk", "Test last year", "12 MAR 2024, 12:04", "#CC0099", "", 0, true, false, "Surprise", "", "", "followedUser", null, null, true);
-        Event event2 = new Event("TestDuringRecWk", "Test during recent week", null, "#FF6347", "", 0, true, false, "Anger", "", "", "followedUser", null, null, true);
+        Event event = new Event("TestBeforeRecWk", "Test last year", "12 MAR 2024, 12:04", "#CC0099", "", 0, true, false, "Surprise", "text hello", "", "followedUser", null, null, true);
+        Event event2 = new Event("TestDuringRecWk", "Test during recent week", null, "#FF6347", "", 0, true, false, "Anger", "shell on the beach", "", "followedUser", null, null, true);
 
 
         // current date to ensure test will work regardless of the time
@@ -200,8 +242,8 @@ public class us050401 {
 
     /**
      * Add an event to database
-     * @param event
-     * @throws InterruptedException
+     * @param event mood event to be added to firestore
+     * @throws InterruptedException wait for latch to release when add event to firestore
      */
     public void seedPost(Event event) throws InterruptedException {
         Database db = new Database();
@@ -218,7 +260,6 @@ public class us050401 {
                 });
         latch.await();
     }
-
 
     /**
      * Remove any of the data that were added in the beginning of the test
@@ -256,8 +297,8 @@ public class us050401 {
         // Specific address for emulated device to access our localHost
         String androidLocalhost = "10.0.2.2";
 
+
         int portNumber = 8080;
         FirebaseFirestore.getInstance().useEmulator(androidLocalhost, portNumber);
     }
-
 }
