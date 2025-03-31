@@ -7,14 +7,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class CommentTest {
+public class TestComment {
 
+    /**
+     * Creates a list containing a single mock comment.
+     * Used for testing list behavior and duplicates.
+     */
     private List<Comment> createMockList() {
         List<Comment> list = new ArrayList<>();
         list.add(new Comment("ken", "This is great!", "29/03/25 15:00"));
         return list;
     }
 
+    /**
+     * Tests that a new comment can be added to the list successfully.
+     */
     @Test
     public void testAddComment() {
         List<Comment> list = createMockList();
@@ -27,6 +34,10 @@ public class CommentTest {
         assertTrue(list.contains(newComment));
     }
 
+    /**
+     * Tests that adding a comment with the same values is recognized as a duplicate.
+     * This assumes Comment implements equals() properly.
+     */
     @Test
     public void testPreventDuplicateManually() {
         List<Comment> list = createMockList();
@@ -35,6 +46,9 @@ public class CommentTest {
         assertTrue(list.contains(duplicate));
     }
 
+    /**
+     * Tests that two comment objects with the same values are considered equal.
+     */
     @Test
     public void testCommentEqual() {
         Comment c1 = new Comment("ken", "Hi", "29/03/25 12:00");
@@ -43,6 +57,10 @@ public class CommentTest {
         assertEquals(c1, c2);
     }
 
+    /**
+     * Tests that comments are sorted chronologically by date when using Collections.sort().
+     * Assumes Comment implements Comparable based on timestamp.
+     */
     @Test
     public void testSortByDate() {
         List<Comment> list = new ArrayList<>();

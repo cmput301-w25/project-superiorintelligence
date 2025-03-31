@@ -8,7 +8,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EventsTest {
+public class TestEvents {
 
     private EventAdapter adapter;
     private List<Event> mockEvents;

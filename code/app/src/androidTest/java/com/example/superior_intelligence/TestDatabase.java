@@ -14,7 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -24,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  * and retrieving events, as well as adding comments.
  */
 @RunWith(AndroidJUnit4.class)
-public class DatabaseTest { 
+public class TestDatabase {
 
     private Database db;
     private FirebaseFirestore firestore;

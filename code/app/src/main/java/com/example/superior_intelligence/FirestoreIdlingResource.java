@@ -62,3 +62,4 @@ public class FirestoreIdlingResource implements IdlingResource {
                 });
     }
 }
+

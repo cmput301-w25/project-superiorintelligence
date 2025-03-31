@@ -9,8 +9,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
-import com.google.firebase.firestore.MemoryCacheSettings;
-import com.google.firebase.firestore.PersistentCacheSettings;
 import com.google.firebase.firestore.Source;
 
 import org.junit.Before;
