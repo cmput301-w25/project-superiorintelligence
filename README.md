@@ -87,7 +87,7 @@ This project is an Android application - Moodgram that allows users to post, tra
 
 ## Documentation
 
-- [Wiki Link]
+- Wiki Link: https://github.com/cmput301-w25/project-superiorintelligence/wiki
 - [Scrum Board]
 - [UI Mockups]
 - [UML]
