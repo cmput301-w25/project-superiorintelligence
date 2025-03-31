@@ -1,6 +1,6 @@
 /**
  * Adapter class for displaying a list of users in a RecyclerView.
- * This class binds data from a list of {@link HelperClass} objects to the UI.
+ * This class binds data from a list of UserHelper objects to the UI.
  */
 
 package com.example.superior_intelligence;
@@ -17,8 +17,9 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     private List<UserHelper> userList;
     private OnUserClickListener listener;
     /**
-     * Constructs a new {@code UserAdapter} with the specified list of users.
-     * @param userList the list of {@link UserHelper} objects to be displayed.
+     * Constructs a new UserAdapter with the specified list of users.
+     * @param userList the list of UserHelper objects to be displayed.
+     * @param listener An interface that allows handling user click events.
      */
     public UserAdapter(List<UserHelper> userList, OnUserClickListener listener) {
         this.userList = userList;
@@ -26,11 +27,11 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     }
 
     /**
-     * Called when the RecyclerView needs a new {@link UserViewHolder} to represent an item.
+     * Called when the RecyclerView needs a new UserViewHolder to represent an item.
      *
      * @param parent   the parent ViewGroup.
      * @param viewType the view type of the new View.
-     * @return a new {@code UserViewHolder} that holds a View of the given view type.
+     * @return a new UserViewHolder that holds a View of the given view type.
      */
     @Override
     public UserViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -42,7 +43,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     /**
      * Called by RecyclerView to display the data at the specified position.
      *
-     * @param holder   the {@code UserViewHolder} to bind the data to.
+     * @param holder   the UserViewHolder to bind the data to.
      * @param position the position of the data item within the dataset.
      */
     @Override
@@ -75,7 +76,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         TextView nameTextView, usernameTextView;
 
         /**
-         * Constructs a new {@code UserViewHolder} with the specified view.
+         * Constructs a new UserViewHolder with the specified view.
          *
          * @param itemView the view representing a single item in the list.
          */
@@ -90,13 +91,13 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
      * Interface definition for a callback to be invoked when a user is clicked.
      *
      * This interface is used to handle the event when a user is clicked in a UI context, passing the corresponding
-     * {@link UserHelper} object for the clicked user.
+     * UserHelper object for the clicked user.
      */
     public interface OnUserClickListener {
         /**
          * Called when a user is clicked.
          *
-         * @param user The {@link UserHelper} object representing the clicked user.
+         * @param user The UserHelper object representing the clicked user.
          */
         void onUserClick(UserHelper user);
     }
