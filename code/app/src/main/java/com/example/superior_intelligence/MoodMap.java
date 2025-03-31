@@ -61,6 +61,12 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
     // Added for test synchronization: Latch to signal when markers are loaded.
     public CountDownLatch markersLatch; // Public so tests can set it
 
+    /**
+     * Called when the activity is first created.
+     * @param savedInstanceState If the activity is being re-initialized after previously
+     *                           being shut down then this Bundle contains the data it most
+     *                           recently supplied in onSaveInstanceState(Bundle).
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,6 +101,10 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
         }
     }
 
+    /**
+     * Callback for when the map is ready to be used.
+     * @param map The GoogleMap object representing the map.
+     */
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
         googleMap = map;
@@ -118,11 +128,11 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
     }
 
     /**
-     * Main filter logic:
-     * 1) If "My Posts" is checked, show ALL events from the current user.
-     * 2) Otherwise, show ONLY the single most recent event for each followed user,
-     *    within 5 km of the current map center.
+     * Applies the current filter settings to the map:
+     * - If "My Posts" is checked, shows all events by current user
+     * - Otherwise shows most recent event from each followed user within 5km
      */
+
     public void applyFilters() {
         if (googleMap == null) {
             return;
@@ -243,8 +253,9 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
     }
 
     /**
-     * Places a marker for the given doc if it's within 5 km of the given location.
-     * This is used for the "single most recent event" approach in the else branch.
+     * Places a marker for the given document if it's within 5 km of the specified location.
+     * @param doc The Firestore document containing the mood event data
+     * @param currentLocation The reference location to measure distance from
      */
     private void placeMarkerIfWithinRange(DocumentSnapshot doc, LatLng currentLocation) {
         Double lat = doc.getDouble("lat");
@@ -292,8 +303,9 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
     }
 
     /**
-     * Executes the Firestore query and processes the results (including a 5 km distance filter).
-     * This method places ALL docs that match the query (for "my posts" scenario).
+     * Executes a Firestore query and processes the results, placing markers for matching documents.
+     * @param query The Firestore query to execute
+     * @param currentLocation The reference location for distance filtering
      */
     private void executeQuery(Query query, LatLng currentLocation) {
         query.get()
@@ -368,7 +380,10 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
     }
 
     /**
-     * Creates a custom marker icon by combining the mood icon and the username text.
+     * Creates a custom marker icon with text label.
+     * @param baseIconRes The resource ID of the base icon image
+     * @param label The text label to add to the icon
+     * @return BitmapDescriptor containing the combined icon and label
      */
     private BitmapDescriptor createLabeledMarker(int baseIconRes, String label) {
         Bitmap original = BitmapFactory.decodeResource(getResources(), baseIconRes);
@@ -394,7 +409,8 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
     }
 
     /**
-     * Shows an AlertDialog with details of the clicked mood event.
+     * Shows a dialog with details of a mood event.
+     * @param docSnap The Firestore document containing the event details
      */
     private void showEventDialog(DocumentSnapshot docSnap) {
         String title = docSnap.getString("title");
@@ -419,7 +435,9 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
     }
 
     /**
-     * Returns the drawable resource ID for the given mood string, or -1 if unrecognized.
+     * Gets the appropriate marker icon for a given mood.
+     * @param mood The mood string to get an icon for
+     * @return Resource ID of the corresponding icon, or -1 if not found
      */
     public static int getMoodMarkerIcon(String mood) {
         if (mood == null) {
@@ -449,7 +467,11 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
 
     /**
      * Calculates the distance between two coordinates using the Haversine formula.
-     * @return distance in kilometers
+     * @param lat1 Latitude of first point
+     * @param lon1 Longitude of first point
+     * @param lat2 Latitude of second point
+     * @param lon2 Longitude of second point
+     * @return distance in kilometers between the points
      */
     public static float distanceInKilometers(double lat1, double lon1, double lat2, double lon2) {
         final int EARTH_RADIUS_KM = 6371; // Approximate radius of Earth in km
@@ -466,12 +488,22 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
         return (float) (EARTH_RADIUS_KM * c);
     }
 
+    /**
+     * Checks if two locations are within a specified distance of each other.
+     * @param lat1 Latitude of first point
+     * @param lon1 Longitude of first point
+     * @param lat2 Latitude of second point
+     * @param lon2 Longitude of second point
+     * @param maxDistanceKm The maximum allowed distance in kilometers
+     * @return true if the points are within the specified distance, false otherwise
+     */
     public static boolean isWithinRange(double lat1, double lon1, double lat2, double lon2, float maxDistanceKm) {
         return distanceInKilometers(lat1, lon1, lat2, lon2) <= maxDistanceKm;
     }
 
     /**
-     * Test hook: Returns the list of markers currently displayed on the map.
+     * Gets the list of markers currently displayed on the map.
+     * @return List of Marker objects on the map
      */
     public List<Marker> getMarkers() {
         return markers;
