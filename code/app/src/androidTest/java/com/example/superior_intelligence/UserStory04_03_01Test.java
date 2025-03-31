@@ -1,5 +1,4 @@
 package com.example.superior_intelligence;
-
 import static androidx.test.espresso.Espresso.onView;
 import org.junit.Rule;
 import org.junit.Test;
@@ -10,6 +9,9 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.rule.ActivityTestRule;
 import static androidx.test.espresso.action.ViewActions.click;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import java.text.SimpleDateFormat;
 import java.util.UUID;
@@ -22,6 +24,8 @@ import org.junit.Before;
 import java.util.concurrent.CountDownLatch;
 import java.util.Locale;
 import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
+import android.os.SystemClock;
+
 /**
  * UI test to see the "Filter By Emotional State" user story (User Story 04.03.01 and issue number 5 including all sub issues).
  * signin anonymously and then makes two mood events for the test user (one with mood "Anger" and one with mood "Happy"), then launches HomeActivity
@@ -36,6 +40,9 @@ public class UserStory04_03_01Test
     private FirebaseAuth auth;
     private String angerEventId;
     private String happyEventId;
+    @BeforeClass
+    public static void setupEmulator(){FirebaseFirestore.getInstance().useEmulator("10.0.2.2", 8080);}
+
     @Before
     public void setUp()throws InterruptedException
     {   db= FirebaseFirestore.getInstance();
