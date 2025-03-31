@@ -1,16 +1,20 @@
 package com.example.superior_intelligence;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Manages event-related functionalities such as retrieving emoji resources,
+ * overlay colors, parsing comments, and handling event updates and deletions.
+ */
 public class EventManager {
 
     /**
-     * Returns a drawable resource ID based on mood.
+     * Returns a drawable resource ID based on the specified mood.
+     *
+     * @param mood The mood string (e.g., "happiness", "anger").
+     * @return The corresponding drawable resource ID.
      */
     public static int getEmojiResource(String mood) {
         if (mood == null) return R.drawable.happy_icon;
@@ -28,7 +32,10 @@ public class EventManager {
     }
 
     /**
-     * Returns a hex overlay color string for the given mood.
+     * Returns a hex color string for overlay based on the specified mood.
+     *
+     * @param mood The mood string.
+     * @return A hex color string representing the mood overlay color.
      */
     public static String getOverlayColorForMood(String mood) {
         if (mood == null) return "#FFD700"; // Default to Yellow
@@ -45,6 +52,12 @@ public class EventManager {
         }
     }
 
+    /**
+     * Parses a Firestore comment data structure into a list of Comment objects.
+     *
+     * @param commentsMap A map containing usernames as keys and lists of comment data as values.
+     * @return A list of Comment objects extracted from the map.
+     */
     public static List<Comment> parseComments(Map<String, List<Map<String, String>>> commentsMap) {
         List<Comment> commentsList = new ArrayList<>();
         if (commentsMap == null) return commentsList;
@@ -62,18 +75,39 @@ public class EventManager {
         return commentsList;
     }
 
+    /**
+     * Callback interface for handling event deletion results.
+     */
     public interface DeleteCallback {
         void onDeleteResult(boolean success);
     }
 
+    /**
+     * Callback interface for handling event update results.
+     */
     public interface UpdateCallback {
         void onUpdateResult(boolean success);
     }
 
+    /**
+     * Deletes an event from the database.
+     *
+     * @param db The database instance.
+     * @param eventId The ID of the event to be deleted.
+     * @param callback The callback to handle the result.
+     */
     public void deleteEvent(Database db, String eventId, DeleteCallback callback) {
         db.deleteEvent(eventId, callback::onDeleteResult);
     }
 
+    /**
+     * Updates the public/private status of an event in the database.
+     *
+     * @param db The database instance.
+     * @param event The event object to be updated.
+     * @param newStatus The new public/private status.
+     * @param callback The callback to handle the update result.
+     */
     public void updateEventStatus(Database db, Event event, boolean newStatus, UpdateCallback callback) {
         if (event.isPublic_status() != newStatus) {
             event.setPublic_status(newStatus);
