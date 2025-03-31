@@ -1,5 +1,6 @@
 package com.example.superior_intelligence;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -14,6 +15,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -30,6 +32,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.maps.android.clustering.ClusterItem;
+import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,6 +61,12 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
     // Added for testing: List to store markers.
     private List<Marker> markers = new ArrayList<>();
 
+    private final List<MoodClusterItem> clusterItems = new ArrayList<>();
+
+    // Manages markers clustered together on mood map for really close locations.
+    private ClusterManager<MoodClusterItem> clusterManager;
+
+
     // Added for test synchronization: Latch to signal when markers are loaded.
     public CountDownLatch markersLatch; // Public so tests can set it
 
@@ -64,7 +75,9 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.map); // Must contain <fragment> for SupportMapFragment and filter checkboxes
 
-        db = FirebaseFirestore.getInstance();
+        if (db == null) {
+            db = FirebaseFirestore.getInstance();
+        }
 
         // Find checkboxes
         cbConfusion   = findViewById(R.id.cb_confusion);
@@ -95,24 +108,38 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
 
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
-        googleMap = map;
+        this.googleMap = map;
 
         // Move camera to Edmonton
         LatLng edmonton = new LatLng(53.5461, -113.4938);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(edmonton, 11.5f));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(edmonton, 15f));
 
-        // Load markers immediately
-        applyFilters();
+        // Enable map gestures and controls
+        googleMap.getUiSettings().setZoomControlsEnabled(true);
+        googleMap.getUiSettings().setZoomGesturesEnabled(true);
+        googleMap.getUiSettings().setScrollGesturesEnabled(true);
+        googleMap.getUiSettings().setMapToolbarEnabled(false);
 
-        // Show event details on marker click
-        googleMap.setOnMarkerClickListener(marker -> {
-            Object tag = marker.getTag();
-            if (tag instanceof DocumentSnapshot) {
-                DocumentSnapshot docSnap = (DocumentSnapshot) tag;
-                showEventDialog(docSnap);
-            }
+        // Initialize cluster manager
+        clusterManager = new ClusterManager<>(this, googleMap);
+        clusterManager.setRenderer(new MoodClusterRenderer(this, googleMap, clusterManager));
+
+        // Set listeners for clustering behavior
+        googleMap.setOnCameraIdleListener(clusterManager);
+        googleMap.setOnMarkerClickListener(clusterManager);
+
+        // Optional: handle individual mood item clicks
+        clusterManager.setOnClusterItemClickListener(item -> {
+            new AlertDialog.Builder(this)
+                    .setTitle(item.getTitle())
+                    .setMessage(item.getSnippet())
+                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                    .show();
             return true;
         });
+
+        // Load markers only if a filter is applied
+        applyFilters();
     }
 
     /**
@@ -262,31 +289,19 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
             return;
         }
 
-        // If we reach here, doc is within 5 km
-        LatLng position = new LatLng(lat, lng);
         String mood = doc.getString("mood");
         String user = doc.getString("postUser");
         String markerTitle = (user != null) ? user : "Unknown User";
         String markerSnippet = (mood != null) ? "Mood: " + mood : "No Mood";
 
-        MarkerOptions options = new MarkerOptions()
-                .position(position)
-                .title(markerTitle)
-                .snippet(markerSnippet)
-                .anchor(0.5f, 1.0f);
-
+        // Add to cluster
         int iconRes = getMoodMarkerIcon(mood);
-        if (iconRes != -1) {
-            BitmapDescriptor labeledIcon = createLabeledMarker(iconRes, markerTitle);
-            options.icon(labeledIcon);
-        }
+        if (iconRes == -1) return; // skip unknown moods
+        MoodClusterItem item = new MoodClusterItem(lat, lng, markerTitle, markerSnippet, iconRes);
+        clusterItems.add(item);  // Track for testing
+        clusterManager.addItem(item);
+        clusterManager.cluster();
 
-        Marker marker = googleMap.addMarker(options);
-        if (marker != null) {
-            marker.setTag(doc);
-            // Add marker to our list for testing
-            markers.add(marker);
-        }
     }
 
     /**
@@ -312,7 +327,6 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
                             continue;
                         }
 
-                        // Check if event is within 5 km
                         float[] distanceResult = new float[1];
                         Location.distanceBetween(
                                 currentLocation.latitude, currentLocation.longitude,
@@ -323,32 +337,19 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
                             continue;
                         }
 
-                        LatLng position = new LatLng(lat, lng);
-
-                        // Marker info
                         String markerTitle = (user != null) ? user : "Unknown User";
                         String markerSnippet = (mood != null) ? "Mood: " + mood : "No Mood";
 
-                        MarkerOptions options = new MarkerOptions()
-                                .position(position)
-                                .title(markerTitle)
-                                .snippet(markerSnippet)
-                                .anchor(0.5f, 1.0f);
-
+                        // Add to cluster
                         int iconRes = getMoodMarkerIcon(mood);
-                        if (iconRes != -1) {
-                            BitmapDescriptor labeledIcon = createLabeledMarker(iconRes, markerTitle);
-                            options.icon(labeledIcon);
-                        }
-
-                        Marker marker = googleMap.addMarker(options);
-                        if (marker != null) {
-                            marker.setTag(doc);
-                            // Add marker to our list for testing
-                            markers.add(marker);
-                        }
+                        if (iconRes == -1) return; // skip unknown moods
+                        MoodClusterItem item = new MoodClusterItem(lat, lng, markerTitle, markerSnippet, iconRes);
+                        clusterManager.addItem(item);
+                        clusterItems.add(item);
                     }
-                    // Signal that markers are loaded
+                    clusterManager.cluster();
+
+
                     if (markersLatch != null) {
                         markersLatch.countDown();
                     }
@@ -358,62 +359,10 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
                             "Error loading events: " + e.getMessage(),
                             Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "Query failed: ", e);
-                    // Signal even on failure to prevent test deadlock
                     if (markersLatch != null) {
                         markersLatch.countDown();
                     }
                 });
-    }
-
-    /**
-     * Creates a custom marker icon by combining the mood icon and the username text.
-     */
-    private BitmapDescriptor createLabeledMarker(int baseIconRes, String label) {
-        Bitmap original = BitmapFactory.decodeResource(getResources(), baseIconRes);
-        int iconWidth = 150, iconHeight = 150;
-        Bitmap scaledIcon = Bitmap.createScaledBitmap(original, iconWidth, iconHeight, false);
-
-        int extraHeight = 60;
-        Bitmap combined = Bitmap.createBitmap(iconWidth, iconHeight + extraHeight, Bitmap.Config.ARGB_8888);
-
-        Canvas canvas = new Canvas(combined);
-        canvas.drawBitmap(scaledIcon, 0, 0, null);
-
-        Paint paint = new Paint();
-        paint.setColor(Color.BLACK);
-        paint.setTextSize(40f);
-        paint.setTextAlign(Paint.Align.CENTER);
-
-        float xPos = iconWidth / 2f;
-        float yPos = iconHeight + 40f;
-        canvas.drawText(label, xPos, yPos, paint);
-
-        return BitmapDescriptorFactory.fromBitmap(combined);
-    }
-
-    /**
-     * Shows an AlertDialog with details of the clicked mood event.
-     */
-    private void showEventDialog(DocumentSnapshot docSnap) {
-        String title = docSnap.getString("title");
-        String mood = docSnap.getString("mood");
-        String explanation = docSnap.getString("moodExplanation");
-        String situation = docSnap.getString("situation");
-        String date = docSnap.getString("date");
-        String user = docSnap.getString("postUser");
-
-        StringBuilder messageBuilder = new StringBuilder();
-        messageBuilder.append("Mood: ").append(mood != null ? mood : "N/A").append("\n")
-                .append("User: ").append(user != null ? user : "N/A").append("\n")
-                .append("Reason: ").append(explanation != null ? explanation : "N/A").append("\n")
-                .append("Situation: ").append(situation != null ? situation : "N/A").append("\n")
-                .append("Date: ").append(date != null ? date : "N/A").append("\n");
-
-        new AlertDialog.Builder(this)
-                .setTitle(title != null ? title : "Mood Event")
-                .setMessage(messageBuilder.toString())
-                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
-                .show();
     }
 
     /**
@@ -468,10 +417,69 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
         return distanceInKilometers(lat1, lon1, lat2, lon2) <= maxDistanceKm;
     }
 
-    /**
-     * Test hook: Returns the list of markers currently displayed on the map.
-     */
-    public List<Marker> getMarkers() {
-        return markers;
+    public class MoodClusterItem implements ClusterItem {
+        private final LatLng position;
+        private final String title;
+        private final String snippet;
+        private final int iconResId;
+
+        public MoodClusterItem(double lat, double lng, String title, String snippet, int iconResId) {
+            this.position = new LatLng(lat, lng);
+            this.title = title;
+            this.snippet = snippet;
+            this.iconResId = iconResId;
+        }
+
+        @NonNull
+        @Override
+        public LatLng getPosition() {
+            return position;
+        }
+
+        @Override
+        public String getTitle() {
+            return title;
+        }
+
+        @Override
+        public String getSnippet() {
+            return snippet;
+        }
+
+        @Nullable
+        @Override
+        public Float getZIndex() {
+            return 0.0f;
+        }
+
+        public int getIconResId() {
+            return iconResId;
+        }
     }
+
+    class MoodClusterRenderer extends DefaultClusterRenderer<MoodClusterItem> {
+        private final Context context;
+
+        public MoodClusterRenderer(Context context, GoogleMap map, ClusterManager<MoodClusterItem> clusterManager) {
+            super(context, map, clusterManager);
+            this.context = context;
+        }
+
+        @Override
+        protected void onBeforeClusterItemRendered(@NonNull MoodClusterItem item, @NonNull MarkerOptions markerOptions) {
+            Bitmap original = BitmapFactory.decodeResource(context.getResources(), item.getIconResId());
+            Bitmap scaled = Bitmap.createScaledBitmap(original, 100, 100, false); // Resize to 100x100 px
+            BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(scaled);
+
+            markerOptions.icon(icon)
+                    .title(item.getTitle())
+                    .snippet(item.getSnippet());
+
+        }
+    }
+
+    public List<MoodClusterItem> getClusterItems() {
+        return clusterItems;
+    }
+
 }

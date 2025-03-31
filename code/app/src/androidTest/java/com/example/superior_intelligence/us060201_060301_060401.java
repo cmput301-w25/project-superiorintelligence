@@ -22,9 +22,11 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -37,12 +39,19 @@ import org.junit.runner.RunWith;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import com.example.superior_intelligence.MoodMap.MoodClusterItem;
+
 
 /**
  * Test class for MoodMap activity, verifying marker display functionality.
+ * Note: The tester must enable location services on their android emulator for the tests to work.
+ * Without it, the emulator has no way of determining the user's location.
  */
 @RunWith(AndroidJUnit4.class)
 public class us060201_060301_060401 {
@@ -117,41 +126,37 @@ public class us060201_060301_060401 {
     public void testMyPostsMarkersDisplayed() throws InterruptedException {
         MoodMap activity = activityRule.launchActivity(new Intent());
         final CountDownLatch latch = new CountDownLatch(1);
+
         activity.runOnUiThread(() -> {
             try {
-                // Inject mock Firestore
                 Field dbField = MoodMap.class.getDeclaredField("db");
                 dbField.setAccessible(true);
                 dbField.set(activity, mockFirestore);
 
-                // Explicitly set "My Posts" checkbox to checked
                 CheckBox cbMyPosts = activity.findViewById(R.id.cb_myposts);
                 cbMyPosts.setChecked(true);
+                cbMyPosts.callOnClick(); // trigger internal state change
 
-                // Set the latch for synchronization
                 activity.markersLatch = latch;
             } catch (Exception e) {
                 throw new RuntimeException("Failed to inject mock or set checkbox", e);
             }
         });
 
-        // Apply filters
         onView(withId(R.id.btn_apply_filters)).perform(click());
 
-        // Wait for markers to load with a 5-second timeout
         boolean completed = latch.await(5, TimeUnit.SECONDS);
         assertTrue("Marker loading timed out", completed);
 
-        // Retrieve markers on the main thread
-        final List<Marker> markers = new ArrayList<>();
-        activity.runOnUiThread(() -> markers.addAll(activity.getMarkers()));
+        final List<MoodMap.MoodClusterItem> clusterItems = new ArrayList<>();
+        activity.runOnUiThread(() -> clusterItems.addAll(activity.getClusterItems()));
+        Thread.sleep(500); // Optional: slight UI thread buffer
 
-        // Verify markers
-        assertEquals("Expected 3 markers for current user's posts", 3, markers.size());
+        assertEquals("Expected 3 markers for current user's posts", 3, clusterItems.size());
         String currentUser = User.getInstance().getUsername();
-        for (Marker marker : markers) {
-            assertEquals("Marker title should be current user", currentUser, marker.getTitle());
-            assertTrue("Marker snippet should contain 'Mood:'", marker.getSnippet().contains("Mood:"));
+        for (MoodMap.MoodClusterItem item : clusterItems) {
+            assertEquals("Marker title should be current user", currentUser, item.getTitle());
+            assertTrue("Marker snippet should contain 'Mood:'", item.getSnippet().contains("Mood:"));
         }
     }
 
@@ -164,39 +169,33 @@ public class us060201_060301_060401 {
         final CountDownLatch latch = new CountDownLatch(1);
         activity.runOnUiThread(() -> {
             try {
-                // Inject mock Firestore
                 Field dbField = MoodMap.class.getDeclaredField("db");
                 dbField.setAccessible(true);
                 dbField.set(activity, mockFirestore);
 
-                // Ensure "My Posts" checkbox is unchecked
                 CheckBox cbMyPosts = activity.findViewById(R.id.cb_myposts);
                 cbMyPosts.setChecked(false);
 
-                // Set the latch for synchronization
                 activity.markersLatch = latch;
             } catch (Exception e) {
-                throw new RuntimeException("Failed to inject mock or set checkbox", e);
+                throw new RuntimeException("Failed to inject mock", e);
             }
         });
 
-        // Apply filters
         onView(withId(R.id.btn_apply_filters)).perform(click());
 
-        // Wait for markers to load with a 5-second timeout
         boolean completed = latch.await(5, TimeUnit.SECONDS);
         assertTrue("Marker loading timed out", completed);
 
-        // Retrieve markers on the main thread
-        final List<Marker> markers = new ArrayList<>();
-        activity.runOnUiThread(() -> markers.addAll(activity.getMarkers()));
+        final List<MoodMap.MoodClusterItem> clusterItems = new ArrayList<>();
+        activity.runOnUiThread(() -> clusterItems.addAll(activity.getClusterItems()));
+        Thread.sleep(500); // Optional: slight UI thread buffer
 
-        // Verify markers
-        assertEquals("Expected 2 markers for followed users", 2, markers.size());
+        assertEquals("Expected 2 markers for followed users", 2, clusterItems.size());
         String currentUser = User.getInstance().getUsername();
-        for (Marker marker : markers) {
-            assertNotEquals("Marker title should not be the current user", currentUser, marker.getTitle());
-            assertTrue("Marker snippet should contain 'Mood:'", marker.getSnippet().contains("Mood:"));
+        for (MoodMap.MoodClusterItem item : clusterItems) {
+            assertNotEquals("Marker title should not be the current user", currentUser, item.getTitle());
+            assertTrue("Marker snippet should contain 'Mood:'", item.getSnippet().contains("Mood:"));
         }
     }
 
@@ -207,6 +206,7 @@ public class us060201_060301_060401 {
     public void testRecentFollowedUsersEventsWithinRange() throws InterruptedException {
         MoodMap activity = activityRule.launchActivity(new Intent());
         final CountDownLatch latch = new CountDownLatch(1);
+
         activity.runOnUiThread(() -> {
             try {
                 // Inject mock Firestore
@@ -214,7 +214,7 @@ public class us060201_060301_060401 {
                 dbField.setAccessible(true);
                 dbField.set(activity, mockFirestore);
 
-                // Ensure "My Posts" checkbox is unchecked
+                // Uncheck "My Posts" filter
                 CheckBox cbMyPosts = activity.findViewById(R.id.cb_myposts);
                 cbMyPosts.setChecked(false);
 
@@ -225,7 +225,7 @@ public class us060201_060301_060401 {
             }
         });
 
-        // Move camera to test location on the main thread
+        // Move camera to test center
         activity.runOnUiThread(() -> {
             LatLng testCenter = new LatLng(53.5461, -113.4938);
             activity.googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(testCenter, 11.5f));
@@ -234,26 +234,25 @@ public class us060201_060301_060401 {
         // Apply filters
         onView(withId(R.id.btn_apply_filters)).perform(click());
 
-        // Wait for markers to load with a 5-second timeout
+        // Wait for async marker clustering to complete
         boolean completed = latch.await(5, TimeUnit.SECONDS);
         assertTrue("Marker loading timed out", completed);
 
-        // Retrieve markers on the main thread
-        final List<Marker> markers = new ArrayList<>();
-        activity.runOnUiThread(() -> markers.addAll(activity.getMarkers()));
+        // Retrieve clustered items directly from MoodMap
+        final List<MoodClusterItem> clusterItems = activity.getClusterItems();
+        assertEquals("Expected 2 markers for recent followed user events within range", 2, clusterItems.size());
 
-        // Verify markers
-        assertEquals("Expected 2 markers for recent followed user events within range", 2, markers.size());
-
+        // Confirm they’re within 5km of test center
         Location testCenterLoc = new Location("");
         testCenterLoc.setLatitude(53.5461);
         testCenterLoc.setLongitude(-113.4938);
-        for (Marker marker : markers) {
+
+        for (MoodClusterItem item : clusterItems) {
             Location markerLoc = new Location("");
-            markerLoc.setLatitude(marker.getPosition().latitude);
-            markerLoc.setLongitude(marker.getPosition().longitude);
+            markerLoc.setLatitude(item.getPosition().latitude);
+            markerLoc.setLongitude(item.getPosition().longitude);
             float distance = testCenterLoc.distanceTo(markerLoc);
-            assertTrue("Marker " + marker.getTitle() + " should be within 5 km", distance <= 5000);
+            assertTrue("Marker " + item.getTitle() + " should be within 5 km", distance <= 5000);
         }
     }
 
@@ -310,4 +309,15 @@ public class us060201_060301_060401 {
             callback.onUserListRetrieved(Arrays.asList("followed1", "followed2"));
         }
     }
+
+    private Map<String, Object> createMockDoc(String username, double lat, double lng, String mood) {
+        Map<String, Object> doc = new HashMap<>();
+        doc.put("username", username);
+        doc.put("mood", mood);
+        doc.put("reason", "testing");
+        doc.put("timestamp", new Timestamp(new Date())); // recent date
+        doc.put("location", new GeoPoint(lat, lng));
+        return doc;
+    }
+
 }
