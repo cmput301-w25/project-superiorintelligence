@@ -41,16 +41,21 @@ import java.util.Map;
  * - If "My Posts" is checked, shows ALL of the current user's events.
  * - Otherwise, shows ONLY the single most recent event for each followed user,
  *   filtered to within 5 km from the current map center.
+ *
+ * NOTE: A test hook (getMarkers) has been added for UI testing purposes.
  */
 public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final String TAG = "MoodMap";
-    private GoogleMap googleMap;
+    public GoogleMap googleMap;
     private FirebaseFirestore db;
 
     // Filter CheckBoxes
     private CheckBox cbConfusion, cbAnger, cbFear,
             cbDisgust, cbHappy, cbSad, cbShame, cbSurprise, cbMyPosts;
+
+    // List to store markers for testing purposes.
+    private List<Marker> markers = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,14 +116,16 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
     /**
      * Main filter logic:
      * 1) If "My Posts" is checked, show ALL events from the current user.
-     * 2) Otherwise, show ONLY the single most recent event from each followed user,
+     * 2) Otherwise, show ONLY the single most recent event for each followed user,
      *    within 5 km of the current map center.
      */
     private void applyFilters() {
         if (googleMap == null) {
             return;
         }
+        // Clear previous markers from the map and test hook list.
         googleMap.clear();
+        markers.clear();
 
         // Get the current user from your app's singleton
         User currentUser = User.getInstance();
@@ -161,7 +168,7 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
             // Show ALL of my events
             Query myQuery = baseQuery.whereEqualTo("postUser", currentUsername);
             Log.d(TAG, "Showing all events by user: " + currentUsername);
-            // We can reuse the existing "executeQuery" method to place all markers
+            // Reuse the executeQuery method to place all markers
             executeQuery(myQuery, currentLocation);
 
         } else {
@@ -177,12 +184,12 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
                 // Build a query for all events by followed users
                 Query followedQuery = finalBaseQuery.whereIn("postUser", followedUsers);
 
-                // Now fetch those events and group by user, picking only the most recent
+                // Fetch events and group by user, picking only the most recent
                 followedQuery.get()
                         .addOnSuccessListener(snap -> {
                             Log.d(TAG, "Documents found: " + snap.size());
 
-                            // We'll store only the single doc with the largest timestamp per user
+                            // Store only the single doc with the largest timestamp per user
                             Map<String, DocumentSnapshot> latestByUser = new HashMap<>();
 
                             for (DocumentSnapshot doc : snap.getDocuments()) {
@@ -206,8 +213,7 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
                                 }
                             }
 
-                            // Now place a marker only for the single doc per user
-                            // if it's within 5 km of currentLocation
+                            // Place a marker for each user if it's within 5 km of currentLocation
                             for (DocumentSnapshot doc : latestByUser.values()) {
                                 placeMarkerIfWithinRange(doc, currentLocation);
                             }
@@ -224,7 +230,7 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
 
     /**
      * Places a marker for the given doc if it's within 5 km of the given location.
-     * This is used for the "single most recent event" approach in the else branch.
+     * This is used for the "single most recent event" approach.
      */
     private void placeMarkerIfWithinRange(DocumentSnapshot doc, LatLng currentLocation) {
         Double lat = doc.getDouble("lat");
@@ -244,7 +250,7 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
             return;
         }
 
-        // If we reach here, doc is within 5 km
+        // If within 5 km, create marker
         LatLng position = new LatLng(lat, lng);
         String mood = doc.getString("mood");
         String user = doc.getString("postUser");
@@ -266,12 +272,13 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
         Marker marker = googleMap.addMarker(options);
         if (marker != null) {
             marker.setTag(doc);
+            markers.add(marker); // Save marker for testing
         }
     }
 
     /**
      * Executes the Firestore query and processes the results (including a 5 km distance filter).
-     * This method places ALL docs that match the query (for "my posts" scenario).
+     * This method places ALL documents that match the query (used in the "my posts" scenario).
      */
     private void executeQuery(Query query, LatLng currentLocation) {
         query.get()
@@ -324,6 +331,7 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
                         Marker marker = googleMap.addMarker(options);
                         if (marker != null) {
                             marker.setTag(doc);
+                            markers.add(marker); // Save marker for testing
                         }
                     }
                 })
@@ -413,5 +421,13 @@ public class MoodMap extends AppCompatActivity implements OnMapReadyCallback {
             default:
                 return -1;
         }
+    }
+
+    /**
+     * Test hook: Returns the list of markers currently displayed on the map.
+     * This is used by UI tests to verify that the correct markers are displayed.
+     */
+    public List<Marker> getMarkers() {
+        return markers;
     }
 }
