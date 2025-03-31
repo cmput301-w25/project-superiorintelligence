@@ -18,7 +18,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     private OnUserClickListener listener;
     /**
      * Constructs a new {@code UserAdapter} with the specified list of users.
-     *
      * @param userList the list of {@link UserHelper} objects to be displayed.
      */
     public UserAdapter(List<UserHelper> userList, OnUserClickListener listener) {
@@ -87,7 +86,18 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         }
     }
 
+    /**
+     * Interface definition for a callback to be invoked when a user is clicked.
+     *
+     * This interface is used to handle the event when a user is clicked in a UI context, passing the corresponding
+     * {@link UserHelper} object for the clicked user.
+     */
     public interface OnUserClickListener {
+        /**
+         * Called when a user is clicked.
+         *
+         * @param user The {@link UserHelper} object representing the clicked user.
+         */
         void onUserClick(UserHelper user);
     }
 }
