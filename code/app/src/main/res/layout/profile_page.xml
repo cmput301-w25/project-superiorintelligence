@@ -131,7 +131,7 @@
         android:focusable="true"
         android:orientation="horizontal"
         android:padding="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/signout"
+        app:layout_constraintBottom_toTopOf="@+id/graph_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.333"
         app:layout_constraintStart_toStartOf="parent"
@@ -151,6 +151,51 @@
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
             android:text="User Search"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="@string/content_desc_arrow_icon"
+            android:src="@drawable/simple_arrow"
+            app:tint="@color/black" />
+    </LinearLayout>
+
+
+
+    <LinearLayout
+
+        android:id="@+id/graph_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:background="@drawable/rounded_background"
+        android:clickable="true"
+
+        android:focusable="true"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/signout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.333"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/search_user_button">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="@string/content_desc_search_icon"
+            android:src="@android:drawable/ic_menu_compass"
+            app:tint="@color/black" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:text="MoodGraph"
             android:textColor="@color/black"
             android:textSize="16sp" />
 

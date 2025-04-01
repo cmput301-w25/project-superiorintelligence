@@ -117,6 +117,12 @@ public class ProfileActivity extends AppCompatActivity {
             finish();
         });
 
+        LinearLayout graphButton = findViewById(R.id.graph_button);
+        graphButton.setOnClickListener(v -> {
+            Intent intent = new Intent(this, MoodTrendActivity.class);
+            startActivity(intent);
+        });
+
         // Single edit button for both name and profile photo
         editProfileButton.setOnClickListener(v -> showEditOptionsDialog());
     }

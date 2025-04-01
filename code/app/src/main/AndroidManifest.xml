@@ -77,6 +77,11 @@
             android:parentActivityName=".MainActivity"
             android:exported="true"/>
 
+
+        <activity android:name=".MoodTrendActivity"
+            android:parentActivityName=".MainActivity"
+            android:exported="true"/>
+
         <!-- Create Account Page -->
         <activity android:name=".CreateAccountActivity"
             android:parentActivityName=".LoginPageActivity"
